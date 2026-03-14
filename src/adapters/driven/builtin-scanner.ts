@@ -1,0 +1,131 @@
+import { readFile, readdir, lstat } from 'node:fs/promises';
+import { join, relative, extname } from 'node:path';
+import { createHash } from 'node:crypto';
+import type { Scanner } from '../../core/ports/scanner.js';
+import type { ScanResult, ScanFinding } from '../../core/types.js';
+
+interface ScanRule {
+  rule: string;
+  severity: 'critical' | 'warning' | 'info';
+  pattern: RegExp;
+  fileExtensions?: string[]; // undefined = all files
+  message: string;
+}
+
+const PROMPT_INJECTION_RULES: ScanRule[] = [
+  {
+    rule: 'prompt-injection',
+    severity: 'critical',
+    pattern: /ignore\s+(all\s+)?previous\s+instructions/i,
+    message: 'Potential prompt injection: attempts to override prior instructions',
+  },
+  {
+    rule: 'prompt-injection',
+    severity: 'critical',
+    pattern: /your\s+system\s+prompt\s+is/i,
+    message: 'Potential prompt injection: attempts to redefine system prompt',
+  },
+  {
+    rule: 'prompt-injection',
+    severity: 'warning',
+    pattern: /you\s+are\s+now\s+(?:a|an)\s+/i,
+    message: 'Potential prompt injection: attempts to reassign identity',
+  },
+];
+
+const CODE_RULES: ScanRule[] = [
+  {
+    rule: 'dangerous-eval',
+    severity: 'critical',
+    // Pattern matches eval( and new Function( — dynamic code execution
+    pattern: /\beval\s*\(|new\s+Function\s*\(/,
+    fileExtensions: ['.js', '.ts', '.mjs', '.cjs'],
+    message: 'Dangerous dynamic code execution: eval() or new Function() usage',
+  },
+  {
+    rule: 'base64-shell',
+    severity: 'critical',
+    pattern: /base64\s+(-d|--decode).*\|\s*(bash|sh|zsh)/,
+    fileExtensions: ['.sh', '.bash', '.zsh'],
+    message: 'Base64-decoded content piped to shell',
+  },
+];
+
+const ALL_RULES = [...PROMPT_INJECTION_RULES, ...CODE_RULES];
+
+export class BuiltinScanner implements Scanner {
+  readonly name = 'builtin';
+
+  async scanSkill(skillPath: string, skillName: string): Promise<ScanResult> {
+    const findings: ScanFinding[] = [];
+    const allContent: string[] = [];
+
+    await this.walkFiles(skillPath, skillPath, async (filePath, relativePath) => {
+      const stat = await lstat(filePath);
+
+      // Check for symlink escape
+      if (stat.isSymbolicLink()) {
+        findings.push({
+          rule: 'symlink-escape',
+          severity: 'critical',
+          file: relativePath,
+          line: 0,
+          message: 'Symbolic link detected — potential directory escape',
+        });
+        return;
+      }
+
+      const content = await readFile(filePath, 'utf-8');
+      allContent.push(content);
+      const ext = extname(filePath);
+      const lines = content.split('\n');
+
+      for (let i = 0; i < lines.length; i++) {
+        for (const rule of ALL_RULES) {
+          if (rule.fileExtensions && !rule.fileExtensions.includes(ext)) continue;
+          if (rule.pattern.test(lines[i])) {
+            findings.push({
+              rule: rule.rule,
+              severity: rule.severity,
+              file: relativePath,
+              line: i + 1,
+              message: rule.message,
+            });
+          }
+        }
+      }
+    });
+
+    const hash = `sha256:${createHash('sha256').update(allContent.join('')).digest('hex')}`;
+    const passed = findings.filter((f) => f.severity === 'critical' || f.severity === 'error').length === 0;
+
+    return {
+      skillName,
+      findings,
+      passed,
+      hash,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  async scanDiff(skillPath: string, skillName: string, _changedFiles: string[]): Promise<ScanResult> {
+    // v1: full re-scan on diff
+    return this.scanSkill(skillPath, skillName);
+  }
+
+  private async walkFiles(
+    dir: string,
+    rootDir: string,
+    callback: (filePath: string, relativePath: string) => Promise<void>,
+  ): Promise<void> {
+    const entries = await readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        await this.walkFiles(fullPath, rootDir, callback);
+      } else {
+        await callback(fullPath, relative(rootDir, fullPath));
+      }
+    }
+  }
+}
