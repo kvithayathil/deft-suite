@@ -8,12 +8,15 @@ import { InMemorySearchIndex } from '../helpers/in-memory-search-index.js';
 import { InMemorySkillLockStore } from '../helpers/in-memory-skill-lock-store.js';
 import { StubScanner } from '../helpers/stub-scanner.js';
 import { NoopLogger } from '../helpers/noop-logger.js';
+import { makeSkill } from '../helpers/fixture-skills.js';
 import { mergeConfigs } from '../../src/core/config-merger.js';
 import { SkillResolver } from '../../src/core/skill-resolver.js';
 import { TrustEvaluator } from '../../src/core/trust-evaluator.js';
 import { SkillLifecycle } from '../../src/core/skill-lifecycle.js';
 import { SkillLockManager } from '../../src/core/skill-lock.js';
 import { ManifestBuilder } from '../../src/core/manifest-builder.js';
+import { handleInstallSkill } from '../../src/tools/install-skill.js';
+import { TrustLevel, SkillState } from '../../src/core/types.js';
 
 function makeContext(): ToolContext {
   const logger = new NoopLogger();
@@ -77,5 +80,96 @@ describe('MCP Server Integration', () => {
     expect(server).toBeDefined();
     // TODO: Full request/response integration testing via InMemoryTransport
     // requires transport-level wiring covered in Task 33
+  });
+});
+
+describe('End-to-End Install Flow', () => {
+  it('installs a skill from bundled store and verifies all post-install state', async () => {
+    const ctx = makeContext();
+
+    // Seed a skill in the bundled store — not in skillStore
+    const bundledSkill = makeSkill({
+      metadata: { name: 'e2e-skill', description: 'End-to-end test skill' },
+      trustLevel: TrustLevel.Bundled,
+      state: SkillState.Active,
+      sourcePath: '.agents/skills/e2e-skill',
+    });
+    (ctx.bundledStore as InMemorySkillStore).seed('e2e-skill', bundledSkill);
+
+    // Precondition: skill does not yet exist in skillStore
+    expect(await ctx.skillStore.exists('e2e-skill')).toBe(false);
+
+    // Execute install
+    const result = await handleInstallSkill({ skill: 'e2e-skill' }, ctx);
+
+    // Response indicates success
+    expect(result.content).toHaveLength(1);
+    const parsed = JSON.parse(result.content[0].text);
+    expect(parsed.installed).toBe('e2e-skill');
+
+    // Skill is in skillStore
+    const installed = await ctx.skillStore.get('e2e-skill');
+    expect(installed).not.toBeNull();
+    expect(installed!.metadata.name).toBe('e2e-skill');
+
+    // Lock entry is created
+    const lockEntry = await ctx.lockManager.getEntry('e2e-skill');
+    expect(lockEntry).not.toBeNull();
+    expect(lockEntry!.scanResult).toBe('clean');
+    expect(lockEntry!.contentHash).toBeTruthy();
+
+    // Lifecycle state is Active
+    const lifecycleState = ctx.lifecycle.getState('e2e-skill');
+    expect(lifecycleState).not.toBeNull();
+    expect(lifecycleState!.state).toBe(SkillState.Active);
+  });
+
+  it('rejects duplicate install with ALREADY_EXISTS error', async () => {
+    const ctx = makeContext();
+
+    // Seed skill in both stores to simulate already-installed
+    const skill = makeSkill({
+      metadata: { name: 'already-installed', description: 'Already installed skill' },
+      trustLevel: TrustLevel.Bundled,
+      state: SkillState.Active,
+      sourcePath: '.agents/skills/already-installed',
+    });
+    (ctx.skillStore as InMemorySkillStore).seed('already-installed', skill);
+    (ctx.bundledStore as InMemorySkillStore).seed('already-installed', skill);
+
+    const { SkillMcpError, ErrorCode } = await import('../../src/core/errors.js');
+
+    await expect(handleInstallSkill({ skill: 'already-installed' }, ctx)).rejects.toThrow(SkillMcpError);
+
+    try {
+      await handleInstallSkill({ skill: 'already-installed' }, ctx);
+    } catch (err) {
+      expect(err).toBeInstanceOf(SkillMcpError);
+      expect((err as InstanceType<typeof SkillMcpError>).code).toBe(ErrorCode.AlreadyExists);
+    }
+  });
+
+  it('installs correct skill content and hash is recorded in lock', async () => {
+    const ctx = makeContext();
+
+    const skillContent = '# My Skill\nDo something useful with this content.';
+    const bundledSkill = makeSkill({
+      metadata: { name: 'hash-check-skill', description: 'Skill for hash verification' },
+      content: skillContent,
+      trustLevel: TrustLevel.Bundled,
+      state: SkillState.Active,
+      sourcePath: '.agents/skills/hash-check-skill',
+    });
+    (ctx.bundledStore as InMemorySkillStore).seed('hash-check-skill', bundledSkill);
+
+    await handleInstallSkill({ skill: 'hash-check-skill' }, ctx);
+
+    const installed = await ctx.skillStore.get('hash-check-skill');
+    expect(installed!.content).toBe(skillContent);
+
+    const lockEntry = await ctx.lockManager.getEntry('hash-check-skill');
+    // contentHash should be a non-empty string
+    expect(typeof lockEntry!.contentHash).toBe('string');
+    expect(lockEntry!.contentHash.length).toBeGreaterThan(0);
   });
 });
