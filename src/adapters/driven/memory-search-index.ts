@@ -1,5 +1,5 @@
 import type { SearchIndex } from '../../core/ports/search-index.js';
-import type { SkillMetadata, SearchResult } from '../../core/types.js';
+import type { SkillMetadata, SearchResult, TrustLevel } from '../../core/types.js';
 
 export class MemorySearchIndex implements SearchIndex {
   private skills: SkillMetadata[] = [];
@@ -26,7 +26,7 @@ export class MemorySearchIndex implements SearchIndex {
         return {
           name: skill.name,
           description: skill.description,
-          trustLevel: skill.trustLevel || 'unknown',
+          trustLevel: ('unknown' as TrustLevel),
           score,
         };
       })

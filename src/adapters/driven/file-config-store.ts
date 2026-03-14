@@ -7,7 +7,7 @@ export class FileConfigStore implements ConfigStore {
   constructor(private readonly filePath: string) {}
 
   async load(): Promise<Partial<Config> | null> {
-    try { return this.expandEnvVars(JSON.parse(await readFile(this.filePath, 'utf-8'))); }
+    try { return this.expandEnvVars(JSON.parse(await readFile(this.filePath, 'utf-8'))) as Partial<Config>; }
     catch { return null; }
   }
 

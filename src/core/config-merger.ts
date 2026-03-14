@@ -83,7 +83,7 @@ export function mergeConfigs(global?: Partial<Config> | null, project?: Partial<
     result = deepMerge(result, project as Record<string, unknown>, true);
     enforceAccessControlPrecedence(result, global);
   }
-  return result as Config;
+  return result as unknown as Config;
 }
 
 function loadEnvOverrides(): Partial<Config> | null {
