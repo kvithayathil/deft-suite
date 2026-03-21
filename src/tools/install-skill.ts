@@ -1,7 +1,8 @@
 import type { ToolHandler } from './types.js';
 import type { SourceStrategy } from '../core/skill-resolver.js';
 import type { Source } from '../core/types.js';
-import { alreadyExists, skillNotFound, permissionDenied, scanFailed } from '../core/errors.js';
+import { alreadyInstalled, skillNotFound, permissionDenied, scanFailed, validationFailed } from '../core/errors.js';
+import { validateSkillMetadata } from '../core/validator.js';
 
 interface InstallSkillParams {
   skill: string;
@@ -11,12 +12,12 @@ interface InstallSkillParams {
 }
 
 export const handleInstallSkill: ToolHandler<InstallSkillParams> = async (params, ctx) => {
-  const { skill: name, target_dir: _target_dir, platform, source } = params;
+  const { skill: name, platform, source } = params;
 
   // 1. Duplicate check
   const existing = await ctx.skillStore.exists(name);
   if (existing) {
-    throw alreadyExists(name);
+    throw alreadyInstalled(name);
   }
 
   // 2. Access control check
@@ -28,6 +29,12 @@ export const handleInstallSkill: ToolHandler<InstallSkillParams> = async (params
   const resolved = await ctx.resolver.resolve(name, { source });
   if (!resolved) {
     throw skillNotFound(name, [source ?? 'default']);
+  }
+
+  // 3b. Validate resolved skill metadata
+  const validation = validateSkillMetadata(resolved.metadata);
+  if (!validation.valid) {
+    throw validationFailed(validation.errors);
   }
 
   // 4. Begin scanning

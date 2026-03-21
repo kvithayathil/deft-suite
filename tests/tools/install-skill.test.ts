@@ -15,7 +15,7 @@ import { ManifestBuilder } from '../../src/core/manifest-builder.js';
 import { DEFAULT_CONFIG } from '../../src/core/config-merger.js';
 import { ErrorCode } from '../../src/core/errors.js';
 import type { ToolContext } from '../../src/tools/context.js';
-import type { SecurityConfig } from '../../src/core/types.js';
+import { TrustLevel, SkillState, type SecurityConfig } from '../../src/core/types.js';
 
 function makeContext(securityOverride?: Partial<SecurityConfig>): ToolContext {
   const skillStore = new InMemorySkillStore();
@@ -107,7 +107,23 @@ describe('handleInstallSkill', () => {
 
     await expect(
       handleInstallSkill({ skill: 'tdd-python' }, ctx),
-    ).rejects.toMatchObject({ code: ErrorCode.AlreadyExists });
+    ).rejects.toMatchObject({ code: ErrorCode.AlreadyInstalled });
+  });
+
+  it('rejects skill that fails metadata validation', async () => {
+    const ctx = makeContext();
+    await (ctx.bundledStore as InMemorySkillStore).write('BAD-NAME', {
+      metadata: { name: 'BAD-NAME', description: '' },
+      content: 'body',
+      resources: [],
+      trustLevel: TrustLevel.Bundled,
+      state: SkillState.Active,
+      sourcePath: 'BAD-NAME',
+    });
+
+    await expect(
+      handleInstallSkill({ skill: 'BAD-NAME' }, ctx),
+    ).rejects.toMatchObject({ code: ErrorCode.ValidationFailed });
   });
 
   it('throws SKILL_NOT_FOUND when resolver returns null', async () => {
