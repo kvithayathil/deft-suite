@@ -976,7 +976,7 @@ Expected: All PASS
 Run: `npx vitest run`
 Expected: All pass
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 7: Commit** *(pending — not performed in this session)*
 
 ```bash
 git add src/tools/context.ts src/tools/save-config.ts tests/tools/save-config.test.ts
@@ -1262,12 +1262,16 @@ This requires changing `readFile(filePath, 'utf-8')` to `readFile(filePath)` (Bu
 Run: `npx vitest run tests/adapters/builtin-scanner.test.ts`
 Expected: All PASS
 
-- [ ] **Step 5: Run all tests**
+- [x] **Step 5: Run all tests**
 
 Run: `npx vitest run`
-Expected: All pass
+Result: ✅ All pass (`33` files, `236` tests)
 
-- [ ] **Step 6: Commit**
+Additional verification completed:
+- `npm run typecheck` → ✅ pass
+- `npm run lint` → ✅ pass (after adding `eslint.config.js` and resolving lint errors)
+
+- [ ] **Step 6: Commit** *(pending — not performed in this session)*
 
 ```bash
 git add src/adapters/driven/builtin-scanner.ts tests/adapters/builtin-scanner.test.ts
@@ -1914,12 +1918,16 @@ Update `src/workers/scanner-worker.ts` and `src/workers/index-worker.ts` with th
 Scanner worker: reads `security.periodicScanIntervalHours`, runs scan loop.
 Index worker: rebuilds index when notified of changes.
 
-- [ ] **Step 5: Run all tests**
+- [x] **Step 5: Run all tests**
 
 Run: `npx vitest run`
-Expected: All pass
+Result: ✅ All pass (`33` files, `236` tests)
 
-- [ ] **Step 6: Commit**
+Additional verification completed:
+- `npm run typecheck` → ✅ pass
+- `npm run lint` → ✅ pass
+
+- [ ] **Step 6: Commit** *(pending — not performed in this session)*
 
 ```bash
 git add src/workers/sync-worker.ts src/workers/scanner-worker.ts src/workers/index-worker.ts tests/workers/sync-worker.test.ts
@@ -2151,16 +2159,98 @@ describe('full context wiring', () => {
 });
 ```
 
-- [ ] **Step 5: Run all tests**
+- [x] **Step 5: Run all tests**
 
 Run: `npx vitest run`
-Expected: All pass
+Result: ✅ All pass (`33` files, `236` tests)
 
-- [ ] **Step 6: Commit**
+Additional verification completed:
+- `npm run typecheck` → ✅ pass
+- `npm run lint` → ✅ pass
+
+- [ ] **Step 6: Commit** *(pending — not performed in this session)*
 
 ```bash
 git add src/index.ts tests/integration/bootstrap.integration.test.ts
 git commit -m "feat: complete bootstrap wiring — onConfigReload, isOffline, all context fields"
+```
+
+---
+
+### Task 16: Update Public-Facing Documentation (README, docs/)
+
+The project has no root `README.md` and no user-facing documentation outside of the internal `docs/superpowers/` directory. Before v1 ships, public documentation must explain what the MCP is, how to install/configure it, and how to use it.
+
+**Files:**
+- Create: `README.md`
+- Create: `docs/configuration.md`
+- Create: `docs/tools-reference.md`
+- Create: `docs/getting-started.md`
+
+- [x] **Step 1: Create root README.md**
+
+Write a `README.md` covering:
+- Project overview — what skill-mcp is and why it exists
+- Prerequisites (Node.js version, etc.)
+- Installation (`npm install`, building from source)
+- Quick-start: how to add skill-mcp to your MCP client config (e.g. Claude Desktop `claude_desktop_config.json`, Windsurf `mcp_config.json`, VS Code, etc.)
+- Available tools — brief one-liner per tool (`search_skills`, `get_skill`, `install_skill`, `save_skill`, `remove_skill`, `save_config`, `get_status`, `list_categories`, `push_skills`)
+- Link to detailed docs in `docs/`
+- License / contributing section placeholder
+
+- [x] **Step 2: Create docs/getting-started.md**
+
+Write a getting-started guide covering:
+- First-time setup (global config location `~/.config/skill-mcp/config.json`)
+- Running via stdio transport (`node dist/index.js`)
+- Verifying the server is working (`get_status` tool)
+- Installing your first skill (`install_skill`)
+- Creating a custom skill (`save_skill`)
+- Project-level config discovery (`.skill-mcp/`, `.claude/skill-mcp/`, `.agents/skill-mcp/`)
+
+- [x] **Step 3: Create docs/configuration.md**
+
+Write a configuration reference covering:
+- Global config file location and schema (`~/.config/skill-mcp/config.json`)
+- Project config discovery chain (`.skill-mcp/config.json` → `.claude/skill-mcp/config.json` → `.agents/skill-mcp/config.json`)
+- Config merging behavior (project overrides global)
+- All config sections with defaults:
+  - `schemaVersion`
+  - `sources` (local, git, registry)
+  - `security` (trust levels, access control mode, scan settings)
+  - `manifest` (max size, format)
+  - `resilience` (rate limits, timeouts, circuit breakers)
+  - `sync` (interval, sources)
+- Hot-reload via `save_config`
+- Environment variable overrides (if any)
+
+- [x] **Step 4: Create docs/tools-reference.md**
+
+Write a tool reference covering each MCP tool:
+- `search_skills` — params, behavior, example
+- `get_skill` — params, stale-serve behavior during scanning, trust indicators
+- `install_skill` — params, validation, scanning flow
+- `save_skill` — params, validation, duplicate check, scan-before-save
+- `remove_skill` — params, SKILL_LOCKED behavior
+- `save_config` — params, hot-reload trigger
+- `get_status` — response shape (summary, circuit breakers, access control, network)
+- `list_categories` — params, behavior
+- `push_skills` — params, git push behavior
+- Error codes reference table (`SKILL_NOT_FOUND`, `VALIDATION_FAILED`, `SCAN_FAILED`, `RATE_LIMITED`, `NETWORK_UNAVAILABLE`, `OPERATION_TIMEOUT`, `ALREADY_EXISTS`)
+
+- [x] **Step 5: Review docs for accuracy against implementation**
+
+Read through each doc and cross-reference against the actual source in `src/` to ensure param names, config keys, default values, and error codes are accurate.
+
+- [x] **Step 6: Run spell-check / link-check if available**
+
+If a markdown linter or spell-checker is configured, run it. Otherwise, manual review.
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add README.md docs/getting-started.md docs/configuration.md docs/tools-reference.md
+git commit -m "docs: add public-facing README, getting-started, configuration, and tools reference"
 ```
 
 ---
@@ -2184,6 +2274,23 @@ git commit -m "feat: complete bootstrap wiring — onConfigReload, isOffline, al
 | 13 | clientInfo + manifest | MCP handshake capture, manifest on connect |
 | 14 | Logger context | Structured context in log output |
 | 15 | Final wiring | onConfigReload, isOffline, integration test |
+| 16 | Public-facing docs | README.md, getting-started, configuration, tools-reference |
 
-**Estimated commits:** 15
-**Dependencies:** Tasks 1–3 should be done first (critical fixes). Tasks 4–15 are independent and can be parallelized.
+**Estimated commits:** 16
+**Dependencies:** Tasks 1–3 should be done first (critical fixes). Tasks 4–15 are independent and can be parallelized. Task 16 (docs) should be done last so documentation reflects the final implementation.
+
+### Current Project Status (Updated)
+
+- Implementation status: ✅ Tasks 1–15 completed in code and tests
+- Documentation status: ✅ Task 16 docs created (`README.md`, `docs/getting-started.md`, `docs/configuration.md`, `docs/tools-reference.md`)
+- Verification status: ✅ tests, typecheck, and lint passing
+- Commit status: ⏳ pending user action
+
+### Session Progress Update (2026-03-20, 21:59 local)
+
+- [x] Re-verified full test suite: `npx vitest run` → ✅ `33` files, `236` tests passing
+- [x] Re-verified typing: `npm run typecheck` → ✅ pass
+- [x] Re-verified lint: `npm run lint` → ✅ pass
+- [x] Confirmed existing implementation coverage for Tasks 1–15 in current working tree
+- [x] Completed execution: Task 16 public-facing documentation (`README.md`, `docs/getting-started.md`, `docs/configuration.md`, `docs/tools-reference.md`)
+- [ ] Optional cleanup step: split/land logical commits per task group

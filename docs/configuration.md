@@ -1,0 +1,155 @@
+# Configuration Reference
+
+`skill-mcp` merges configuration from three layers:
+
+1. built-in defaults
+2. global config (`~/.config/skill-mcp/config.json`)
+3. project config (first discovered path)
+
+## Global Config
+
+Path:
+
+`~/.config/skill-mcp/config.json`
+
+Loaded by `FileConfigStore` during bootstrap.
+
+## Project Config Discovery
+
+By default, project config is discovered in this order:
+
+1. `.skill-mcp/config.json`
+2. `.claude/skill-mcp/config.json`
+3. `.agents/skill-mcp/config.json`
+
+The first match wins.
+
+You can override discovery directories via `projectConfigPaths`.
+
+## Merge Behavior
+
+Implemented in `mergeConfigs(global, project)`.
+
+- Env overrides are applied first.
+- Global config merges over defaults.
+- Project config merges over global.
+- Top-level arrays:
+  - `sources` and `projectConfigPaths` concatenate by default.
+  - Use `"<key>:replace": true` to replace instead of concatenate.
+- Global access-control precedence is enforced:
+  - `blocklist`: global blocked entries are retained.
+  - `allowlist`: merged allowed entries are filtered to global allowed keys.
+
+## Environment Variable Overrides
+
+Currently supported:
+
+- `SKILL_MCP_LOG_LEVEL` → `logging.level`
+- `SKILL_MCP_MIN_TRUST` → `security.minTrustLevel`
+
+## Full Config Shape
+
+```json
+{
+  "schemaVersion": 1,
+  "manifest": {
+    "skills": [
+      "mcp-guide",
+      "skill-writer",
+      "security-baseline",
+      "mcp-debug",
+      "git-workflows",
+      "cli-discovery",
+      "core-cli-tools"
+    ],
+    "maxManifestSize": 10,
+    "warnThreshold": 8
+  },
+  "sources": [],
+  "sync": {
+    "intervalMinutes": 60,
+    "autoUpdate": true
+  },
+  "security": {
+    "minTrustLevel": "community",
+    "scanOnInstall": true,
+    "periodicScanIntervalHours": 24,
+    "accessControl": {
+      "mode": "blocklist",
+      "blocked": [],
+      "allowed": []
+    }
+  },
+  "platformDirectories": {
+    "claude-code": ".claude/skill-mcp",
+    "windsurf": ".windsurf/skill-mcp",
+    "cursor": ".cursor/skill-mcp",
+    "opencode": ".opencode/skill-mcp",
+    "zed": ".zed/skill-mcp",
+    "copilot": ".copilot/skill-mcp",
+    "default": ".agents/skill-mcp"
+  },
+  "projectConfigPaths": [
+    ".skill-mcp",
+    ".claude/skill-mcp",
+    ".agents/skill-mcp"
+  ],
+  "push": {
+    "remote": "origin",
+    "branch": "main",
+    "autoCommit": false
+  },
+  "logging": {
+    "level": "error",
+    "file": "~/.cache/skill-mcp/logs/skill-mcp.log",
+    "maxFileSize": "10MB",
+    "maxFiles": 3,
+    "structured": false
+  },
+  "telemetry": {
+    "enabled": false,
+    "exporterEndpoint": null,
+    "exporterProtocol": "grpc",
+    "serviceName": "skill-mcp",
+    "sampleRate": 1
+  },
+  "resilience": {
+    "rateLimits": {
+      "search_skills": { "bucketSize": 20, "refillPerMinute": 20 },
+      "install_skill": { "bucketSize": 10, "refillPerMinute": 10 },
+      "push_skills": { "bucketSize": 5, "refillPerMinute": 5 }
+    }
+  },
+  "backup": {
+    "enabled": false,
+    "target": "git",
+    "interval": "daily",
+    "onConfigChange": true
+  },
+  "metadata": {
+    "createdOn": "<platform>",
+    "createdBy": "skill-mcp@0.1.0",
+    "platforms": ["<platform>"],
+    "arch": "<arch>"
+  }
+}
+```
+
+## Hot Reload
+
+`save_config`:
+
+1. writes `ctx.config` to `configStore`
+2. calls `onConfigReload()`
+
+Current reload behavior in bootstrap:
+- re-load global config
+- re-discover project config
+- re-merge effective config
+- mutate in-memory config object
+- rebuild search index metadata
+
+## Notes
+
+- `update_config` modifies session config only and does not persist.
+- `schemaVersion` and `metadata` are locked in `update_config`.
