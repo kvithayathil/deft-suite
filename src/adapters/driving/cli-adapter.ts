@@ -1,5 +1,6 @@
 export class CliAdapter {
   async run(args: string[], flags: Record<string, unknown>): Promise<void> {
+    void flags;
     const [command, ...rest] = args;
     switch (command) {
       case 'search': return this.search(rest[0]);
@@ -26,6 +27,7 @@ export class CliAdapter {
   }
 
   private async help(command?: string): Promise<void> {
+    const detail = command ? `\nHelp for command: ${command}` : '';
     process.stdout.write([
       'Usage: skill-mcp <command> [options]', '',
       'Commands:',
@@ -37,6 +39,6 @@ export class CliAdapter {
       '  doctor            Diagnose issues',
       '  version           Show version',
       '  help [command]    Show help', '',
-    ].join('\n'));
+    ].join('\n') + detail);
   }
 }

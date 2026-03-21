@@ -1,10 +1,15 @@
-import type { SkillStore, ConfigStore, Scanner, SearchIndex, SkillLockStore, Logger } from '../core/ports/index.js';
+import type { SkillStore, ConfigStore, Scanner, SearchIndex, Logger } from '../core/ports/index.js';
 import type { Config } from '../core/types.js';
 import type { SkillResolver } from '../core/skill-resolver.js';
 import type { TrustEvaluator } from '../core/trust-evaluator.js';
 import type { SkillLifecycle } from '../core/skill-lifecycle.js';
 import type { SkillLockManager } from '../core/skill-lock.js';
 import type { ManifestBuilder } from '../core/manifest-builder.js';
+
+export interface ResilienceContext {
+  rateLimiters: Map<string, import('../resilience/token-bucket.js').TokenBucket>;
+  circuitBreakers: Map<string, import('../resilience/circuit-breaker.js').CircuitBreaker>;
+}
 
 export interface ToolContext {
   skillStore: SkillStore;
@@ -19,6 +24,9 @@ export interface ToolContext {
   manifestBuilder: ManifestBuilder;
   config: Config;
   logger: Logger;
+  resilience?: ResilienceContext;
   vendorConfigOverlay?: (skillName: string, skill: import('../core/types.js').Skill) => Promise<Record<string, unknown> | undefined>;
   isOffline?: () => boolean;
+  onConfigReload?: () => Promise<void>;
+  clientInfo?: { name?: string; version?: string };
 }

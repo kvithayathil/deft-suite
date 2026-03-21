@@ -89,7 +89,7 @@ export class SkillLifecycle {
 
   listByState(state: SkillState): string[] {
     return Array.from(this.entries.entries())
-      .filter(([_, entry]) => entry.state === state)
+      .filter(([, entry]) => entry.state === state)
       .map(([name]) => name);
   }
 

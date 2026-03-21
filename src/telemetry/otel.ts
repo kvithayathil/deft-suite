@@ -14,11 +14,11 @@ export interface Telemetry {
 
 class NoopSpan implements Span {
   end(): void {}
-  setError(_err: Error): void {}
+  setError(): void {}
 }
 
 class NoopTelemetry implements Telemetry {
-  startSpan(_name: string): Span {
+  startSpan(): Span {
     return new NoopSpan();
   }
 

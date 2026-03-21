@@ -86,9 +86,9 @@ describe('handleListCategories', () => {
   it('returns list of categories from the search index', async () => {
     const ctx = makeContext();
     await ctx.searchIndex.rebuild([
-      { name: 'tdd-python', description: 'TDD', metadata: { category: 'testing' } },
-      { name: 'security-baseline', description: 'Security', metadata: { category: 'security' } },
-      { name: 'another-test', description: 'Another', metadata: { category: 'testing' } },
+      { name: 'tdd-python', description: 'TDD', tags: ['testing'] },
+      { name: 'security-baseline', description: 'Security', tags: ['security'] },
+      { name: 'another-test', description: 'Another', tags: ['testing'] },
     ]);
 
     const result = await handleListCategories({}, ctx);

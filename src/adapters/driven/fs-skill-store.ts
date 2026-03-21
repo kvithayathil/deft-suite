@@ -42,7 +42,11 @@ export class FsSkillStore implements SkillStore {
     try { return await readFile(join(this.basePath, skillName, resourcePath), 'utf-8'); } catch { return null; }
   }
 
-  async fetch(_name: string, _source: Source): Promise<Skill | null> { return null; }
+  async fetch(name: string, source: Source): Promise<Skill | null> {
+    void name;
+    void source;
+    return null;
+  }
 
   async listNames(): Promise<string[]> {
     try {

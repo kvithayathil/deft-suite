@@ -124,7 +124,7 @@ describe('End-to-End Install Flow', () => {
     expect(lifecycleState!.state).toBe(SkillState.Active);
   });
 
-  it('rejects duplicate install with ALREADY_EXISTS error', async () => {
+  it('rejects duplicate install with ALREADY_INSTALLED error', async () => {
     const ctx = makeContext();
 
     // Seed skill in both stores to simulate already-installed
@@ -145,7 +145,7 @@ describe('End-to-End Install Flow', () => {
       await handleInstallSkill({ skill: 'already-installed' }, ctx);
     } catch (err) {
       expect(err).toBeInstanceOf(SkillMcpError);
-      expect((err as InstanceType<typeof SkillMcpError>).code).toBe(ErrorCode.AlreadyExists);
+      expect((err as InstanceType<typeof SkillMcpError>).code).toBe(ErrorCode.AlreadyInstalled);
     }
   });
 

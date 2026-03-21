@@ -1,4 +1,4 @@
-import type { ToolHandler, ToolResult } from './types.js';
+import type { ToolHandler } from './types.js';
 import { invalidQuery } from '../core/errors.js';
 
 interface SearchParams { query: string; limit?: number; }
