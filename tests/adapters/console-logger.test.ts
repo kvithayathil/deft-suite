@@ -35,4 +35,12 @@ describe('ConsoleLogger', () => {
     expect(infoSpy).toHaveBeenCalled();
     expect(debugSpy).toHaveBeenCalled();
   });
+
+  it('includes structured context in log output', () => {
+    const spy = vi.spyOn(console, 'info').mockImplementation(() => {});
+    const logger = new ConsoleLogger('info');
+    logger.info('hello', { skill: 'tdd-python', state: 'active' });
+    expect(spy).toHaveBeenCalledWith(expect.stringContaining('skill=tdd-python'));
+    expect(spy).toHaveBeenCalledWith(expect.stringContaining('state=active'));
+  });
 });

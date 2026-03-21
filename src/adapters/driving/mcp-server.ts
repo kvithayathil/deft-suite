@@ -1,6 +1,6 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+import { CallToolRequestSchema, ListToolsRequestSchema, InitializeRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import type { ToolContext } from '../../tools/context.js';
 import type { ToolHandler } from '../../tools/types.js';
 import { SkillMcpError } from '../../core/errors.js';
@@ -112,10 +112,30 @@ export async function createMcpServer(
   ctx: ToolContext,
   handlers: Map<string, ToolHandler>,
 ): Promise<Server> {
+  const skillMetadata = await ctx.skillStore.listMetadata();
+  const bundledMetadata = await ctx.bundledStore.listMetadata();
+  const manifest = ctx.manifestBuilder.build([...bundledMetadata, ...skillMetadata]);
+  const manifestText = ctx.manifestBuilder.toText(manifest);
+
   const server = new Server(
     { name: 'skill-mcp', version: '0.1.0' },
     { capabilities: { tools: {} } },
   );
+
+  server.setRequestHandler(InitializeRequestSchema, async (request) => {
+    const clientInfo = request.params.clientInfo as { name?: string; version?: string } | undefined;
+    ctx.clientInfo = clientInfo;
+
+    return {
+      protocolVersion: request.params.protocolVersion,
+      capabilities: { tools: {} },
+      serverInfo: {
+        name: 'skill-mcp',
+        version: '0.1.0',
+      },
+      instructions: manifestText,
+    };
+  });
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
     tools: TOOL_DEFINITIONS,

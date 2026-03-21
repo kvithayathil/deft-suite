@@ -9,25 +9,32 @@ export class ConsoleLogger implements Logger {
     this.minLevel = LEVEL_ORDER[level];
   }
 
-  error(message: string): void {
-    this.log('error', message);
+  error(message: string, context?: Record<string, unknown>): void {
+    this.log('error', message, context);
   }
 
-  warn(message: string): void {
-    this.log('warn', message);
+  warn(message: string, context?: Record<string, unknown>): void {
+    this.log('warn', message, context);
   }
 
-  info(message: string): void {
-    this.log('info', message);
+  info(message: string, context?: Record<string, unknown>): void {
+    this.log('info', message, context);
   }
 
-  debug(message: string): void {
-    this.log('debug', message);
+  debug(message: string, context?: Record<string, unknown>): void {
+    this.log('debug', message, context);
   }
 
-  private log(level: LogLevel, message: string): void {
+  private formatContext(context?: Record<string, unknown>): string {
+    if (!context || Object.keys(context).length === 0) {
+      return '';
+    }
+    return ` ${Object.entries(context).map(([k, v]) => `${k}=${String(v)}`).join(' ')}`;
+  }
+
+  private log(level: LogLevel, message: string, context?: Record<string, unknown>): void {
     if (LEVEL_ORDER[level] <= this.minLevel) {
-      console[level](`[${level.toUpperCase()}] ${message}`);
+      console[level](`[${level.toUpperCase()}] ${message}${this.formatContext(context)}`);
     }
   }
 }
