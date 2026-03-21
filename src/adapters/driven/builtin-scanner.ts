@@ -31,6 +31,13 @@ const PROMPT_INJECTION_RULES: ScanRule[] = [
     pattern: /you\s+are\s+now\s+(?:a|an)\s+/i,
     message: 'Potential prompt injection: attempts to reassign identity',
   },
+  {
+    rule: 'template-injection',
+    severity: 'warning',
+    pattern: /\{\{[^}]*\}\}/,
+    fileExtensions: ['.md'],
+    message: 'Template syntax in markdown — potential injection vector for dynamic content',
+  },
 ];
 
 const CODE_RULES: ScanRule[] = [
@@ -48,6 +55,20 @@ const CODE_RULES: ScanRule[] = [
     pattern: /base64\s+(-d|--decode).*\|\s*(bash|sh|zsh)/,
     fileExtensions: ['.sh', '.bash', '.zsh'],
     message: 'Base64-decoded content piped to shell',
+  },
+  {
+    rule: 'hex-encoded-cmd',
+    severity: 'critical',
+    pattern: /xxd\s+-r\s+-p|printf\s+'\\x/,
+    fileExtensions: ['.sh', '.bash', '.zsh'],
+    message: 'Hex-encoded content decoded at runtime — potential obfuscated command',
+  },
+  {
+    rule: 'obfuscation',
+    severity: 'warning',
+    pattern: /tr\s+["']a-zA-Z["']\s+["']n-za-mN-ZA-M["']|rot13/i,
+    fileExtensions: ['.sh', '.bash', '.zsh', '.js', '.ts'],
+    message: 'ROT13 or character rotation detected — potential obfuscation',
   },
 ];
 
@@ -75,7 +96,19 @@ export class BuiltinScanner implements Scanner {
         return;
       }
 
-      const content = await readFile(filePath, 'utf-8');
+      const contentBuffer = await readFile(filePath);
+      if (contentBuffer.includes(0x00)) {
+        findings.push({
+          rule: 'unexpected-binary',
+          severity: 'warning',
+          file: relativePath,
+          line: 0,
+          message: 'Binary file detected in skill directory — skills should contain only text files',
+        });
+        return;
+      }
+
+      const content = contentBuffer.toString('utf-8');
       allContent.push(content);
       const ext = extname(filePath);
       const lines = content.split('\n');
@@ -108,8 +141,9 @@ export class BuiltinScanner implements Scanner {
     };
   }
 
-  async scanDiff(skillPath: string, skillName: string, _changedFiles: string[]): Promise<ScanResult> {
+  async scanDiff(skillPath: string, skillName: string, changedFiles: string[]): Promise<ScanResult> {
     // v1: full re-scan on diff
+    void changedFiles;
     return this.scanSkill(skillPath, skillName);
   }
 

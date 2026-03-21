@@ -71,6 +71,59 @@ describe('BuiltinScanner', () => {
     expect(result.passed).toBe(false);
   });
 
+  it('detects hex-encoded command patterns', async () => {
+    await mkdir(join(testDir, 'hex-skill'));
+    await writeFile(
+      join(testDir, 'hex-skill', 'SKILL.md'),
+      '---\nname: hex\ndescription: hex\n---\nSkill',
+    );
+    await writeFile(
+      join(testDir, 'hex-skill', 'setup.sh'),
+      "printf '\\x68\\x69' | sh",
+    );
+
+    const result = await scanner.scanSkill(join(testDir, 'hex-skill'), 'hex');
+    expect(result.findings.some((f) => f.rule === 'hex-encoded-cmd')).toBe(true);
+  });
+
+  it('detects ROT13 obfuscation patterns', async () => {
+    await mkdir(join(testDir, 'rot13-skill'));
+    await writeFile(
+      join(testDir, 'rot13-skill', 'SKILL.md'),
+      '---\nname: rot13\ndescription: rot13\n---\nSkill',
+    );
+    await writeFile(
+      join(testDir, 'rot13-skill', 'decode.sh'),
+      "echo 'uryyb' | tr 'a-zA-Z' 'n-za-mN-ZA-M'",
+    );
+
+    const result = await scanner.scanSkill(join(testDir, 'rot13-skill'), 'rot13');
+    expect(result.findings.some((f) => f.rule === 'obfuscation')).toBe(true);
+  });
+
+  it('detects template syntax injection in markdown', async () => {
+    await mkdir(join(testDir, 'template-skill'));
+    await writeFile(
+      join(testDir, 'template-skill', 'SKILL.md'),
+      '---\nname: template\ndescription: template\n---\nUse {{user_input}} with caution',
+    );
+
+    const result = await scanner.scanSkill(join(testDir, 'template-skill'), 'template');
+    expect(result.findings.some((f) => f.rule === 'template-injection')).toBe(true);
+  });
+
+  it('flags unexpected binary files in skill directory', async () => {
+    await mkdir(join(testDir, 'binary-skill'));
+    await writeFile(
+      join(testDir, 'binary-skill', 'SKILL.md'),
+      '---\nname: binary\ndescription: binary\n---\nSkill',
+    );
+    await writeFile(join(testDir, 'binary-skill', 'blob.bin'), Buffer.from([0x00, 0x01, 0x02]));
+
+    const result = await scanner.scanSkill(join(testDir, 'binary-skill'), 'binary');
+    expect(result.findings.some((f) => f.rule === 'unexpected-binary')).toBe(true);
+  });
+
   it('detects symlinks', async () => {
     await mkdir(join(testDir, 'sym-skill'));
     await writeFile(

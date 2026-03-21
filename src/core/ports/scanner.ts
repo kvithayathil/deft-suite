@@ -1,4 +1,4 @@
-import type { ScanResult, ScanFinding } from '../types.js';
+import type { ScanResult } from '../types.js';
 
 export interface Scanner {
   scanSkill(skillPath: string, skillName: string): Promise<ScanResult>;
