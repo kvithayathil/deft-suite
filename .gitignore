@@ -4,3 +4,4 @@ coverage/
 .superpowers/
 .worktrees/
 *.tsbuildinfo
+.agent-workspace/
