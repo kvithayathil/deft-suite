@@ -14,6 +14,41 @@ export const handleGetSkill: ToolHandler<GetSkillParams> = async (params, ctx) =
     })));
   }
 
+  // Stale-serve behavior: while scanning, serve the currently resolvable version
+  // and mark the response explicitly as stale + scanning.
+  if (entry?.state === SkillState.Scanning) {
+    const lockEntry = await ctx.lockManager.getEntry(params.name);
+    if (!lockEntry && !entry.previousHash) {
+      throw skillNotFound(params.name, ['scanning — no previous version available']);
+    }
+
+    const staleSkill = await ctx.resolver.resolve(params.name);
+    if (!staleSkill) {
+      throw skillNotFound(params.name, ['cache', 'bundled']);
+    }
+
+    const staleIndicator = TRUST_INDICATORS[staleSkill.trustLevel];
+    const staleVendorConfig = ctx.vendorConfigOverlay
+      ? await ctx.vendorConfigOverlay(params.name, staleSkill)
+      : undefined;
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify({
+          name: staleSkill.metadata.name,
+          description: staleSkill.metadata.description,
+          trust: `${staleIndicator} ${staleSkill.trustLevel}`,
+          content: staleSkill.content,
+          resources: staleSkill.resources,
+          stale: true,
+          scanning: true,
+          ...(staleVendorConfig ? { vendor_config: staleVendorConfig } : {}),
+        }, null, 2),
+      }],
+    };
+  }
+
   // Resolve the skill
   const skill = await ctx.resolver.resolve(params.name);
   if (!skill) {
@@ -21,7 +56,7 @@ export const handleGetSkill: ToolHandler<GetSkillParams> = async (params, ctx) =
   }
 
   const indicator = TRUST_INDICATORS[skill.trustLevel];
-  const stale = entry?.state === SkillState.Scanning;
+  const stale = false;
 
   // Vendor config overlay
   const vendorConfig = ctx.vendorConfigOverlay
