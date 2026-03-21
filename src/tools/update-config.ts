@@ -24,13 +24,13 @@ export const handleUpdateConfig: ToolHandler<UpdateConfigParams> = async (params
 
   // Merge into session config (in-memory only, no disk write)
   const parts = params.key.split('.');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let current: any = ctx.config;
+  let current: Record<string, unknown> = ctx.config as unknown as Record<string, unknown>;
   for (let i = 0; i < parts.length - 1; i++) {
-    if (typeof current[parts[i]] !== 'object' || current[parts[i]] === null) {
+    const value = current[parts[i]];
+    if (typeof value !== 'object' || value === null) {
       current[parts[i]] = {};
     }
-    current = current[parts[i]];
+    current = current[parts[i]] as Record<string, unknown>;
   }
   current[parts[parts.length - 1]] = params.value;
 

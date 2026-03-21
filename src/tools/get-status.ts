@@ -13,33 +13,44 @@ export const handleGetStatus: ToolHandler<Record<string, unknown>> = async (_par
     };
   }
 
-  const activeSkills = ctx.lifecycle.listByState(SkillState.Active);
-  const scanningSkills = ctx.lifecycle.listByState(SkillState.Scanning);
-  const quarantinedSkills = ctx.lifecycle.listByState(SkillState.Quarantined);
-  const forcedSkills = ctx.lifecycle.listByState(SkillState.ActiveForced);
+  const summary = {
+    installed: (await ctx.skillStore.listNames()).length,
+    active: ctx.lifecycle.listByState(SkillState.Active).length,
+    scanning: ctx.lifecycle.listByState(SkillState.Scanning).length,
+    quarantined: ctx.lifecycle.listByState(SkillState.Quarantined).length,
+    forced: ctx.lifecycle.listByState(SkillState.ActiveForced).length,
+    locked: (await ctx.lockManager.listLockedSkills()).length,
+  };
 
   // Lock info
   const lockedSkills = await ctx.lockManager.listLockedSkills();
 
-  // Store info
-  const installedNames = await ctx.skillStore.listNames();
+  // Circuit breaker info
+  const circuitBreakers: Record<string, string> = {};
+  if (ctx.resilience) {
+    for (const [source, breaker] of ctx.resilience.circuitBreakers) {
+      circuitBreakers[source] = breaker.getState();
+    }
+  }
+
+  // Access control info
+  const accessControl = { mode: ctx.config.security.accessControl.mode };
+
+  // Network status
+  const network = ctx.isOffline?.() ? 'unavailable' : 'available';
 
   return {
     content: [{
       type: 'text',
       text: JSON.stringify({
-        summary: {
-          installed: installedNames.length,
-          active: activeSkills.length,
-          scanning: scanningSkills.length,
-          quarantined: quarantinedSkills.length,
-          forced: forcedSkills.length,
-          locked: lockedSkills.length,
-        },
+        summary,
         skills: states,
         lock: {
           lockedSkills,
         },
+        circuitBreakers,
+        accessControl,
+        network,
       }, null, 2),
     }],
   };
