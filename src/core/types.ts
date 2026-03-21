@@ -46,6 +46,7 @@ export enum SkillState {
 export interface SkillMetadata {
   name: string;
   description: string;
+  tags?: string[];
   license?: string;
   compatibility?: string;
   metadata?: Record<string, unknown>;

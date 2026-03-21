@@ -35,10 +35,25 @@ export class MemorySearchIndex implements SearchIndex {
   }
 
   async listCategories(): Promise<string[]> {
-    return [];
+    const tags = new Set<string>();
+    for (const skill of this.skills) {
+      if (skill.tags) {
+        for (const tag of skill.tags) {
+          tags.add(tag);
+        }
+      }
+    }
+    return [...tags].sort();
   }
 
-  async getByCategory(_category: string): Promise<SearchResult[]> {
-    return [];
+  async getByCategory(category: string): Promise<SearchResult[]> {
+    return this.skills
+      .filter(skill => skill.tags?.includes(category))
+      .map(skill => ({
+        name: skill.name,
+        description: skill.description,
+        trustLevel: ('unknown' as TrustLevel),
+        score: 1,
+      }));
   }
 }

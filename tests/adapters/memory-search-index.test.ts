@@ -48,13 +48,24 @@ describe('MemorySearchIndex', () => {
     expect(results.length).toBe(1);
   });
 
-  it('listCategories returns empty (v1 — no categories)', async () => {
+  it('listCategories returns unique categories from tags', async () => {
     const idx = new MemorySearchIndex();
-    expect(await idx.listCategories()).toEqual([]);
+    await idx.rebuild([
+      { name: 'security-review', description: 'Security checks', tags: ['security', 'audit'] },
+      { name: 'api-design', description: 'API patterns', tags: ['backend'] },
+      { name: 'auth-audit', description: 'Auth checks', tags: ['security'] },
+    ]);
+    expect(await idx.listCategories()).toEqual(['audit', 'backend', 'security']);
   });
 
-  it('getByCategory returns empty (v1)', async () => {
+  it('getByCategory returns skills matching category tag', async () => {
     const idx = new MemorySearchIndex();
-    expect(await idx.getByCategory('any')).toEqual([]);
+    await idx.rebuild([
+      { name: 'security-review', description: 'Security checks', tags: ['security', 'audit'] },
+      { name: 'api-design', description: 'API patterns', tags: ['backend'] },
+    ]);
+    const matches = await idx.getByCategory('security');
+    expect(matches).toHaveLength(1);
+    expect(matches[0].name).toBe('security-review');
   });
 });

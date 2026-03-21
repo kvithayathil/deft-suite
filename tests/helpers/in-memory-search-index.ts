@@ -1,5 +1,5 @@
 import type { SearchIndex } from '../../src/core/ports/search-index.js';
-import type { SkillMetadata, SearchResult } from '../../src/core/types.js';
+import { TrustLevel, type SkillMetadata, type SearchResult } from '../../src/core/types.js';
 
 export class InMemorySearchIndex implements SearchIndex {
   private skills: SkillMetadata[] = [];
@@ -19,7 +19,7 @@ export class InMemorySearchIndex implements SearchIndex {
       .map((s, i) => ({
         name: s.name,
         description: s.description,
-        trustLevel: 'bundled' as const,
+        trustLevel: TrustLevel.Bundled,
         score: 1 - (i * 0.1),
       }));
   }
@@ -27,19 +27,20 @@ export class InMemorySearchIndex implements SearchIndex {
   async listCategories(): Promise<string[]> {
     const cats = new Set<string>();
     for (const s of this.skills) {
-      const cat = s.metadata?.['category'] as string | undefined;
-      if (cat) cats.add(cat);
+      for (const tag of s.tags ?? []) {
+        cats.add(tag);
+      }
     }
-    return Array.from(cats);
+    return Array.from(cats).sort();
   }
 
   async getByCategory(category: string): Promise<SearchResult[]> {
     return this.skills
-      .filter(s => s.metadata?.['category'] === category)
+      .filter(s => s.tags?.includes(category))
       .map(s => ({
         name: s.name,
         description: s.description,
-        trustLevel: 'bundled' as const,
+        trustLevel: TrustLevel.Bundled,
         score: 1,
       }));
   }
