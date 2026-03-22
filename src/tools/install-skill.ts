@@ -62,6 +62,8 @@ export const handleInstallSkill: ToolHandler<InstallSkillParams> = async (params
     source: { type: 'local' } as Source,
   });
 
+  ctx.usageStore?.recordAccess(name);
+
   return {
     content: [{
       type: 'text',

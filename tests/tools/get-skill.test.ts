@@ -7,6 +7,7 @@ import { InMemorySearchIndex } from '../helpers/in-memory-search-index.js';
 import { InMemorySkillLockStore } from '../helpers/in-memory-skill-lock-store.js';
 import { NoopLogger } from '../helpers/noop-logger.js';
 import { FIXTURE_SKILLS } from '../helpers/fixture-skills.js';
+import { InMemoryUsageStore } from '../helpers/in-memory-usage-store.js';
 import { SkillResolver } from '../../src/core/skill-resolver.js';
 import { TrustEvaluator } from '../../src/core/trust-evaluator.js';
 import { SkillLifecycle } from '../../src/core/skill-lifecycle.js';
@@ -17,7 +18,7 @@ import { ErrorCode } from '../../src/core/errors.js';
 import { SkillState } from '../../src/core/types.js';
 import type { ToolContext } from '../../src/tools/context.js';
 
-function makeContext(): ToolContext {
+function makeContext(overrides: Partial<ToolContext> = {}): ToolContext {
   const skillStore = new InMemorySkillStore();
   const bundledStore = new InMemorySkillStore();
   const logger = new NoopLogger();
@@ -33,6 +34,7 @@ function makeContext(): ToolContext {
     manifestBuilder: new ManifestBuilder(DEFAULT_CONFIG.manifest),
     config: DEFAULT_CONFIG,
     logger,
+    ...overrides,
   };
 }
 
@@ -51,6 +53,21 @@ describe('handleGetSkill', () => {
     expect(parsed.content).toBe(skill.content);
     expect(parsed.resources).toEqual(skill.resources);
     expect(parsed.stale).toBe(false);
+  });
+
+  it('records usage access on successful get', async () => {
+    const usageStore = new InMemoryUsageStore();
+    const ctx = makeContext({ usageStore });
+    const skill = FIXTURE_SKILLS.tddPython;
+    (ctx.skillStore as InMemorySkillStore).seed(skill.metadata.name, skill);
+    ctx.lifecycle.markActive(skill.metadata.name, 'abc123');
+
+    await handleGetSkill({ name: skill.metadata.name }, ctx);
+
+    const usage = usageStore.getRawData();
+    expect(usage).toHaveLength(1);
+    expect(usage[0].name).toBe(skill.metadata.name);
+    expect(usage[0].accessCount).toBe(1);
   });
 
   it('returns stale version during scanning (skill previously active, now scanning)', async () => {
@@ -81,10 +98,13 @@ describe('handleGetSkill', () => {
   });
 
   it('throws SKILL_NOT_FOUND for missing skill', async () => {
-    const ctx = makeContext();
+    const usageStore = new InMemoryUsageStore();
+    const ctx = makeContext({ usageStore });
 
     await expect(
       handleGetSkill({ name: 'nonexistent-skill' }, ctx),
     ).rejects.toMatchObject({ code: ErrorCode.SkillNotFound });
+
+    expect(usageStore.getRawData()).toHaveLength(0);
   });
 });

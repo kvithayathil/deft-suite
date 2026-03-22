@@ -55,6 +55,8 @@ export const handleGetSkill: ToolHandler<GetSkillParams> = async (params, ctx) =
     throw skillNotFound(params.name, ['cache', 'bundled']);
   }
 
+  ctx.usageStore?.recordAccess(params.name);
+
   const indicator = TRUST_INDICATORS[skill.trustLevel];
   const stale = false;
 

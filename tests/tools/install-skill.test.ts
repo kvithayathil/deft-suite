@@ -7,6 +7,7 @@ import { InMemorySearchIndex } from '../helpers/in-memory-search-index.js';
 import { InMemorySkillLockStore } from '../helpers/in-memory-skill-lock-store.js';
 import { NoopLogger } from '../helpers/noop-logger.js';
 import { FIXTURE_SKILLS } from '../helpers/fixture-skills.js';
+import { InMemoryUsageStore } from '../helpers/in-memory-usage-store.js';
 import { SkillResolver } from '../../src/core/skill-resolver.js';
 import { TrustEvaluator } from '../../src/core/trust-evaluator.js';
 import { SkillLifecycle } from '../../src/core/skill-lifecycle.js';
@@ -17,7 +18,10 @@ import { ErrorCode } from '../../src/core/errors.js';
 import type { ToolContext } from '../../src/tools/context.js';
 import { TrustLevel, SkillState, type SecurityConfig } from '../../src/core/types.js';
 
-function makeContext(securityOverride?: Partial<SecurityConfig>): ToolContext {
+function makeContext(
+  securityOverride?: Partial<SecurityConfig>,
+  overrides: Partial<ToolContext> = {},
+): ToolContext {
   const skillStore = new InMemorySkillStore();
   const bundledStore = new InMemorySkillStore();
   const logger = new NoopLogger();
@@ -37,6 +41,7 @@ function makeContext(securityOverride?: Partial<SecurityConfig>): ToolContext {
     manifestBuilder: new ManifestBuilder(DEFAULT_CONFIG.manifest),
     config: { ...DEFAULT_CONFIG, security },
     logger,
+    ...overrides,
   };
 }
 
@@ -71,6 +76,36 @@ describe('handleInstallSkill', () => {
     // Lifecycle should be active
     const state = ctx.lifecycle.getState('tdd-python');
     expect(state?.state).toBe('active');
+  });
+
+  it('records usage access on successful install when usageStore is present', async () => {
+    const usageStore = new InMemoryUsageStore();
+    const ctx = makeContext(undefined, { usageStore });
+
+    (ctx.bundledStore as InMemorySkillStore).seed(
+      FIXTURE_SKILLS.tddPython.metadata.name,
+      FIXTURE_SKILLS.tddPython,
+    );
+
+    await handleInstallSkill({ skill: 'tdd-python' }, ctx);
+
+    const usage = usageStore.getRawData();
+    expect(usage).toHaveLength(1);
+    expect(usage[0].name).toBe('tdd-python');
+    expect(usage[0].accessCount).toBe(1);
+  });
+
+  it('does not throw when usageStore is missing on successful install', async () => {
+    const ctx = makeContext();
+
+    (ctx.bundledStore as InMemorySkillStore).seed(
+      FIXTURE_SKILLS.tddPython.metadata.name,
+      FIXTURE_SKILLS.tddPython,
+    );
+
+    await expect(
+      handleInstallSkill({ skill: 'tdd-python' }, ctx),
+    ).resolves.toBeDefined();
   });
 
   it('rejects blocked skill (access control) — throws error', async () => {
@@ -127,12 +162,15 @@ describe('handleInstallSkill', () => {
   });
 
   it('throws SKILL_NOT_FOUND when resolver returns null', async () => {
-    const ctx = makeContext();
+    const usageStore = new InMemoryUsageStore();
+    const ctx = makeContext(undefined, { usageStore });
 
     // Do NOT seed anything — resolver will return null
     await expect(
       handleInstallSkill({ skill: 'nonexistent-skill', source: 'cache' }, ctx),
     ).rejects.toMatchObject({ code: ErrorCode.SkillNotFound });
+
+    expect(usageStore.getRawData()).toHaveLength(0);
   });
 
   it('quarantines skill and throws when scan fails', async () => {
