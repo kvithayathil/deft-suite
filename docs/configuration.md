@@ -47,6 +47,71 @@ Currently supported:
 - `SKILL_MCP_LOG_LEVEL` → `logging.level`
 - `SKILL_MCP_MIN_TRUST` → `security.minTrustLevel`
 
+## Unified Search Configuration
+
+### `registries`
+
+Controls team/community catalog sources used by `search_skills`.
+
+```json
+{
+  "registries": {
+    "cacheMinutes": 60,
+    "sources": [
+      { "type": "static", "url": "https://example.com/skill-catalog.json" },
+      { "type": "git", "url": "https://github.com/acme/skill-catalog.git" }
+    ]
+  }
+}
+```
+
+- `cacheMinutes`: freshness window before a source is considered stale.
+- `sources`: ordered list of remote catalogs; each source is queried independently.
+- Cache behavior in `search_skills`:
+  - `refresh: false` (default): uses cached catalog when fresh.
+  - stale cache or cache miss: fetches remote catalog.
+  - remote failure: falls back to cached catalog when available and sets `offline: true`.
+
+### `github`
+
+Controls opt-in GitHub discovery in `search_skills`.
+
+```json
+{
+  "github": {
+    "search": false,
+    "topics": ["mcp-skill"]
+  }
+}
+```
+
+- `search: true` enables GitHub Search API calls.
+- `topics` narrows results using topic/tag filters.
+
+Privacy note:
+- when enabled, user search queries are sent to GitHub.
+- auth chain is opportunistic (`gh auth token` → `GITHUB_TOKEN` → unauthenticated).
+- keep `search: false` if your environment disallows outbound query sharing.
+
+### `usage`
+
+Controls local usage/frecency tracking.
+
+```json
+{
+  "usage": {
+    "pruneThreshold": 10000,
+    "sessionCap": 3,
+    "ceilingPercent": 20,
+    "dbPath": ""
+  }
+}
+```
+
+- Data is stored in a local SQLite file (`<configDir>/usage.db` by default).
+- Used by `search_skills` to blend keyword relevance with frecency for local ranking.
+- Used by CLI usage commands (`usage export`, `usage reset`, `stats`).
+
 ## Full Config Shape
 
 ```json

@@ -1,6 +1,6 @@
 # Skill MCP — Roadmap
 
-> Last updated: 2026-03-20
+> Last updated: 2026-03-21
 
 ## Completed
 
@@ -18,30 +18,22 @@ All 16 tasks from the [v1 completion plan](superpowers/plans/2026-03-20-v1-compl
 - **Logger** — structured context in console output
 - **Documentation** — README, getting-started, configuration, tools-reference
 
+### Phase 1: Unified Skill Search
+
+All planned Phase 1 tasks from the [unified search plan](superpowers/plans/2026-03-21-unified-search-task-breakdown.md) are complete:
+
+- unified domain/config foundations (`registries`, `github`, `usage`)
+- frecency engine with pruning/session-cap/ceiling safeguards
+- SQLite-backed usage tracking and search analytics
+- catalog adapters (git/static), GitHub discovery adapter, and pure catalog searcher
+- grouped unified `search_skills` orchestrator with offline fallback + cache-aware behavior
+- bootstrap and CLI integration (`search --refresh`, interactive install picker, usage/stats commands)
+- integration coverage for grouped responses, offline fallback, cache lifecycle, and MCP tool invocation
+- documentation refresh across configuration/getting-started/tools reference/README
+
 ---
 
 ## Next Up
-
-### Phase 1: Unified Skill Search *(high priority)*
-
-**Spec:** [unified-skill-search-design.md](superpowers/specs/2026-03-14-unified-skill-search-design.md)
-
-Extends search from local-only to a unified system blending local skills, remote catalogs, and GitHub discovery with frecency-based ranking.
-
-| Task | Description | Estimated Effort |
-|------|-------------|-----------------|
-| 1. **Core types & config** | Add `CatalogEntry`, `RegistryConfig`, `GitHubConfig`, `UsageConfig` types; extend config merger with defaults | Small |
-| 2. **Frecency engine** | Pure scoring functions (time-decay, pruning, session cap, ceiling enforcement) | Small |
-| 3. **UsageStore port + SQLite adapter** | `better-sqlite3` backed store for access tracking, search log, pruning | Medium |
-| 4. **CatalogStore port + adapters** | Git clone/pull adapter + static JSON HTTP adapter for team/community registries | Medium |
-| 5. **GitHub search port + adapter** | GitHub Search API with opportunistic auth (`gh`, `GITHUB_TOKEN`, unauthenticated) | Medium |
-| 6. **Catalog searcher** | Pure function — keyword search over pre-loaded catalog data | Small |
-| 7. **Unified search orchestrator** | Update `search_skills` to query all sources, return grouped response with frecency blending | Medium |
-| 8. **Record usage in get_skill/install_skill** | Bump frecency on skill access | Small |
-| 9. **CLI interactive install picker** | Numbered remote results, interactive selection, search + install flow | Medium |
-| 10. **CLI usage commands** | `usage export`, `usage reset`, `stats` | Small |
-| 11. **Bundled usage-stats skill** | Teaches agents to interpret usage data via CLI | Small |
-| 12. **Integration tests** | Offline fallback, grouped response format, frecency ranking | Medium |
 
 ### Phase 2: Security & Reliability *(medium priority)*
 

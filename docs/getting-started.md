@@ -113,6 +113,52 @@ The first path found is loaded and merged over global config.
 - Use `update_config` for in-session updates (memory only).
 - Use `save_config` to write config to disk and trigger reload.
 
+## 11) Configure Team Catalogs (Optional)
+
+Add registry sources to your config to include team-maintained catalogs in unified search:
+
+```json
+{
+  "registries": {
+    "cacheMinutes": 60,
+    "sources": [
+      { "type": "static", "url": "https://example.com/skill-catalog.json" },
+      { "type": "git", "url": "https://github.com/acme/skill-catalog.git" }
+    ]
+  }
+}
+```
+
+Then call `search_skills` and you will receive grouped results under `local`, `catalogs`, and `github`.
+
+## 12) Enable GitHub Search (Optional)
+
+GitHub search is opt-in:
+
+```json
+{
+  "github": {
+    "search": true,
+    "topics": ["mcp-skill"]
+  }
+}
+```
+
+- Keep this disabled if you do not want search queries sent to GitHub.
+- For best rate limits, authenticate with `gh auth login` or set `GITHUB_TOKEN`.
+
+## 13) Inspect Usage and Frecency (CLI)
+
+The CLI includes usage analytics commands backed by local SQLite storage:
+
+```bash
+node dist/cli.js stats
+node dist/cli.js usage export --format json
+node dist/cli.js usage reset --all
+```
+
+You can also install and use the bundled `usage-stats` skill to help interpret frecency/search analytics.
+
 ## Next
 
 - `docs/configuration.md` for full schema and merge semantics

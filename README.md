@@ -7,11 +7,14 @@ It focuses on:
 - trust-aware skill lifecycle and lock tracking
 - compact manifest injection at MCP initialize time
 - project-aware config overlays
+- unified search across local, team catalogs, and GitHub (opt-in)
+- frecency-aware ranking with local usage analytics
 
 ## Prerequisites
 
 - Node.js `>=20.0.0`
 - npm
+- Build toolchain support for native addons (`better-sqlite3` used for usage/frecency storage)
 
 ## Install and Build
 
@@ -61,9 +64,17 @@ Use your client’s specific config file location (for example Claude Desktop, W
 4. Call `get_skill` to inspect installed content.
 5. Call `save_skill` to add your own skill.
 
+## CLI Highlights
+
+- `node dist/cli.js search "python" --refresh`
+- `node dist/cli.js stats`
+- `node dist/cli.js usage export --format json`
+- `node dist/cli.js usage reset <name>`
+- `node dist/cli.js usage reset --all`
+
 ## Available Tools
 
-- `search_skills`: Search by keyword.
+- `search_skills`: Unified search with grouped `local` / `catalogs` / `github` response.
 - `get_skill`: Return full skill content and trust indicator.
 - `get_resource`: Return a skill resource file.
 - `list_categories`: Return indexed skill categories.
@@ -74,6 +85,10 @@ Use your client’s specific config file location (for example Claude Desktop, W
 - `update_config`: Update session config in memory.
 - `save_config`: Persist config and trigger reload.
 - `get_status`: Return summary, lifecycle, lock, network, and circuit breaker state.
+
+## Native Dependency Note
+
+`skill-mcp` uses `better-sqlite3` for local usage/frecency tracking. Most macOS/Linux/Windows environments are supported, but minimal container images may need build prerequisites for native module compilation.
 
 ## Documentation
 

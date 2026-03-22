@@ -13,28 +13,62 @@ Search skills by keyword.
 ```json
 {
   "query": "tdd",
-  "limit": 10
+  "limit": 10,
+  "sources": ["local", "catalog", "github"],
+  "refresh": false
 }
 ```
 
 - `query` (required): non-empty string
-- `limit` (optional): currently accepted by schema, not enforced in handler
+- `limit` (optional): max results per source
+- `sources` (optional): subset of `local`, `catalog`, `github`
+- `refresh` (optional): if `true`, bypasses catalog freshness checks and fetches remotes
 
 ### Output
 
 ```json
 {
-  "results": [
+  "local": [
     {
       "name": "tdd-python",
       "description": "...",
       "trustLevel": "community",
-      "score": 1
+      "score": 1,
+      "installed": true,
+      "frecency": 0.7
+    }
+  ],
+  "catalogs": {
+    "catalog.test-skills.json": [
+      {
+        "name": "catalog-python-skill",
+        "description": "...",
+        "catalogName": "team-catalog",
+        "score": 2,
+        "source": { "type": "url", "url": "https://catalog.test/python" }
+      }
+    ]
+  },
+  "github": [
+    {
+      "name": "owner/python-skill",
+      "description": "...",
+      "tags": ["mcp-skill"],
+      "score": 10,
+      "installable": true,
+      "source": { "type": "github", "repo": "owner/python-skill" }
     }
   ],
   "offline": false
 }
 ```
+
+Backward compatibility:
+
+- If no catalog/github sources are configured, `search_skills` still returns the grouped shape with:
+  - `local`: local results
+  - `catalogs`: `{}`
+  - `github`: `[]`
 
 ## `get_skill`
 
