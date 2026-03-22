@@ -16,6 +16,7 @@ import { SkillLifecycle } from '../../src/core/skill-lifecycle.js';
 import { SkillLockManager } from '../../src/core/skill-lock.js';
 import { ManifestBuilder } from '../../src/core/manifest-builder.js';
 import { handleInstallSkill } from '../../src/tools/install-skill.js';
+import { handleSearchSkills } from '../../src/tools/search-skills.js';
 import { TrustLevel, SkillState } from '../../src/core/types.js';
 
 function makeContext(): ToolContext {
@@ -80,6 +81,47 @@ describe('MCP Server Integration', () => {
     expect(server).toBeDefined();
     // TODO: Full request/response integration testing via InMemoryTransport
     // requires transport-level wiring covered in Task 33
+  });
+
+  it('invokes search_skills through MCP tools/call handler with grouped response shape', async () => {
+    const ctx = makeContext();
+    await ctx.searchIndex.rebuild([
+      { name: 'local-python', description: 'Local python workflows' },
+    ]);
+
+    const handlers = new Map<string, ToolHandler>([
+      ['search_skills', handleSearchSkills as unknown as ToolHandler],
+    ]);
+    const server = await createMcpServer(ctx, handlers);
+
+    const callHandler = (server as unknown as {
+      _requestHandlers: Map<string, (request: unknown, extra: unknown) => Promise<{ content: Array<{ text: string }> }>>;
+    })._requestHandlers.get('tools/call');
+
+    expect(callHandler).toBeDefined();
+
+    const response = await callHandler!(
+      {
+        method: 'tools/call',
+        params: {
+          name: 'search_skills',
+          arguments: {
+            query: 'python',
+          },
+        },
+      },
+      {
+        signal: new AbortController().signal,
+        requestId: 1,
+      },
+    );
+
+    const parsed = JSON.parse(response.content[0].text);
+    expect(Array.isArray(parsed.local)).toBe(true);
+    expect(parsed.local[0].name).toBe('local-python');
+    expect(parsed.catalogs).toEqual({});
+    expect(parsed.github).toEqual([]);
+    expect(typeof parsed.offline).toBe('boolean');
   });
 });
 

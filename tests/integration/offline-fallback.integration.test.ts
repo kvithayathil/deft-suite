@@ -69,8 +69,10 @@ describe('Offline Fallback Integration', () => {
       const parsed = JSON.parse(result.content[0].text);
 
       expect(parsed.offline).toBe(true);
-      expect(parsed.results).toHaveLength(1);
-      expect(parsed.results[0].name).toBe('tdd-python');
+      expect(parsed.local).toHaveLength(1);
+      expect(parsed.local[0].name).toBe('tdd-python');
+      expect(parsed.catalogs).toEqual({});
+      expect(parsed.github).toEqual([]);
     });
 
     it('returns all matching results from local index when offline', async () => {
@@ -86,9 +88,9 @@ describe('Offline Fallback Integration', () => {
       const parsed = JSON.parse(result.content[0].text);
 
       expect(parsed.offline).toBe(true);
-      expect(parsed.results).toHaveLength(2);
-      expect(parsed.results.map((r: { name: string }) => r.name)).toContain('tdd-python');
-      expect(parsed.results.map((r: { name: string }) => r.name)).toContain('tdd-typescript');
+      expect(parsed.local).toHaveLength(2);
+      expect(parsed.local.map((r: { name: string }) => r.name)).toContain('tdd-python');
+      expect(parsed.local.map((r: { name: string }) => r.name)).toContain('tdd-typescript');
     });
 
     it('returns offline: false when online', async () => {

@@ -5,3 +5,6 @@ export type { CredentialStore } from './credential-store.js';
 export type { SearchIndex } from './search-index.js';
 export type { SkillLockStore } from './skill-lock-store.js';
 export type { Logger, LogLevel } from './logger.js';
+export type { UsageStore } from './usage-store.js';
+export type { CatalogStore } from './catalog-store.js';
+export type { GitHubSearch } from './github-search.js';

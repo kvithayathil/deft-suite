@@ -19,6 +19,7 @@ import type { ResilienceContext } from './resilience/tool-wrapper.js';
 import { WorkerManager } from './workers/worker-manager.js';
 import type { ToolContext } from './tools/context.js';
 import type { ToolHandler } from './tools/types.js';
+import { wireOptionalAdapters } from './bootstrap.js';
 import { handleSearchSkills } from './tools/search-skills.js';
 import { handleGetSkill } from './tools/get-skill.js';
 import { handleInstallSkill } from './tools/install-skill.js';
@@ -36,7 +37,8 @@ export const VERSION = '0.1.0';
 
 async function main(): Promise<void> {
   // Config
-  const configPath = join(homedir(), '.config', 'skill-mcp', 'config.json');
+  const configDir = join(homedir(), '.config', 'skill-mcp');
+  const configPath = join(configDir, 'config.json');
   const configStore = new FileConfigStore(configPath);
   const rawConfig = await configStore.load();
   const projectConfig = await discoverProjectConfig(
@@ -108,6 +110,12 @@ async function main(): Promise<void> {
     },
   };
 
+  await wireOptionalAdapters(ctx, {
+    configDir,
+    logger,
+    searchRateLimiter: rateLimiters.get('search_skills'),
+  });
+
   ctx.onConfigReload = async () => {
     const newRaw = await configStore.load();
     const newProject = await discoverProjectConfig(
@@ -116,6 +124,11 @@ async function main(): Promise<void> {
     );
     const newConfig = mergeConfigs(newRaw, newProject?.config);
     Object.assign(ctx.config, newConfig);
+    await wireOptionalAdapters(ctx, {
+      configDir,
+      logger,
+      searchRateLimiter: rateLimiters.get('search_skills'),
+    });
 
     const allMeta = await skillStore.listMetadata();
     const bundledMeta = await bundledStore.listMetadata();

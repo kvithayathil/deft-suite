@@ -11,7 +11,18 @@ const TOOL_DEFINITIONS = [
     description: 'Search skills by keyword',
     inputSchema: {
       type: 'object' as const,
-      properties: { query: { type: 'string' }, limit: { type: 'number' } },
+      properties: {
+        query: { type: 'string' },
+        limit: { type: 'number' },
+        sources: {
+          type: 'array',
+          items: {
+            type: 'string',
+            enum: ['local', 'catalog', 'github'],
+          },
+        },
+        refresh: { type: 'boolean' },
+      },
       required: ['query'],
     },
   },
