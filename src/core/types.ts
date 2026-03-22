@@ -78,6 +78,35 @@ export interface Source {
   trust?: TrustLevel;
 }
 
+export type CatalogSkillSource =
+  | { type: 'github'; repo: string; ref?: string }
+  | { type: 'path'; path: string }
+  | { type: 'url'; url: string };
+
+export interface CatalogSkill {
+  name: string;
+  description: string;
+  source: CatalogSkillSource;
+  tags?: string[];
+  version?: string;
+}
+
+export interface CatalogEntry {
+  name: string;
+  description?: string;
+  skills: CatalogSkill[];
+}
+
+export interface RegistrySource {
+  url: string;
+  type: 'git' | 'static';
+}
+
+export interface RegistryConfig {
+  cacheMinutes: number;
+  sources: RegistrySource[];
+}
+
 // --- Skill Lock (Spec Section 6a) ---
 
 export interface SkillLockEntry {
@@ -161,6 +190,39 @@ export interface BackupConfig {
   onConfigChange: boolean;
 }
 
+export interface GitHubConfig {
+  search: boolean;
+  topics: string[];
+}
+
+export interface UsageEntry {
+  name: string;
+  score: number;
+  lastAccessed: string;
+  firstAccessed: string;
+  accessCount: number;
+}
+
+export interface UsageStats {
+  totalSkills: number;
+  totalScore: number;
+  topSkills: UsageEntry[];
+  dbSizeBytes?: number;
+}
+
+export interface UsageConfig {
+  pruneThreshold: number;
+  sessionCap: number;
+  ceilingPercent: number;
+  dbPath: string;
+}
+
+export interface SearchStats {
+  totalSearches: number;
+  avgResultCount: number;
+  sourceBreakdown: Record<string, number>;
+}
+
 export interface ConfigMetadata {
   createdOn: string;
   createdBy: string;
@@ -172,6 +234,9 @@ export interface Config {
   schemaVersion: number;
   manifest: ManifestConfig;
   sources: Source[];
+  registries?: RegistryConfig;
+  github?: GitHubConfig;
+  usage?: UsageConfig;
   sync: SyncConfig;
   security: SecurityConfig;
   platformDirectories: Record<string, string>;
@@ -214,6 +279,35 @@ export interface SearchResult {
   description: string;
   trustLevel: TrustLevel;
   score: number;
+}
+
+export interface LocalSearchResult extends SearchResult {
+  frecency?: number;
+  installed: true;
+}
+
+export interface CatalogSearchResult {
+  name: string;
+  description: string;
+  source: CatalogSkillSource;
+  catalogName: string;
+  score: number;
+}
+
+export interface GitHubSearchResult {
+  name: string;
+  description: string;
+  source: CatalogSkillSource;
+  tags: string[];
+  score: number;
+  installable: true;
+}
+
+export interface UnifiedSearchResult {
+  local: LocalSearchResult[];
+  catalogs: Record<string, CatalogSearchResult[]>;
+  github: GitHubSearchResult[];
+  offline: boolean;
 }
 
 // --- Scan Types ---

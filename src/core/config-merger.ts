@@ -8,6 +8,9 @@ export const DEFAULT_CONFIG: Config = {
     warnThreshold: 8,
   },
   sources: [],
+  registries: { cacheMinutes: 60, sources: [] },
+  github: { search: false, topics: ['mcp-skill', 'agent-skill'] },
+  usage: { pruneThreshold: 10000, sessionCap: 3, ceilingPercent: 20, dbPath: '' },
   sync: { intervalMinutes: 60, autoUpdate: true },
   security: {
     minTrustLevel: TrustLevel.Community,

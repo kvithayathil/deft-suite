@@ -69,6 +69,39 @@ describe('mergeConfigs', () => {
     expect(result.security.minTrustLevel).toBe(TrustLevel.Community);
     expect(result.security.scanOnInstall).toBe(false);
   });
+
+  it('includes unified search defaults', () => {
+    const result = mergeConfigs();
+    expect(result.registries).toEqual({ cacheMinutes: 60, sources: [] });
+    expect(result.github).toEqual({ search: false, topics: ['mcp-skill', 'agent-skill'] });
+    expect(result.usage).toEqual({ pruneThreshold: 10000, sessionCap: 3, ceilingPercent: 20, dbPath: '' });
+  });
+
+  it('deep merges github partial overrides', () => {
+    const project: Partial<Config> = {
+      github: { search: true } as Config['github'],
+    };
+    const result = mergeConfigs(undefined, project);
+    expect(result.github).toEqual({ search: true, topics: ['mcp-skill', 'agent-skill'] });
+  });
+
+  it('replaces registries.sources instead of concatenating', () => {
+    const global: Partial<Config> = {
+      registries: {
+        cacheMinutes: 60,
+        sources: [{ type: 'git', url: 'https://github.com/org/one.git' }],
+      },
+    };
+    const project: Partial<Config> = {
+      registries: {
+        cacheMinutes: 30,
+        sources: [{ type: 'static', url: 'https://example.com/catalog.json' }],
+      },
+    };
+    const result = mergeConfigs(global, project);
+    expect(result.registries?.cacheMinutes).toBe(30);
+    expect(result.registries?.sources).toEqual([{ type: 'static', url: 'https://example.com/catalog.json' }]);
+  });
 });
 
 describe('DEFAULT_CONFIG', () => {
