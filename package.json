@@ -5,7 +5,8 @@
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "deft": "dist/cli.js"
+    "deft": "dist/cli.js",
+    "deft-mcp": "dist/index.js"
   },
   "files": [
     "dist",

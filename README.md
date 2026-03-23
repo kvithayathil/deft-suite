@@ -65,20 +65,47 @@ node dist/cli.js --help
 
 ## MCP Client Setup
 
-Register as a stdio server in your MCP client config:
+Add to your MCP client config (Claude Desktop, Windsurf, Cursor, VS Code, etc.):
+
+### Via npx (recommended — no local clone needed)
 
 ```json
 {
   "mcpServers": {
     "deft-mcp": {
-      "command": "node",
-      "args": ["/absolute/path/to/deft-mcp/dist/index.js"]
+      "command": "npx",
+      "args": ["-y", "github:kvithayathil/deft-suite", "deft-mcp"]
     }
   }
 }
 ```
 
-Works with Claude Desktop, Windsurf, Cursor, VS Code, and any MCP-compatible client.
+Pin a specific version for stability:
+
+```json
+{
+  "mcpServers": {
+    "deft-mcp": {
+      "command": "npx",
+      "args": ["-y", "github:kvithayathil/deft-suite#v1.0.0-beta", "deft-mcp"]
+    }
+  }
+}
+```
+
+> **Note:** First run is slower while dependencies install and compile. Subsequent runs use the npx cache.
+
+### Via local path (if installed globally or from source)
+
+```json
+{
+  "mcpServers": {
+    "deft-mcp": {
+      "command": "deft-mcp"
+    }
+  }
+}
+```
 
 ## Quick Start
 
