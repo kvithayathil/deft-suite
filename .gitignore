@@ -5,3 +5,7 @@ coverage/
 .worktrees/
 *.tsbuildinfo
 .agent-workspace/
+CLAUDE.md
+AGENTS.md
+.agent/
+docs/superpowers/specs/
