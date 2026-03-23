@@ -3,9 +3,9 @@ import { join } from 'node:path';
 import type { Config } from './types.js';
 
 const DEFAULT_PROJECT_CONFIG_PATHS = [
-  '.skill-mcp',
-  '.claude/skill-mcp',
-  '.agents/skill-mcp',
+  '.deft',
+  '.claude/deft',
+  '.agents/deft',
 ];
 
 export interface DiscoveredConfig {

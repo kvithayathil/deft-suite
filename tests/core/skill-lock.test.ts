@@ -36,7 +36,7 @@ describe('SkillLockManager', () => {
       const existing: SkillLock = {
         lockVersion: 1,
         generatedAt: '2026-03-13T10:00:00Z',
-        generatedBy: 'skill-mcp@0.1.0',
+        generatedBy: 'deft-mcp@0.1.0',
         skills: { 'tdd-python': makeLockEntry() },
       };
       store = new InMemorySkillLockStore(existing);
@@ -107,7 +107,7 @@ describe('SkillLockManager', () => {
       const existing: SkillLock = {
         lockVersion: 1,
         generatedAt: '2026-03-13T10:00:00Z',
-        generatedBy: 'skill-mcp@0.1.0',
+        generatedBy: 'deft-mcp@0.1.0',
         skills: { 'tdd-python': makeLockEntry({ contentHash: 'sha256:pre-existing' }) },
       };
       const preloadedStore = new InMemorySkillLockStore(existing);

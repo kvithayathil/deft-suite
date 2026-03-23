@@ -82,7 +82,7 @@ export class CliAdapter {
           return;
         }
 
-        this.stderr.write(`Unknown command: ${command}\nRun 'skill-mcp help' for usage.\n`);
+        this.stderr.write(`Unknown command: ${command}\nRun 'deft help' for usage.\n`);
         process.exit(1);
     }
   }
@@ -90,7 +90,7 @@ export class CliAdapter {
   private async search(query?: string, flags: Record<string, unknown> = {}): Promise<void> {
     const trimmedQuery = query?.trim() ?? '';
     if (trimmedQuery.length === 0) {
-      throw new Error('Usage: skill-mcp search <query> [--refresh]');
+      throw new Error('Usage: deft search <query> [--refresh]');
     }
 
     const ctx = await this.createContext();
@@ -153,7 +153,7 @@ export class CliAdapter {
 
       const name = rest[0]?.trim();
       if (!name) {
-        throw new Error('Usage: skill-mcp usage reset <name> | --all');
+        throw new Error('Usage: deft usage reset <name> | --all');
       }
 
       usageStore.reset(name);
@@ -161,7 +161,7 @@ export class CliAdapter {
       return;
     }
 
-    throw new Error('Usage: skill-mcp usage export --format json|csv | skill-mcp usage reset <name> [--all]');
+    throw new Error('Usage: deft usage export --format json|csv | deft usage reset <name> [--all]');
   }
 
   private async stats(): Promise<void> {
@@ -182,13 +182,13 @@ export class CliAdapter {
   }
 
   private async version(): Promise<void> {
-    this.stdout.write(`skill-mcp ${this.versionText}\n`);
+    this.stdout.write(`deft-mcp ${this.versionText}\n`);
   }
 
   private async help(command?: string): Promise<void> {
     const detail = command ? `\nHelp for command: ${command}` : '';
     this.stdout.write([
-      'Usage: skill-mcp <command> [options]', '',
+      'Usage: deft <command> [options]', '',
       'Commands:',
       '  search <query> [--refresh]           Search local/catalog/github skills',
       '  usage export --format json|csv       Export usage/frecency data',
@@ -334,7 +334,7 @@ function formatBytes(size: number): string {
 }
 
 async function defaultCreateCliContext(): Promise<ToolContext> {
-  const configDir = join(homedir(), '.config', 'skill-mcp');
+  const configDir = join(homedir(), '.config', 'deft');
   const configPath = join(configDir, 'config.json');
   const configStore = new FileConfigStore(configPath);
   const rawConfig = await configStore.load();
@@ -345,8 +345,8 @@ async function defaultCreateCliContext(): Promise<ToolContext> {
   const config = mergeConfigs(rawConfig, projectConfig?.config);
 
   const logger = new ConsoleLogger(config.logging.level);
-  const skillsDir = join(homedir(), '.local', 'share', 'skill-mcp', 'skills');
-  const bundledDir = join(homedir(), '.local', 'share', 'skill-mcp', 'bundled');
+  const skillsDir = join(homedir(), '.local', 'share', 'deft', 'skills');
+  const bundledDir = join(homedir(), '.local', 'share', 'deft', 'bundled');
   const skillStore = new FsSkillStore(skillsDir);
   const bundledStore = new FsSkillStore(bundledDir);
   const searchIndex = new MemorySearchIndex();

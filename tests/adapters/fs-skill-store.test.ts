@@ -10,7 +10,7 @@ describe('FsSkillStore', () => {
   let store: FsSkillStore;
 
   beforeEach(async () => {
-    testDir = await mkdtemp(join(tmpdir(), 'skill-mcp-test-'));
+    testDir = await mkdtemp(join(tmpdir(), 'deft-test-'));
     store = new FsSkillStore(testDir);
   });
 

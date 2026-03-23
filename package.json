@@ -1,11 +1,11 @@
 {
-  "name": "skill-mcp",
+  "name": "deft-mcp",
   "version": "1.0.0-beta",
-  "description": "Context-efficient MCP broker for agent skills, tools, prompts, and resources",
+  "description": "Deft Suite — Context-efficient MCP broker for agent skills, tools, prompts, and resources",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "skill-mcp": "dist/cli.js"
+    "deft": "dist/cli.js"
   },
   "scripts": {
     "build": "tsc",
@@ -19,8 +19,10 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "keywords": [
+    "deft",
+    "deft-suite",
     "mcp",
     "skills",
     "agent",

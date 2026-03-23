@@ -1,6 +1,6 @@
 # Tools Reference
 
-This reference describes the MCP tools exposed by `skill-mcp` (`src/adapters/driving/mcp-server.ts`).
+This reference describes the MCP tools exposed by `deft-mcp` (`src/adapters/driving/mcp-server.ts`).
 
 All successful calls return a `content` array with a single text JSON payload.
 
@@ -294,7 +294,7 @@ Persist current config and trigger hot reload.
 ```json
 {
   "saved": true,
-  "path": "~/.config/skill-mcp/config.json",
+  "path": "~/.config/deft/config.json",
   "message": "Config saved and reloaded from '...'."
 }
 ```

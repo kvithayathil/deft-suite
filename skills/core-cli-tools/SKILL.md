@@ -1,11 +1,11 @@
 ---
 name: core-cli-tools
-description: Core CLI tool patterns for building on top of skill-mcp
+description: Core CLI tool patterns for building on top of deft-mcp
 ---
 
 # Core CLI Tools
 
-Build CLI tools that integrate with the skill-mcp infrastructure using standard patterns and APIs.
+Build CLI tools that integrate with the Deft Suite infrastructure using standard patterns and APIs.
 
 ## Core Tool Types
 

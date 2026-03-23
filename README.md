@@ -1,4 +1,4 @@
-# skill-mcp
+# Deft Suite
 
 > **v1.0.0-beta** — [Changelog](CHANGELOG.md)
 
@@ -45,9 +45,9 @@ Register as a stdio server in your MCP client config:
 ```json
 {
   "mcpServers": {
-    "skill-mcp": {
+    "deft-mcp": {
       "command": "node",
-      "args": ["/absolute/path/to/skill-mcp/dist/index.js"]
+      "args": ["/absolute/path/to/deft-mcp/dist/index.js"]
     }
   }
 }
@@ -83,10 +83,10 @@ Works with Claude Desktop, Windsurf, Cursor, VS Code, and any MCP-compatible cli
 ## CLI
 
 ```bash
-node dist/cli.js search "python" --refresh
-node dist/cli.js stats
-node dist/cli.js usage export --format json
-node dist/cli.js usage reset --all
+deft search "python" --refresh
+deft stats
+deft usage export --format json
+deft usage reset --all
 ```
 
 ## Documentation
@@ -105,4 +105,4 @@ Contributions welcome. Add tests for behavioral changes and keep docs aligned wi
 
 ## License
 
-MIT
+[GPL-3.0](LICENSE) — All derivative works must remain open source. See the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.html) for details.

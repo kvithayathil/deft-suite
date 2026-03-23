@@ -10,7 +10,7 @@ describe('SqliteUsageStore', () => {
   let dbPath: string;
 
   beforeEach(async () => {
-    testDir = await mkdtemp(join(tmpdir(), 'skill-mcp-usage-'));
+    testDir = await mkdtemp(join(tmpdir(), 'deft-usage-'));
     dbPath = join(testDir, 'usage.db');
   });
 

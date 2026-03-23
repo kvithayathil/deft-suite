@@ -6,7 +6,7 @@ import { FileSkillLockStore } from '../../src/adapters/driven/file-skill-lock-st
 
 describe('FileSkillLockStore', () => {
   let testDir: string;
-  beforeEach(async () => { testDir = await mkdtemp(join(tmpdir(), 'skill-mcp-lock-')); });
+  beforeEach(async () => { testDir = await mkdtemp(join(tmpdir(), 'deft-lock-')); });
   afterEach(async () => { await rm(testDir, { recursive: true, force: true }); });
 
   it('returns null when no lock file exists', async () => {

@@ -8,15 +8,15 @@ describe('discoverProjectConfig', () => {
   let tempDir: string;
 
   beforeEach(async () => {
-    tempDir = await mkdtemp(join(tmpdir(), 'skill-mcp-disc-'));
+    tempDir = await mkdtemp(join(tmpdir(), 'deft-disc-'));
   });
 
   afterEach(async () => {
     await rm(tempDir, { recursive: true, force: true });
   });
 
-  it('finds config in .skill-mcp/', async () => {
-    const configDir = join(tempDir, '.skill-mcp');
+  it('finds config in .deft/', async () => {
+    const configDir = join(tempDir, '.deft');
     await mkdir(configDir, { recursive: true });
     await writeFile(join(configDir, 'config.json'), JSON.stringify({ schemaVersion: 1 }));
 
@@ -25,24 +25,24 @@ describe('discoverProjectConfig', () => {
     expect(result!.path).toBe(join(configDir, 'config.json'));
   });
 
-  it('finds config in .claude/skill-mcp/ when .skill-mcp/ missing', async () => {
-    const configDir = join(tempDir, '.claude', 'skill-mcp');
+  it('finds config in .claude/deft/ when .deft/ missing', async () => {
+    const configDir = join(tempDir, '.claude', 'deft');
     await mkdir(configDir, { recursive: true });
     await writeFile(join(configDir, 'config.json'), JSON.stringify({ schemaVersion: 1 }));
 
     const result = await discoverProjectConfig(tempDir);
     expect(result).not.toBeNull();
-    expect(result!.path).toContain('.claude/skill-mcp/config.json');
+    expect(result!.path).toContain('.claude/deft/config.json');
   });
 
-  it('finds config in .agents/skill-mcp/ as last resort', async () => {
-    const configDir = join(tempDir, '.agents', 'skill-mcp');
+  it('finds config in .agents/deft/ as last resort', async () => {
+    const configDir = join(tempDir, '.agents', 'deft');
     await mkdir(configDir, { recursive: true });
     await writeFile(join(configDir, 'config.json'), JSON.stringify({ schemaVersion: 1 }));
 
     const result = await discoverProjectConfig(tempDir);
     expect(result).not.toBeNull();
-    expect(result!.path).toContain('.agents/skill-mcp/config.json');
+    expect(result!.path).toContain('.agents/deft/config.json');
   });
 
   it('returns null when no project config exists', async () => {
@@ -51,8 +51,8 @@ describe('discoverProjectConfig', () => {
   });
 
   it('uses first match — does not continue checking', async () => {
-    const dir1 = join(tempDir, '.skill-mcp');
-    const dir2 = join(tempDir, '.claude', 'skill-mcp');
+    const dir1 = join(tempDir, '.deft');
+    const dir2 = join(tempDir, '.claude', 'deft');
     await mkdir(dir1, { recursive: true });
     await mkdir(dir2, { recursive: true });
     await writeFile(join(dir1, 'config.json'), JSON.stringify({ schemaVersion: 1, manifest: { maxManifestSize: 5 } }));

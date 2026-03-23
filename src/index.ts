@@ -37,7 +37,7 @@ export const VERSION = '1.0.0-beta';
 
 async function main(): Promise<void> {
   // Config
-  const configDir = join(homedir(), '.config', 'skill-mcp');
+  const configDir = join(homedir(), '.config', 'deft');
   const configPath = join(configDir, 'config.json');
   const configStore = new FileConfigStore(configPath);
   const rawConfig = await configStore.load();
@@ -54,8 +54,8 @@ async function main(): Promise<void> {
   }
 
   // Adapters
-  const skillsDir = join(homedir(), '.local', 'share', 'skill-mcp', 'skills');
-  const bundledDir = join(homedir(), '.local', 'share', 'skill-mcp', 'bundled');
+  const skillsDir = join(homedir(), '.local', 'share', 'deft', 'skills');
+  const bundledDir = join(homedir(), '.local', 'share', 'deft', 'bundled');
   const skillStore = new FsSkillStore(skillsDir);
   const bundledStore = new FsSkillStore(bundledDir);
   const scanner = new BuiltinScanner();
@@ -65,7 +65,7 @@ async function main(): Promise<void> {
   const resolver = new SkillResolver(skillStore, bundledStore, config.sources, logger);
   const trustEvaluator = new TrustEvaluator(config.security);
   const lifecycle = new SkillLifecycle(logger);
-  const lockPath = join(homedir(), '.config', 'skill-mcp', 'skill-lock.json');
+  const lockPath = join(homedir(), '.config', 'deft', 'skill-lock.json');
   const lockStore = new FileSkillLockStore(lockPath);
   const lockManager = new SkillLockManager(lockStore, logger);
   const manifestBuilder = new ManifestBuilder(config.manifest);
@@ -172,7 +172,7 @@ async function main(): Promise<void> {
 
   // Graceful shutdown
   const shutdown = async (): Promise<void> => {
-    logger.info('Shutting down skill-mcp server...');
+    logger.info('Shutting down deft-mcp server...');
     await workerManager.shutdown();
     await server.close();
     process.exit(0);
@@ -182,7 +182,7 @@ async function main(): Promise<void> {
   process.on('SIGTERM', () => { void shutdown(); });
 
   await startStdioServer(server);
-  logger.info(`skill-mcp v${VERSION} started`);
+  logger.info(`deft-mcp v${VERSION} started`);
 }
 
 main().catch((err: unknown) => {

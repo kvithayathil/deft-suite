@@ -1,16 +1,16 @@
 # Configuration Reference
 
-`skill-mcp` merges configuration from three layers:
+`deft` merges configuration from three layers:
 
 1. built-in defaults
-2. global config (`~/.config/skill-mcp/config.json`)
+2. global config (`~/.config/deft/config.json`)
 3. project config (first discovered path)
 
 ## Global Config
 
 Path:
 
-`~/.config/skill-mcp/config.json`
+`~/.config/deft/config.json`
 
 Loaded by `FileConfigStore` during bootstrap.
 
@@ -18,9 +18,9 @@ Loaded by `FileConfigStore` during bootstrap.
 
 By default, project config is discovered in this order:
 
-1. `.skill-mcp/config.json`
-2. `.claude/skill-mcp/config.json`
-3. `.agents/skill-mcp/config.json`
+1. `.deft/config.json`
+2. `.claude/deft/config.json`
+3. `.agents/deft/config.json`
 
 The first match wins.
 
@@ -44,8 +44,8 @@ Implemented in `mergeConfigs(global, project)`.
 
 Currently supported:
 
-- `SKILL_MCP_LOG_LEVEL` → `logging.level`
-- `SKILL_MCP_MIN_TRUST` → `security.minTrustLevel`
+- `DEFT_LOG_LEVEL` → `logging.level`
+- `DEFT_MIN_TRUST` → `security.minTrustLevel`
 
 ## Unified Search Configuration
 
@@ -146,18 +146,18 @@ Controls local usage/frecency tracking.
     }
   },
   "platformDirectories": {
-    "claude-code": ".claude/skill-mcp",
-    "windsurf": ".windsurf/skill-mcp",
-    "cursor": ".cursor/skill-mcp",
-    "opencode": ".opencode/skill-mcp",
-    "zed": ".zed/skill-mcp",
-    "copilot": ".copilot/skill-mcp",
-    "default": ".agents/skill-mcp"
+    "claude-code": ".claude/deft",
+    "windsurf": ".windsurf/deft",
+    "cursor": ".cursor/deft",
+    "opencode": ".opencode/deft",
+    "zed": ".zed/deft",
+    "copilot": ".copilot/deft",
+    "default": ".agents/deft"
   },
   "projectConfigPaths": [
-    ".skill-mcp",
-    ".claude/skill-mcp",
-    ".agents/skill-mcp"
+    ".deft",
+    ".claude/deft",
+    ".agents/deft"
   ],
   "push": {
     "remote": "origin",
@@ -166,7 +166,7 @@ Controls local usage/frecency tracking.
   },
   "logging": {
     "level": "error",
-    "file": "~/.cache/skill-mcp/logs/skill-mcp.log",
+    "file": "~/.cache/deft/logs/deft.log",
     "maxFileSize": "10MB",
     "maxFiles": 3,
     "structured": false
@@ -175,7 +175,7 @@ Controls local usage/frecency tracking.
     "enabled": false,
     "exporterEndpoint": null,
     "exporterProtocol": "grpc",
-    "serviceName": "skill-mcp",
+    "serviceName": "deft-mcp",
     "sampleRate": 1
   },
   "resilience": {
@@ -193,7 +193,7 @@ Controls local usage/frecency tracking.
   },
   "metadata": {
     "createdOn": "<platform>",
-    "createdBy": "skill-mcp@1.0.0-beta",
+    "createdBy": "deft-mcp@1.0.0-beta",
     "platforms": ["<platform>"],
     "arch": "<arch>"
   }

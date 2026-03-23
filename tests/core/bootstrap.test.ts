@@ -61,7 +61,7 @@ describe('wireOptionalAdapters', () => {
     let usagePath = '';
 
     await wireOptionalAdapters(ctx, {
-      configDir: '/tmp/skill-mcp',
+      configDir: '/tmp/deft',
       logger: ctx.logger,
       factories: {
         createUsageStore: async (path) => {
@@ -74,7 +74,7 @@ describe('wireOptionalAdapters', () => {
       },
     });
 
-    expect(usagePath).toBe('/tmp/skill-mcp/custom-usage.db');
+    expect(usagePath).toBe('/tmp/deft/custom-usage.db');
     expect(ctx.usageStore).toBe(usageStore);
     expect(ctx.catalogStores?.get('https://example.com/catalog.git')).toBe(gitStore);
     expect(ctx.catalogStores?.get('https://example.com/catalog.json')).toBe(staticStore);
@@ -87,7 +87,7 @@ describe('wireOptionalAdapters', () => {
 
     let usagePath = '';
     await wireOptionalAdapters(ctx, {
-      configDir: '/tmp/skill-mcp',
+      configDir: '/tmp/deft',
       logger: ctx.logger,
       factories: {
         createUsageStore: async (path) => {
@@ -105,7 +105,7 @@ describe('wireOptionalAdapters', () => {
     const logger = ctx.logger as NoopLogger;
 
     await wireOptionalAdapters(ctx, {
-      configDir: '/tmp/skill-mcp',
+      configDir: '/tmp/deft',
       logger,
       factories: {
         createUsageStore: async () => {

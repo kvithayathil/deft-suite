@@ -6,7 +6,7 @@ import { FileConfigStore } from '../../src/adapters/driven/file-config-store.js'
 
 describe('FileConfigStore', () => {
   let testDir: string;
-  beforeEach(async () => { testDir = await mkdtemp(join(tmpdir(), 'skill-mcp-config-')); });
+  beforeEach(async () => { testDir = await mkdtemp(join(tmpdir(), 'deft-config-')); });
   afterEach(async () => { await rm(testDir, { recursive: true, force: true }); });
 
   it('returns null when file does not exist', async () => {

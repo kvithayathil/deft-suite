@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to skill-mcp are documented in this file.
+All notable changes to Deft Suite (deft-mcp) are documented in this file.
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -51,8 +51,8 @@ First public beta. All core features are implemented and tested.
 
 ### Configuration
 - Three-layer merge: built-in defaults → global config → project config
-- Project config discovery: `.skill-mcp/`, `.claude/skill-mcp/`, `.agents/skill-mcp/`
-- Environment variable overrides (`SKILL_MCP_LOG_LEVEL`, `SKILL_MCP_MIN_TRUST`)
+- Project config discovery: `.deft/`, `.claude/deft/`, `.agents/deft/`
+- Environment variable overrides (`DEFT_LOG_LEVEL`, `DEFT_MIN_TRUST`)
 - Hot reload via `save_config`
 - Platform-aware directory conventions (Claude Code, Windsurf, Cursor, Copilot, Zed, OpenCode)
 
@@ -68,4 +68,5 @@ First public beta. All core features are implemented and tested.
 - Structured console logger with configurable levels
 - Skill lock manager with lock file persistence
 - Noop telemetry interface ready for OTel wiring (Phase 2)
-- 317+ tests across unit, integration, and adapter layers
+- 322+ tests across unit, integration, and adapter layers
+- Licensed under GPL-3.0

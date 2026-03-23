@@ -61,7 +61,7 @@ export function validateConfig(config: Record<string, unknown>): ValidationResul
     if (typeof config.schemaVersion !== 'number' || !Number.isInteger(config.schemaVersion) || config.schemaVersion < 1) {
       errors.push({ field: 'schemaVersion', message: 'schemaVersion must be a positive integer' });
     } else if (config.schemaVersion > CURRENT_SCHEMA_VERSION) {
-      warnings.push({ field: 'schemaVersion', message: `Config schemaVersion ${config.schemaVersion} is newer than supported (${CURRENT_SCHEMA_VERSION}). Consider upgrading skill-mcp.` });
+      warnings.push({ field: 'schemaVersion', message: `Config schemaVersion ${config.schemaVersion} is newer than supported (${CURRENT_SCHEMA_VERSION}). Consider upgrading deft-mcp.` });
     }
   }
 

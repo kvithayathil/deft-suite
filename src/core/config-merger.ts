@@ -19,18 +19,18 @@ export const DEFAULT_CONFIG: Config = {
     accessControl: { mode: 'blocklist', blocked: [], allowed: [] },
   },
   platformDirectories: {
-    'claude-code': '.claude/skill-mcp',
-    windsurf: '.windsurf/skill-mcp',
-    cursor: '.cursor/skill-mcp',
-    opencode: '.opencode/skill-mcp',
-    zed: '.zed/skill-mcp',
-    copilot: '.copilot/skill-mcp',
-    default: '.agents/skill-mcp',
+    'claude-code': '.claude/deft',
+    windsurf: '.windsurf/deft',
+    cursor: '.cursor/deft',
+    opencode: '.opencode/deft',
+    zed: '.zed/deft',
+    copilot: '.copilot/deft',
+    default: '.agents/deft',
   },
-  projectConfigPaths: ['.skill-mcp', '.claude/skill-mcp', '.agents/skill-mcp'],
+  projectConfigPaths: ['.deft', '.claude/deft', '.agents/deft'],
   push: { remote: 'origin', branch: 'main', autoCommit: false },
-  logging: { level: 'error', file: '~/.cache/skill-mcp/logs/skill-mcp.log', maxFileSize: '10MB', maxFiles: 3, structured: false },
-  telemetry: { enabled: false, exporterEndpoint: null, exporterProtocol: 'grpc', serviceName: 'skill-mcp', sampleRate: 1.0 },
+  logging: { level: 'error', file: '~/.cache/deft/logs/deft.log', maxFileSize: '10MB', maxFiles: 3, structured: false },
+  telemetry: { enabled: false, exporterEndpoint: null, exporterProtocol: 'grpc', serviceName: 'deft-mcp', sampleRate: 1.0 },
   resilience: {
     rateLimits: {
       search_skills: { bucketSize: 20, refillPerMinute: 20 },
@@ -39,7 +39,7 @@ export const DEFAULT_CONFIG: Config = {
     },
   },
   backup: { enabled: false, target: 'git', interval: 'daily', onConfigChange: true },
-  metadata: { createdOn: process.platform, createdBy: 'skill-mcp@1.0.0-beta', platforms: [process.platform], arch: process.arch },
+  metadata: { createdOn: process.platform, createdBy: 'deft-mcp@1.0.0-beta', platforms: [process.platform], arch: process.arch },
 };
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -91,9 +91,9 @@ export function mergeConfigs(global?: Partial<Config> | null, project?: Partial<
 
 function loadEnvOverrides(): Partial<Config> | null {
   const overrides: Record<string, unknown> = {};
-  const logLevel = process.env.SKILL_MCP_LOG_LEVEL;
+  const logLevel = process.env.DEFT_LOG_LEVEL;
   if (logLevel) { overrides.logging = { level: logLevel }; }
-  const minTrust = process.env.SKILL_MCP_MIN_TRUST;
+  const minTrust = process.env.DEFT_MIN_TRUST;
   if (minTrust) { overrides.security = { minTrustLevel: minTrust }; }
   return Object.keys(overrides).length > 0 ? overrides as Partial<Config> : null;
 }

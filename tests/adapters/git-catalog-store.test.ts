@@ -32,7 +32,7 @@ describe('GitCatalogStore', () => {
   let baseDir: string;
 
   beforeEach(async () => {
-    baseDir = await mkdtemp(join(tmpdir(), 'skill-mcp-git-catalog-'));
+    baseDir = await mkdtemp(join(tmpdir(), 'deft-git-catalog-'));
     vi.mocked(execFile).mockReset();
   });
 

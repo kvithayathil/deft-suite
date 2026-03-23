@@ -14,7 +14,7 @@ interface CacheEntry {
 export class GitCatalogStore implements CatalogStore {
   private readonly cache = new Map<string, CacheEntry>();
 
-  constructor(private readonly baseDir: string = join(tmpdir(), 'skill-mcp-catalogs')) {}
+  constructor(private readonly baseDir: string = join(tmpdir(), 'deft-catalogs')) {}
 
   async fetch(source: RegistrySource): Promise<CatalogEntry> {
     await mkdir(this.baseDir, { recursive: true });

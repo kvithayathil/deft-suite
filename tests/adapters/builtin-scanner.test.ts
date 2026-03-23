@@ -9,7 +9,7 @@ describe('BuiltinScanner', () => {
   let scanner: BuiltinScanner;
 
   beforeEach(async () => {
-    testDir = await mkdtemp(join(tmpdir(), 'skill-mcp-scan-'));
+    testDir = await mkdtemp(join(tmpdir(), 'deft-scan-'));
     scanner = new BuiltinScanner();
   });
 

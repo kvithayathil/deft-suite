@@ -1,6 +1,6 @@
 # Getting Started
 
-This guide walks through first-time setup and your first skill lifecycle with `skill-mcp`.
+This guide walks through first-time setup and your first skill lifecycle with Deft Suite (`deft-mcp`).
 
 ## 1) Install and Build
 
@@ -11,9 +11,9 @@ npm run build
 
 ## 2) Global Config Location
 
-`skill-mcp` uses a global config file at:
+Deft uses a global config file at:
 
-`~/.config/skill-mcp/config.json`
+`~/.config/deft/config.json`
 
 If the file does not exist yet, defaults from `src/core/config-merger.ts` are used.
 
@@ -27,16 +27,16 @@ The server communicates over stdio and is intended to be launched by an MCP clie
 
 ## 4) Configure Your MCP Client
 
-Register `skill-mcp` as a stdio MCP server in your client config.
+Register `deft-mcp` as a stdio MCP server in your client config.
 
 Example shape:
 
 ```json
 {
   "mcpServers": {
-    "skill-mcp": {
+    "deft-mcp": {
       "command": "node",
-      "args": ["/absolute/path/to/skill-mcp/dist/index.js"]
+      "args": ["/absolute/path/to/deft-mcp/dist/index.js"]
     }
   }
 }
@@ -100,11 +100,11 @@ Call `save_skill`:
 
 ## 9) Project-Level Config Discovery
 
-At startup and config reload, `skill-mcp` checks for project config in this order:
+At startup and config reload, Deft checks for project config in this order:
 
-1. `.skill-mcp/config.json`
-2. `.claude/skill-mcp/config.json`
-3. `.agents/skill-mcp/config.json`
+1. `.deft/config.json`
+2. `.claude/deft/config.json`
+3. `.agents/deft/config.json`
 
 The first path found is loaded and merged over global config.
 
@@ -152,9 +152,9 @@ GitHub search is opt-in:
 The CLI includes usage analytics commands backed by local SQLite storage:
 
 ```bash
-node dist/cli.js stats
-node dist/cli.js usage export --format json
-node dist/cli.js usage reset --all
+deft stats
+deft usage export --format json
+deft usage reset --all
 ```
 
 You can also install and use the bundled `usage-stats` skill to help interpret frecency/search analytics.
