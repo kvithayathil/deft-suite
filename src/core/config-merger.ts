@@ -39,7 +39,7 @@ export const DEFAULT_CONFIG: Config = {
     },
   },
   backup: { enabled: false, target: 'git', interval: 'daily', onConfigChange: true },
-  metadata: { createdOn: process.platform, createdBy: 'skill-mcp@0.1.0', platforms: [process.platform], arch: process.arch },
+  metadata: { createdOn: process.platform, createdBy: 'skill-mcp@1.0.0-beta', platforms: [process.platform], arch: process.arch },
 };
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {

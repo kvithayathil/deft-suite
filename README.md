@@ -1,20 +1,21 @@
 # skill-mcp
 
-`skill-mcp` is a Model Context Protocol (MCP) server for discovering, validating, installing, and managing reusable agent skills.
+> **v1.0.0-beta** — [Changelog](CHANGELOG.md)
 
-It focuses on:
-- secure skill install/save flows (validation + scanning)
-- trust-aware skill lifecycle and lock tracking
-- compact manifest injection at MCP initialize time
-- project-aware config overlays
-- unified search across local, team catalogs, and GitHub (opt-in)
-- frecency-aware ranking with local usage analytics
+An MCP server for discovering, validating, installing, and managing reusable agent skills.
+
+- **Unified search** across local skills, team catalogs, and GitHub (opt-in)
+- **Secure install/save** with validation and security scanning
+- **Trust-aware** skill lifecycle with lock tracking
+- **Frecency ranking** blending keyword relevance with local usage patterns
+- **Offline-first** — graceful degradation when remotes are unavailable
+- **Project-aware** config overlays with multi-path discovery
 
 ## Prerequisites
 
 - Node.js `>=20.0.0`
 - npm
-- Build toolchain support for native addons (`better-sqlite3` used for usage/frecency storage)
+- Build toolchain for native addons (`better-sqlite3`)
 
 ## Install and Build
 
@@ -31,7 +32,7 @@ Start the MCP server over stdio:
 node dist/index.js
 ```
 
-You can also build and run the CLI entrypoint:
+Or use the CLI:
 
 ```bash
 node dist/cli.js --help
@@ -39,9 +40,7 @@ node dist/cli.js --help
 
 ## MCP Client Setup
 
-Add a stdio server entry in your MCP client config that points to `node` + `dist/index.js`.
-
-Example shape:
+Register as a stdio server in your MCP client config:
 
 ```json
 {
@@ -54,51 +53,55 @@ Example shape:
 }
 ```
 
-Use your client’s specific config file location (for example Claude Desktop, Windsurf, VS Code MCP-compatible clients).
+Works with Claude Desktop, Windsurf, Cursor, VS Code, and any MCP-compatible client.
 
 ## Quick Start
 
-1. Start the server.
-2. Call `get_status` to confirm health.
-3. Call `search_skills` and `install_skill` to install a skill.
-4. Call `get_skill` to inspect installed content.
-5. Call `save_skill` to add your own skill.
+1. Start the server
+2. `get_status` — confirm health
+3. `search_skills` — find skills across all sources
+4. `install_skill` — install with validation + scanning
+5. `get_skill` — retrieve full content with trust indicator
+6. `save_skill` — create your own
 
-## CLI Highlights
+## Tools
 
-- `node dist/cli.js search "python" --refresh`
-- `node dist/cli.js stats`
-- `node dist/cli.js usage export --format json`
-- `node dist/cli.js usage reset <name>`
-- `node dist/cli.js usage reset --all`
+| Tool | Description |
+|------|-------------|
+| `search_skills` | Unified search with grouped `local` / `catalogs` / `github` response |
+| `get_skill` | Full skill content with trust indicator |
+| `get_resource` | Skill resource file retrieval |
+| `list_categories` | Browse indexed skill categories |
+| `install_skill` | Resolve, validate, scan, and install |
+| `remove_skill` | Remove an installed skill |
+| `save_skill` | Validate, scan, and save a new skill |
+| `push_skills` | Push to remote (placeholder) |
+| `update_config` | In-memory session config update |
+| `save_config` | Persist config with hot reload |
+| `get_status` | Health, lifecycle, lock, network, circuit breaker state |
 
-## Available Tools
+## CLI
 
-- `search_skills`: Unified search with grouped `local` / `catalogs` / `github` response.
-- `get_skill`: Return full skill content and trust indicator.
-- `get_resource`: Return a skill resource file.
-- `list_categories`: Return indexed skill categories.
-- `install_skill`: Resolve, validate, scan, and install a skill.
-- `remove_skill`: Remove an installed skill.
-- `save_skill`: Validate, scan, and save a new skill.
-- `push_skills`: Push skills to remote (currently placeholder; returns unavailable).
-- `update_config`: Update session config in memory.
-- `save_config`: Persist config and trigger reload.
-- `get_status`: Return summary, lifecycle, lock, network, and circuit breaker state.
-
-## Native Dependency Note
-
-`skill-mcp` uses `better-sqlite3` for local usage/frecency tracking. Most macOS/Linux/Windows environments are supported, but minimal container images may need build prerequisites for native module compilation.
+```bash
+node dist/cli.js search "python" --refresh
+node dist/cli.js stats
+node dist/cli.js usage export --format json
+node dist/cli.js usage reset --all
+```
 
 ## Documentation
 
-- `docs/getting-started.md`
-- `docs/configuration.md`
-- `docs/tools-reference.md`
+| Document | Description |
+|----------|-------------|
+| [Getting Started](docs/getting-started.md) | First-time setup and skill lifecycle walkthrough |
+| [Configuration](docs/configuration.md) | Full config schema, merge semantics, environment overrides |
+| [Tools Reference](docs/tools-reference.md) | Per-tool parameters, responses, and error codes |
+| [Roadmap](docs/roadmap.md) | What shipped, what's next |
+| [Changelog](CHANGELOG.md) | Release history |
 
 ## Contributing
 
-Contributions are welcome. Add tests for behavioral changes and keep docs aligned with implementation.
+Contributions welcome. Add tests for behavioral changes and keep docs aligned with implementation.
 
 ## License
 

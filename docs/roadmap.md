@@ -1,72 +1,81 @@
 # Skill MCP — Roadmap
 
-> Last updated: 2026-03-21
-
-## Completed
-
-### v1 Core Implementation
-All 16 tasks from the [v1 completion plan](superpowers/plans/2026-03-20-v1-completion.md) are implemented and verified:
-
-- **Bootstrap wiring** — FileSkillLockStore, resilience context, config discovery, workers
-- **Tool handlers** — validation in save/install, stale-serve in get_skill, hot-reload in save_config, full get_status
-- **Resilience** — tool wrapper composing timeout + rate limit + circuit breaker
-- **Scanner** — 4 new rules (hex-encoded commands, ROT13, template injection, binary detection)
-- **Search index** — category support via tags
-- **Config discovery** — multi-path project config chain (`.skill-mcp/`, `.claude/skill-mcp/`, `.agents/skill-mcp/`)
-- **Workers** — WorkerManager with heartbeat monitoring, start/ready protocol
-- **MCP server** — clientInfo capture from handshake
-- **Logger** — structured context in console output
-- **Documentation** — README, getting-started, configuration, tools-reference
-
-### Phase 1: Unified Skill Search
-
-All planned Phase 1 tasks from the [unified search plan](superpowers/plans/2026-03-21-unified-search-task-breakdown.md) are complete:
-
-- unified domain/config foundations (`registries`, `github`, `usage`)
-- frecency engine with pruning/session-cap/ceiling safeguards
-- SQLite-backed usage tracking and search analytics
-- catalog adapters (git/static), GitHub discovery adapter, and pure catalog searcher
-- grouped unified `search_skills` orchestrator with offline fallback + cache-aware behavior
-- bootstrap and CLI integration (`search --refresh`, interactive install picker, usage/stats commands)
-- integration coverage for grouped responses, offline fallback, cache lifecycle, and MCP tool invocation
-- documentation refresh across configuration/getting-started/tools reference/README
+> Last updated: 2026-03-22
 
 ---
 
-## Next Up
+## v1.0.0-beta — Shipped
 
-### Phase 2: Security & Reliability *(medium priority)*
+Everything below is included in the current release. See [CHANGELOG.md](../CHANGELOG.md) for the full feature list.
 
-| Task | Description | Estimated Effort |
-|------|-------------|-----------------|
-| 1. **CredentialStore adapter** | OS keychain + encrypted file backends for API tokens | Small |
-| 2. **Full OTel implementation** | Wire real spans/metrics when `telemetry.enabled: true` | Small |
-| 3. **Enhanced scanner PATH detection** | Integrate Semgrep, ShellCheck, Trivy, TruffleHog when available on PATH | Medium |
+### Core
+- 11 MCP tools: `search_skills`, `get_skill`, `get_resource`, `list_categories`, `install_skill`, `remove_skill`, `save_skill`, `push_skills`, `update_config`, `save_config`, `get_status`
+- Hexagonal architecture with port interfaces for all adapters
+- Secure install/save flows with validation + security scanning
+- Trust-aware skill lifecycle and lock tracking
+- Compact manifest injection at MCP initialize time
+- Project-aware config overlays with multi-path discovery
+- Resilience layer: tiered timeouts, rate limiting, circuit breakers
+- Worker manager with heartbeat monitoring
 
-### Phase 3: Transport & Distribution *(medium priority)*
+### Unified Search
+- Grouped search across local, team catalogs, and GitHub (opt-in)
+- Frecency-aware ranking with local usage analytics (SQLite-backed)
+- Catalog adapters: git clone/pull and static HTTP with cache
+- GitHub code search with opportunistic auth and rate-limit tracking
+- Offline-first: graceful degradation when remotes are unavailable
 
-| Task | Description | Estimated Effort |
-|------|-------------|-----------------|
-| 1. **SSE/HTTP transport** | Second transport mode beyond stdio for web-based clients | Medium |
-| 2. **IPC socket transport** | Third transport for local inter-process communication | Medium |
-| 3. **Go TUI installer** | Rich terminal installer for first-time setup (cross-platform binary) | Large |
-
-### Phase 4: CLI Completeness *(lower priority)*
-
-| Task | Description | Estimated Effort |
-|------|-------------|-----------------|
-| 1. **`doctor` command** | Diagnose config, scanner, connectivity issues | Small |
-| 2. **`guide` command** | Interactive onboarding walkthrough | Medium |
-| 3. **`manual` command** | Offline reference for all tools and config | Small |
-| 4. **`reset` command** | Reset config, usage data, or skill state | Small |
-| 5. **`uninstall` command** | Clean removal of skills and config | Small |
-| 6. **`logs` command** | View and tail server logs | Small |
+### CLI
+- `search` with `--refresh` and interactive remote install picker
+- `stats` and `usage export/reset` commands
+- Full `--help` and `--version` support
 
 ---
 
-## Design Principles for Future Work
+## Future Phases
 
-- **Hexagonal architecture** — all new features go through port interfaces
+### Phase 2: Observability & Security *(next up)*
+
+| Task | Description | Effort |
+|------|-------------|--------|
+| **OTel implementation** | Wire real spans/metrics into existing `Telemetry` port; pluggable backends (Langfuse, Jaeger, Grafana) via config | Small |
+| **CredentialStore adapter** | OS keychain + encrypted file backends for API tokens | Small |
+| **Enhanced scanner** | Integrate Semgrep, ShellCheck, Trivy, TruffleHog when available on PATH | Medium |
+
+> See [observability research](internal/specs/2026-03-21-observability-eval-research.md) for MLflow/Langfuse analysis.
+
+### Phase 3: Transport & Distribution
+
+| Task | Description | Effort |
+|------|-------------|--------|
+| **SSE/HTTP transport** | Second transport mode for web-based clients | Medium |
+| **IPC socket transport** | Local inter-process communication | Medium |
+| **Go TUI installer** | Cross-platform rich terminal installer for first-time setup | Large |
+
+### Phase 4: CLI Completeness
+
+| Task | Description | Effort |
+|------|-------------|--------|
+| **`doctor`** | Diagnose config, scanner, connectivity issues | Small |
+| **`guide`** | Interactive onboarding walkthrough | Medium |
+| **`manual`** | Offline reference for all tools and config | Small |
+| **`reset`** | Reset config, usage data, or skill state | Small |
+| **`uninstall`** | Clean removal of skills and config | Small |
+| **`logs`** | View and tail server logs | Small |
+
+---
+
+## Research
+
+| Topic | Summary | Link |
+|-------|---------|------|
+| **MLflow vs Langfuse** | Neither is a natural direct integration. OTel foundation first, Langfuse as optional backend, MLflow for separate eval harness. | [Full analysis](internal/specs/2026-03-21-observability-eval-research.md) |
+
+---
+
+## Design Principles
+
+- **Hexagonal architecture** — all features go through port interfaces
 - **TDD** — failing test first, then minimal implementation
 - **Offline-first** — remote features degrade gracefully
 - **Context efficiency** — minimize token cost for agents

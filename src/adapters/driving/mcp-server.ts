@@ -129,7 +129,7 @@ export async function createMcpServer(
   const manifestText = ctx.manifestBuilder.toText(manifest);
 
   const server = new Server(
-    { name: 'skill-mcp', version: '0.1.0' },
+    { name: 'skill-mcp', version: '1.0.0-beta' },
     { capabilities: { tools: {} } },
   );
 
@@ -142,7 +142,7 @@ export async function createMcpServer(
       capabilities: { tools: {} },
       serverInfo: {
         name: 'skill-mcp',
-        version: '0.1.0',
+        version: '1.0.0-beta',
       },
       instructions: manifestText,
     };

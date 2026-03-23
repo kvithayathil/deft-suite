@@ -1,6 +1,6 @@
 {
   "name": "skill-mcp",
-  "version": "0.1.0",
+  "version": "1.0.0-beta",
   "description": "Context-efficient MCP broker for agent skills, tools, prompts, and resources",
   "type": "module",
   "main": "dist/index.js",

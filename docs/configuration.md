@@ -193,7 +193,7 @@ Controls local usage/frecency tracking.
   },
   "metadata": {
     "createdOn": "<platform>",
-    "createdBy": "skill-mcp@0.1.0",
+    "createdBy": "skill-mcp@1.0.0-beta",
     "platforms": ["<platform>"],
     "arch": "<arch>"
   }
