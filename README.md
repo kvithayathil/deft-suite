@@ -17,12 +17,37 @@ An MCP server for discovering, validating, installing, and managing reusable age
 - npm
 - Build toolchain for native addons (`better-sqlite3`)
 
-## Install and Build
+## Installation
+
+### From GitHub (no npm publish required)
 
 ```bash
+npm install -g github:kvithayathil/deft-suite
+```
+
+Or pin a specific tag:
+
+```bash
+npm install -g github:kvithayathil/deft-suite#v1.0.0-beta
+```
+
+### From npm (once published)
+
+```bash
+npm install -g deft-mcp
+```
+
+### From source (development)
+
+```bash
+git clone https://github.com/kvithayathil/deft-suite.git
+cd deft-suite
 npm install
 npm run build
+npm link
 ```
+
+This makes the `deft` CLI available globally via symlink.
 
 ## Run
 
