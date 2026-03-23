@@ -1,5 +1,16 @@
 # Deft Suite
 
+[![CI](https://github.com/kvithayathil/deft-suite/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/kvithayathil/deft-suite/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/kvithayathil/deft-suite/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/kvithayathil/deft-suite/actions/workflows/codeql.yml)
+[![npm version](https://img.shields.io/npm/v/deft-mcp)](https://www.npmjs.com/package/deft-mcp)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen)](https://nodejs.org)
+
+<!-- GitLab badges — uncomment and replace YOUR_GROUP/deft-suite with your GitLab project path
+[![GitLab Pipeline](https://gitlab.com/YOUR_GROUP/deft-suite/badges/main/pipeline.svg)](https://gitlab.com/YOUR_GROUP/deft-suite/-/pipelines)
+[![GitLab Coverage](https://gitlab.com/YOUR_GROUP/deft-suite/badges/main/coverage.svg)](https://gitlab.com/YOUR_GROUP/deft-suite/-/graphs/main/charts)
+-->
+
 > **v1.0.0-beta** — [Changelog](CHANGELOG.md)
 
 An MCP server for discovering, validating, installing, and managing reusable agent skills.
