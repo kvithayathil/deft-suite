@@ -13,7 +13,7 @@ npm install -g github:kvithayathil/deft-suite
 Or pin a specific tag:
 
 ```bash
-npm install -g github:kvithayathil/deft-suite#v1.0.0-beta
+npm install -g github:kvithayathil/deft-suite#v1.0.0-beta.2
 ```
 
 ### From npm (once published)

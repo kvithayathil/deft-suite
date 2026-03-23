@@ -1,6 +1,6 @@
 {
   "name": "deft-mcp",
-  "version": "1.0.0-beta",
+  "version": "1.0.0-beta.2",
   "description": "Deft Suite — Context-efficient MCP broker for agent skills, tools, prompts, and resources",
   "type": "module",
   "main": "dist/index.js",
@@ -13,11 +13,15 @@
     "hooks",
     "skills",
     "README.md",
+    "THIRD-PARTY-NOTICES.md",
     "LICENSE"
   ],
   "scripts": {
     "build": "tsc",
-    "prepare": "tsc",
+    "prepare": "tsc && npm run generate:notices",
+    "postinstall": "git config core.hooksPath .githooks || true",
+    "generate:notices": "node scripts/generate-notices.mjs",
+    "check:notices": "node scripts/generate-notices.mjs --check",
     "dev": "tsc --watch",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -52,6 +56,7 @@
     "@vitest/coverage-v8": "^4.1.0",
     "eslint": "^10.0.3",
     "eslint-plugin-security": "^4.0.0",
+    "license-checker": "^25.0.1",
     "typescript": "^5.9.3",
     "vitest": "^4.1.0"
   }

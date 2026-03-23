@@ -28,6 +28,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Check third-party notices are up to date
+        run: npm run check:notices
+
       - name: Typecheck
         run: npm run typecheck
 

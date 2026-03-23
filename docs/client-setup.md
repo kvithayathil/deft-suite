@@ -25,7 +25,7 @@ All clients use the same server definition. Choose one:
 }
 ```
 
-> **Tip:** Pin a version for stability: `"args": ["-y", "github:kvithayathil/deft-suite#v1.0.0-beta", "deft-mcp"]`
+> **Tip:** Pin a version for stability: `"args": ["-y", "github:kvithayathil/deft-suite#v1.0.0-beta.2", "deft-mcp"]`
 
 ---
 

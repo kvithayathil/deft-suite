@@ -1,0 +1,5 @@
+#!/bin/sh
+set -e
+
+npm run generate:notices
+git add THIRD-PARTY-NOTICES.md README.md

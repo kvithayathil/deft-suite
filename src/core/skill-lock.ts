@@ -75,7 +75,7 @@ export class SkillLockManager {
     return {
       lockVersion: 1,
       generatedAt: new Date().toISOString(),
-      generatedBy: 'deft-mcp@1.0.0-beta',
+      generatedBy: 'deft-mcp@1.0.0-beta.2',
       skills: {},
     };
   }

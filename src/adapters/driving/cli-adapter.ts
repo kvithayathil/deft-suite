@@ -47,7 +47,7 @@ export class CliAdapter {
     this.promptSelection = options.promptSelection;
     this.stdout = options.stdout ?? process.stdout;
     this.stderr = options.stderr ?? process.stderr;
-    this.versionText = options.version ?? '1.0.0-beta';
+    this.versionText = options.version ?? '1.0.0-beta.2';
   }
 
   async run(args: string[], flags: Record<string, unknown>): Promise<void> {

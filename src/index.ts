@@ -34,7 +34,7 @@ import { handleSaveConfig } from './tools/save-config.js';
 import { handleGetStatus } from './tools/get-status.js';
 import { createMcpServer, startStdioServer } from './adapters/driving/mcp-server.js';
 
-export const VERSION = '1.0.0-beta';
+export const VERSION = '1.0.0-beta.2';
 
 async function main(): Promise<void> {
   // Config

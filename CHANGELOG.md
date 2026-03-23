@@ -7,6 +7,17 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.0.0-beta.2] — 2026-03-23
+
+### Added
+- Build-time `THIRD-PARTY-NOTICES.md` generation from dependency license metadata
+- Auto-generated `README.md` Third-Party Notices section synced from generated data
+- Pre-commit hook at `.githooks/pre-commit` to regenerate and stage notices files
+- CI freshness check via `npm run check:notices`
+
+### Changed
+- Version bumped from `1.0.0-beta` to `1.0.0-beta.2`
+
 ## [1.0.0-beta] — 2026-03-22
 
 First public beta. All core features are implemented and tested.

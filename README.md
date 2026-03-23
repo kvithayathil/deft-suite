@@ -11,7 +11,7 @@
 [![GitLab Coverage](https://gitlab.com/YOUR_GROUP/deft-suite/badges/main/coverage.svg)](https://gitlab.com/YOUR_GROUP/deft-suite/-/graphs/main/charts)
 -->
 
-> **v1.0.0-beta** — [Changelog](CHANGELOG.md)
+> **v1.0.0-beta.2** — [Changelog](CHANGELOG.md)
 
 An MCP server for discovering, validating, installing, and managing reusable agent skills.
 
@@ -39,7 +39,7 @@ npm install -g github:kvithayathil/deft-suite
 Or pin a specific tag:
 
 ```bash
-npm install -g github:kvithayathil/deft-suite#v1.0.0-beta
+npm install -g github:kvithayathil/deft-suite#v1.0.0-beta.2
 ```
 
 ### From npm (once published)
@@ -122,7 +122,7 @@ Pin a specific version for stability:
   "mcpServers": {
     "deft-mcp": {
       "command": "npx",
-      "args": ["-y", "github:kvithayathil/deft-suite#v1.0.0-beta", "deft-mcp"]
+      "args": ["-y", "github:kvithayathil/deft-suite#v1.0.0-beta.2", "deft-mcp"]
     }
   }
 }
@@ -193,6 +193,22 @@ deft usage reset --all
 ## Contributing
 
 Contributions welcome. Add tests for behavioral changes and keep docs aligned with implementation.
+<!-- THIRD-PARTY-START -->
+
+## Third-Party Notices
+
+This project uses the following direct runtime dependencies:
+
+| Package | License |
+|---------|---------|
+| [@modelcontextprotocol/sdk](https://github.com/modelcontextprotocol/typescript-sdk) | MIT |
+| [ajv](https://github.com/ajv-validator/ajv) | MIT |
+| [better-sqlite3](https://github.com/WiseLibs/better-sqlite3) | MIT |
+| [yaml](https://github.com/eemeli/yaml) | ISC |
+
+Full license texts are in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
+<!-- THIRD-PARTY-END -->
 
 ## License
 

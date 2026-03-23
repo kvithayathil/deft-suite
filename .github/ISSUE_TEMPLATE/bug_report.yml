@@ -39,7 +39,7 @@ body:
     attributes:
       label: Deft Suite version
       description: Output of `deft --version` or the installed npm version.
-      placeholder: "1.0.0-beta"
+      placeholder: "1.0.0-beta.2"
     validations:
       required: true
 
