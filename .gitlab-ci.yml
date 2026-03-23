@@ -1,0 +1,168 @@
+# Deft Suite — GitLab CI/CD
+# Mirrors .github/workflows/{ci,codeql,dependency-review,release}.yml
+
+stages:
+  - lint
+  - test
+  - build
+  - security
+  - release
+
+variables:
+  NODE_VERSION: "22"
+  npm_config_cache: "$CI_PROJECT_DIR/.npm"
+
+# ---------------------------------------------------------------------------
+# Cache & base templates
+# ---------------------------------------------------------------------------
+.node-cache: &node-cache
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - .npm/
+    policy: pull
+
+.node-setup: &node-setup
+  image: node:${NODE_VERSION}
+  before_script:
+    - npm ci --prefer-offline
+
+# ---------------------------------------------------------------------------
+# Stage: lint
+# ---------------------------------------------------------------------------
+typecheck:
+  stage: lint
+  <<: *node-setup
+  <<: *node-cache
+  script:
+    - npm run typecheck
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+lint:
+  stage: lint
+  <<: *node-setup
+  <<: *node-cache
+  script:
+    - npm run lint
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# ---------------------------------------------------------------------------
+# Stage: test  (Node 20 + 22 matrix)
+# ---------------------------------------------------------------------------
+.test-base:
+  stage: test
+  <<: *node-cache
+  needs: [typecheck, lint]
+  before_script:
+    - npm ci --prefer-offline
+  script:
+    - npm run test:coverage
+  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
+  artifacts:
+    when: always
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+    paths:
+      - coverage/
+    expire_in: 14 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+test:node-22:
+  extends: .test-base
+  image: node:22
+
+test:node-20:
+  extends: .test-base
+  image: node:20
+
+# ---------------------------------------------------------------------------
+# Stage: build
+# ---------------------------------------------------------------------------
+build:
+  stage: build
+  <<: *node-setup
+  <<: *node-cache
+  needs: [typecheck, lint]
+  script:
+    - npm run build
+    - test -f dist/index.js || (echo "dist/index.js not found" && exit 1)
+    - test -f dist/cli.js || (echo "dist/cli.js not found" && exit 1)
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 7 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG =~ /^v/
+
+# ---------------------------------------------------------------------------
+# Stage: security  (replaces CodeQL + Dependency Review)
+# ---------------------------------------------------------------------------
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+
+sast:
+  stage: security
+  variables:
+    SAST_EXCLUDED_ANALYZERS: "bandit, brakeman, flawfinder, gosec, kubesec,
+      phpcs-security-audit, pmd-apex, sobelow, spotbugs"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG =~ /^v/
+
+dependency_scanning:
+  stage: security
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - package.json
+        - package-lock.json
+    - if: $CI_COMMIT_TAG =~ /^v/
+
+# ---------------------------------------------------------------------------
+# Stage: release  (tag-triggered only)
+# ---------------------------------------------------------------------------
+publish:npm:
+  stage: release
+  image: node:22
+  needs: [build, test:node-22, test:node-20, sast]
+  before_script:
+    - npm ci --prefer-offline
+  script:
+    - npm run build
+    - |
+      echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+    - npm publish --access public
+  after_script:
+    - rm -f .npmrc
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v/
+  environment:
+    name: npm
+    url: https://www.npmjs.com/package/deft-mcp
+
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  needs: [publish:npm]
+  script:
+    - echo "Creating release for ${CI_COMMIT_TAG}"
+  release:
+    tag_name: $CI_COMMIT_TAG
+    name: "Release $CI_COMMIT_TAG"
+    description: "Automated release for $CI_COMMIT_TAG"
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v/
