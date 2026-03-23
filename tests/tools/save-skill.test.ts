@@ -100,6 +100,22 @@ describe('handleSaveSkill', () => {
     expect((err as SkillMcpError).code).toBe(ErrorCode.ScanFailed);
   });
 
+  it('extracts description from frontmatter when not passed explicitly', async () => {
+    const ctx = makeContext();
+    const result = await handleSaveSkill(
+      {
+        name: 'fm-desc-skill',
+        content: '---\nname: fm-desc-skill\ndescription: Extracted from frontmatter\n---\nBody',
+      },
+      ctx,
+    );
+
+    const body = JSON.parse(result.content[0].text);
+    expect(body.saved).toBe('fm-desc-skill');
+    const stored = await ctx.skillStore.get('fm-desc-skill');
+    expect(stored!.metadata.description).toBe('Extracted from frontmatter');
+  });
+
   it('saves valid skill successfully', async () => {
     const ctx = makeContext();
     const result = await handleSaveSkill(

@@ -3,6 +3,7 @@ import { validationFailed, alreadyExists, scanFailed } from '../core/errors.js';
 import { validateSkillMetadata } from '../core/validator.js';
 import { TrustLevel, SkillState } from '../core/types.js';
 import type { Source } from '../core/types.js';
+import { parse as parseYaml } from 'yaml';
 
 interface SaveSkillParams {
   name: string;
@@ -23,16 +24,30 @@ export const handleSaveSkill: ToolHandler<SaveSkillParams> = async (params, ctx)
     throw validationFailed(fieldErrors);
   }
 
-  // 2. Metadata validation
+  // 2. Extract description from frontmatter if not provided explicitly
+  let description = params.description ?? '';
+  if (!description) {
+    const fm = params.content.replace(/\r\n/g, '\n').match(/^---\n([\s\S]*?)\n---/);
+    if (fm) {
+      try {
+        const parsed = parseYaml(fm[1]) as Record<string, unknown>;
+        if (typeof parsed?.description === 'string') {
+          description = parsed.description;
+        }
+      } catch { /* ignore malformed frontmatter */ }
+    }
+  }
+
+  // 3. Metadata validation
   const validation = validateSkillMetadata({
     name: params.name,
-    description: params.description ?? '',
+    description,
   });
   if (!validation.valid) {
     throw validationFailed(validation.errors);
   }
 
-  // 3. Duplicate check
+  // 4. Duplicate check
   const exists = await ctx.skillStore.exists(params.name);
   if (exists) {
     throw alreadyExists(params.name);
@@ -41,7 +56,7 @@ export const handleSaveSkill: ToolHandler<SaveSkillParams> = async (params, ctx)
   const skill = {
     metadata: {
       name: params.name,
-      description: params.description ?? '',
+      description,
     },
     content: params.content,
     resources: [],
@@ -50,7 +65,7 @@ export const handleSaveSkill: ToolHandler<SaveSkillParams> = async (params, ctx)
     sourcePath: params.name,
   };
 
-  // 4. Scan before save
+  // 5. Scan before save
   ctx.lifecycle.beginScanning(params.name);
   const scanResult = await ctx.scanner.scanSkill(params.name, params.name);
   if (!scanResult.passed) {
@@ -58,14 +73,14 @@ export const handleSaveSkill: ToolHandler<SaveSkillParams> = async (params, ctx)
     throw scanFailed(params.name, scanResult.findings);
   }
 
-  // 5. Write to store
+  // 6. Write to store
   await ctx.skillStore.write(params.name, skill);
   const hash = await ctx.skillStore.computeHash(params.name);
 
-  // 6. Mark active in lifecycle
+  // 7. Mark active in lifecycle
   ctx.lifecycle.markActive(params.name, hash);
 
-  // 7. Add lock entry
+  // 8. Add lock entry
   await ctx.lockManager.addOrUpdate(params.name, {
     contentHash: hash,
     scanHash: scanResult.hash,
