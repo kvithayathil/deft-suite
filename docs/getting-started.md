@@ -52,9 +52,9 @@ The server communicates over stdio and is intended to be launched by an MCP clie
 
 ## 4) Configure Your MCP Client
 
-Add `deft-mcp` to your MCP client config (Claude Desktop, Windsurf, Cursor, VS Code, etc.):
+Add `deft-mcp` to your MCP client. Config file location and format vary by client — see the **[Client Setup Guide](client-setup.md)** for per-client instructions (Claude, Windsurf, Cursor, VS Code, Zed, JetBrains, OpenCode, Codex).
 
-### Via npx (recommended — no local clone needed)
+Most clients use this JSON under a `mcpServers` key:
 
 ```json
 {
@@ -67,22 +67,7 @@ Add `deft-mcp` to your MCP client config (Claude Desktop, Windsurf, Cursor, VS C
 }
 ```
 
-Pin a specific version for stability:
-
-```json
-{
-  "mcpServers": {
-    "deft-mcp": {
-      "command": "npx",
-      "args": ["-y", "github:kvithayathil/deft-suite#v1.0.0-beta", "deft-mcp"]
-    }
-  }
-}
-```
-
-> **Note:** First run is slower while dependencies install and compile. Subsequent runs use the npx cache.
-
-### Via local path (if installed globally or from source)
+Or if installed globally:
 
 ```json
 {
@@ -93,6 +78,8 @@ Pin a specific version for stability:
   }
 }
 ```
+
+> **Note:** First run via npx is slower while dependencies install and compile. Subsequent runs use the npx cache.
 
 ## 5) Verify Server Health
 
