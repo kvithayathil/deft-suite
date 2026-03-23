@@ -1,0 +1,11 @@
+# Default owners for everything in the repo
+* @kurian-vithayathil
+
+# CI/CD configs require explicit review
+.github/ @kurian-vithayathil
+
+# Core source
+src/ @kurian-vithayathil
+
+# Tests
+tests/ @kurian-vithayathil
