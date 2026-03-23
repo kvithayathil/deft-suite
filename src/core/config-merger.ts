@@ -3,7 +3,7 @@ import { TrustLevel, type Config } from './types.js';
 export const DEFAULT_CONFIG: Config = {
   schemaVersion: 1,
   manifest: {
-    skills: ['mcp-guide', 'skill-writer', 'security-baseline', 'mcp-debug', 'git-workflows', 'cli-discovery', 'core-cli-tools'],
+    skills: ['mcp-guide', 'skill-writer', 'security-baseline', 'mcp-debug', 'git-workflows', 'cli-discovery', 'core-cli-tools', 'agent-hooks'],
     maxManifestSize: 10,
     warnThreshold: 8,
   },

@@ -186,6 +186,7 @@ deft usage reset --all
 | [Client Setup](docs/client-setup.md) | Per-client MCP config (Claude, Windsurf, Cursor, VS Code, Zed, JetBrains, etc.) |
 | [Configuration](docs/configuration.md) | Full config schema, merge semantics, environment overrides |
 | [Tools Reference](docs/tools-reference.md) | Per-tool parameters, responses, and error codes |
+| [Agent Hooks](docs/agent-hooks.md) | Hook integration for consistent MCP usage across agent platforms |
 | [Roadmap](docs/roadmap.md) | What shipped, what's next |
 | [Changelog](CHANGELOG.md) | Release history |
 

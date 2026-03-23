@@ -125,7 +125,8 @@ Controls local usage/frecency tracking.
       "mcp-debug",
       "git-workflows",
       "cli-discovery",
-      "core-cli-tools"
+      "core-cli-tools",
+      "agent-hooks"
     ],
     "maxManifestSize": 10,
     "warnThreshold": 8
