@@ -81,7 +81,7 @@ describe('handleSaveSkill', () => {
     expect((err as SkillMcpError).code).toBe(ErrorCode.AlreadyExists);
   });
 
-  it('scans skill before saving', async () => {
+  it('scans skill after writing and rolls back on failure', async () => {
     const ctx = makeContext();
     (ctx.scanner as StubScanner).failSkill('bad-skill', [
       { rule: 'scan', severity: 'critical', message: 'Bad file', file: 'SKILL.md' },
@@ -98,6 +98,9 @@ describe('handleSaveSkill', () => {
 
     expect(err).toBeInstanceOf(SkillMcpError);
     expect((err as SkillMcpError).code).toBe(ErrorCode.ScanFailed);
+    // Verify rollback: skill should be deleted after failed scan
+    const exists = await ctx.skillStore.exists('bad-skill');
+    expect(exists).toBe(false);
   });
 
   it('extracts description from frontmatter when not passed explicitly', async () => {

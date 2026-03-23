@@ -65,22 +65,28 @@ export const handleSaveSkill: ToolHandler<SaveSkillParams> = async (params, ctx)
     sourcePath: params.name,
   };
 
-  // 5. Scan before save
+  // 5. Write to store first (scanner needs filesystem path)
+  await ctx.skillStore.write(params.name, skill);
+
+  // 6. Read back to get the real filesystem sourcePath
+  const stored = await ctx.skillStore.get(params.name);
+  const scanPath = stored?.sourcePath ?? params.name;
+
+  // 7. Scan after write — roll back on failure
   ctx.lifecycle.beginScanning(params.name);
-  const scanResult = await ctx.scanner.scanSkill(params.name, params.name);
+  const scanResult = await ctx.scanner.scanSkill(scanPath, params.name);
   if (!scanResult.passed) {
+    await ctx.skillStore.delete(params.name);
     ctx.lifecycle.markQuarantined(params.name, scanResult.findings.map((f) => f.message));
     throw scanFailed(params.name, scanResult.findings);
   }
 
-  // 6. Write to store
-  await ctx.skillStore.write(params.name, skill);
   const hash = await ctx.skillStore.computeHash(params.name);
 
-  // 7. Mark active in lifecycle
+  // 8. Mark active in lifecycle
   ctx.lifecycle.markActive(params.name, hash);
 
-  // 8. Add lock entry
+  // 9. Add lock entry
   await ctx.lockManager.addOrUpdate(params.name, {
     contentHash: hash,
     scanHash: scanResult.hash,
