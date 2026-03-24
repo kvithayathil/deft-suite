@@ -1,19 +1,30 @@
 import { parentPort } from 'node:worker_threads';
 import type { WorkerMessage } from './messages.js';
 
-interface SyncConfig {
+interface Source {
+  type: string;
+  url?: string;
+  path?: string;
+}
+
+interface SyncSettings {
   intervalMinutes: number;
-  sources: Array<{ type: string; url?: string; path?: string }>;
+  autoUpdate: boolean;
+}
+
+interface FullConfig {
+  sync?: SyncSettings;
+  sources?: Source[];
 }
 
 let syncTimer: ReturnType<typeof setInterval> | null = null;
 
-function startSyncLoop(config: SyncConfig): void {
-  const intervalMs = config.intervalMinutes * 60 * 1000;
+function startSyncLoop(intervalMinutes: number, sources: Source[]): void {
+  const intervalMs = intervalMinutes * 60 * 1000;
 
   const runSync = (): void => {
     const updated: string[] = [];
-    for (const source of config.sources) {
+    for (const source of sources) {
       if (source.type === 'git' || source.type === 'registry') {
         // Placeholder until remote adapters are wired.
       }
@@ -33,13 +44,13 @@ if (parentPort) {
     if (msg.type === 'ping') {
       parentPort!.postMessage({ type: 'pong' } satisfies WorkerMessage);
     } else if (msg.type === 'start') {
-      const config = msg.config as { sync?: SyncConfig };
+      const config = msg.config as FullConfig;
       if (syncTimer) {
         clearInterval(syncTimer);
         syncTimer = null;
       }
       if (config.sync) {
-        startSyncLoop(config.sync);
+        startSyncLoop(config.sync.intervalMinutes, config.sources ?? []);
       }
       parentPort!.postMessage({ type: 'ready' } satisfies WorkerMessage);
     }
