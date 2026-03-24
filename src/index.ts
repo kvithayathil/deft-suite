@@ -48,6 +48,11 @@ async function main(): Promise<void> {
   );
   const config = mergeConfigs(rawConfig, projectConfig?.config);
 
+  // Seed config file on first run so users have a file to inspect/edit
+  if (!rawConfig) {
+    await configStore.save(config);
+  }
+
   // Logger
   const logger = new ConsoleLogger(config.logging.level);
   if (projectConfig) {

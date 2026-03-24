@@ -13,6 +13,9 @@ Path:
 `~/.config/deft/config.json`
 
 Loaded by `FileConfigStore` during bootstrap.
+On the very first run (when no config file exists), the server automatically
+creates this file with the merged default values so you have a starting point
+to inspect and edit.
 
 ## Project Config Discovery
 
