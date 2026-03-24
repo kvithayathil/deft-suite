@@ -129,7 +129,7 @@ export async function createMcpServer(
   const manifestText = ctx.manifestBuilder.toText(manifest);
 
   const server = new Server(
-    { name: 'deft-mcp', version: '1.0.0-beta.2' },
+    { name: 'deft-mcp', version: '1.0.0-beta.3' },
     { capabilities: { tools: {} } },
   );
 
@@ -142,7 +142,7 @@ export async function createMcpServer(
       capabilities: { tools: {} },
       serverInfo: {
         name: 'deft-mcp',
-        version: '1.0.0-beta.2',
+        version: '1.0.0-beta.3',
       },
       instructions: manifestText,
     };

@@ -11,7 +11,7 @@
 [![GitLab Coverage](https://gitlab.com/YOUR_GROUP/deft-suite/badges/main/coverage.svg)](https://gitlab.com/YOUR_GROUP/deft-suite/-/graphs/main/charts)
 -->
 
-> **v1.0.0-beta.2** — [Changelog](CHANGELOG.md)
+> **v1.0.0-beta.3** — [Changelog](CHANGELOG.md)
 
 An MCP server for discovering, validating, installing, and managing reusable agent skills.
 
@@ -39,7 +39,7 @@ npm install -g github:kvithayathil/deft-suite
 Or pin a specific tag:
 
 ```bash
-npm install -g github:kvithayathil/deft-suite#v1.0.0-beta.2
+npm install -g github:kvithayathil/deft-suite#v1.0.0-beta.3
 ```
 
 ### From npm (once published)
@@ -122,7 +122,7 @@ Pin a specific version for stability:
   "mcpServers": {
     "deft-mcp": {
       "command": "npx",
-      "args": ["-y", "github:kvithayathil/deft-suite#v1.0.0-beta.2", "deft-mcp"]
+      "args": ["-y", "github:kvithayathil/deft-suite#v1.0.0-beta.3", "deft-mcp"]
     }
   }
 }

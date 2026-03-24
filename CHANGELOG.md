@@ -7,6 +7,15 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.0.0-beta.3] — 2026-03-24
+
+### Fixed
+- **sync-worker crash on startup** — `config.sources is not iterable` caused by config shape mismatch; sources are now correctly read from the top-level config (#2)
+
+### Added
+- Auto-create `~/.config/deft/config.json` with merged defaults on first startup
+- Regression tests for sync-worker config handling
+
 ## [1.0.0-beta.2] — 2026-03-23
 
 ### Added
