@@ -10,3 +10,4 @@ AGENTS.md
 .agent/
 docs/superpowers/specs/
 .eslintrc.json
+.envrc

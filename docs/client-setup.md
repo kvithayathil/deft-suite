@@ -27,6 +27,31 @@ All clients use the same server definition. Choose one:
 
 > **Tip:** Pin a version for stability: `"args": ["-y", "github:kvithayathil/deft-suite#v1.0.0-beta.3", "deft-mcp"]`
 
+### Version Pinning
+
+Appending `#<tag>` to the GitHub specifier locks `npx` to a specific release:
+
+```
+github:kvithayathil/deft-suite#v1.0.0-beta.3
+```
+
+**Why pin?**
+- Reproducible behavior across machines and CI
+- Protection against breaking changes in new releases
+- Deterministic builds for team environments
+
+**How to check available versions:**
+
+```bash
+git ls-remote --tags https://github.com/kvithayathil/deft-suite.git
+```
+
+**Trade-offs vs unpinned (`@latest`):**
+- **Pinned** — stable, predictable; requires manual updates to pick up fixes
+- **Unpinned** — always gets the latest; may introduce unexpected changes
+
+For production and shared team configs, pinning is recommended. For personal experimentation, unpinned is fine.
+
 ---
 
 ## Claude Desktop
@@ -218,28 +243,54 @@ Add to your `settings.json`:
 
 ![OpenCode](https://img.shields.io/badge/OpenCode-MCP-333333?style=for-the-badge)
 
-**Config file:**
+OpenCode uses a different format from the standard `mcpServers` convention — it requires a `"mcp"` top-level key, a `"type": "local"` field, and a combined `command` array (not separate `command` + `args`).
 
-```
-~/.config/opencode/config.json
-```
+### Config file locations
+
+OpenCode supports config in two locations:
+
+- **Global:** `~/.config/opencode/config.json`
+- **Project-level:** `opencode.jsonc` in your project root
+
+### Configuration
 
 ```json
 {
-  "mcpServers": {
+  "mcp": {
     "deft-mcp": {
-      "command": "npx",
-      "args": ["-y", "github:kvithayathil/deft-suite", "deft-mcp"]
+      "enabled": true,
+      "type": "local",
+      "command": ["npx", "-y", "github:kvithayathil/deft-suite", "deft-mcp"],
+      "timeout": 30000
     }
   }
 }
 ```
 
-Or use the CLI:
+> **Note:** The first `npx` run compiles native dependencies (`better-sqlite3`) and can take 30–60 seconds. A `timeout` of `30000` (30 s) or higher is recommended to prevent premature timeouts.
 
-```bash
-opencode mcp add deft-mcp -- npx -y github:kvithayathil/deft-suite deft-mcp
+### Pin a version
+
+```json
+{
+  "mcp": {
+    "deft-mcp": {
+      "enabled": true,
+      "type": "local",
+      "command": ["npx", "-y", "github:kvithayathil/deft-suite#v1.0.0-beta.3", "deft-mcp"],
+      "timeout": 30000
+    }
+  }
+}
 ```
+
+### Key differences from other clients
+
+| Aspect | Standard (`mcpServers`) | OpenCode (`mcp`) |
+|--------|------------------------|-------------------|
+| Top-level key | `"mcpServers"` | `"mcp"` |
+| Command format | `"command"` + `"args"` | Combined `"command"` array |
+| Extra fields | — | `"type": "local"`, `"enabled": true` |
 
 ---
 
@@ -346,7 +397,7 @@ Where `mcp.json` contains:
 ### Server not starting
 
 - Ensure Node.js ≥ 20 is installed and on your `PATH`
-- First `npx` run compiles native dependencies (`better-sqlite3`) — this can take 30–60 seconds
+- First `npx` run compiles native dependencies (`better-sqlite3`) — this can take 30–60 seconds. Set a `timeout` of at least `30000` (30 s) in your client config to avoid premature timeouts
 - Check client logs for stderr output from the server process
 
 ### Tools not appearing
