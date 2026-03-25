@@ -370,6 +370,7 @@ async function defaultCreateCliContext(): Promise<ToolContext> {
     trustEvaluator,
     manifestBuilder,
     config,
+    rawConfig: rawConfig ? structuredClone(rawConfig) : {},
     logger,
   };
 

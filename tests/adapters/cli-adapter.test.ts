@@ -42,6 +42,7 @@ function makeContext(overrides: Partial<ToolContext> = {}): ToolContext {
     trustEvaluator: new TrustEvaluator(config.security),
     manifestBuilder: new ManifestBuilder(config.manifest),
     config,
+    rawConfig: {},
     logger,
     ...overrides,
   };

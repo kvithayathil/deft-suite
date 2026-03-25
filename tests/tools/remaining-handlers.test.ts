@@ -38,6 +38,7 @@ function makeContext(): ToolContext {
     trustEvaluator: new TrustEvaluator(DEFAULT_CONFIG.security),
     manifestBuilder: new ManifestBuilder(DEFAULT_CONFIG.manifest),
     config: { ...DEFAULT_CONFIG },
+    rawConfig: {},
     logger,
   };
 }
@@ -208,6 +209,15 @@ describe('handleUpdateConfig', () => {
 
     // Verify in-memory change
     expect(ctx.config.sync.autoUpdate).toBe(false);
+  });
+
+  it('mirrors the change into rawConfig so save_config can persist it', async () => {
+    const ctx = makeContext();
+
+    await handleUpdateConfig({ key: 'sync.autoUpdate', value: false }, ctx);
+
+    const raw = ctx.rawConfig as Record<string, unknown>;
+    expect((raw.sync as Record<string, unknown>).autoUpdate).toBe(false);
   });
 
   it('throws CONFIG_LOCKED for locked keys', async () => {

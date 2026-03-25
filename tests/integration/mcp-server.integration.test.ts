@@ -47,6 +47,7 @@ function makeContext(): ToolContext {
     trustEvaluator,
     manifestBuilder,
     config,
+    rawConfig: {},
     logger,
   };
 }

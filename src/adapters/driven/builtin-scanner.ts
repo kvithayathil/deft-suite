@@ -1,4 +1,5 @@
-import { readFile, readdir, lstat } from 'node:fs/promises';
+import { readdir, open, lstat } from 'node:fs/promises';
+import { constants } from 'node:fs';
 import { join, relative, extname } from 'node:path';
 import { createHash } from 'node:crypto';
 import type { Scanner } from '../../core/ports/scanner.js';
@@ -82,21 +83,32 @@ export class BuiltinScanner implements Scanner {
     const allContent: string[] = [];
 
     await this.walkFiles(skillPath, skillPath, async (filePath, relativePath) => {
-      const stat = await lstat(filePath);
-
-      // Check for symlink escape
-      if (stat.isSymbolicLink()) {
-        findings.push({
-          rule: 'symlink-escape',
-          severity: 'critical',
-          file: relativePath,
-          line: 0,
-          message: 'Symbolic link detected — potential directory escape',
-        });
-        return;
+      // Open with O_NOFOLLOW so symlinks fail with ELOOP — avoids TOCTOU
+      // between a separate lstat() check and readFile().
+      let fh;
+      try {
+        fh = await open(filePath, constants.O_RDONLY | constants.O_NOFOLLOW);
+      } catch (err: unknown) {
+        if ((err as NodeJS.ErrnoException).code === 'ELOOP') {
+          findings.push({
+            rule: 'symlink-escape',
+            severity: 'critical',
+            file: relativePath,
+            line: 0,
+            message: 'Symbolic link detected — potential directory escape',
+          });
+          return;
+        }
+        throw err;
       }
 
-      const contentBuffer = await readFile(filePath);
+      let contentBuffer: Buffer;
+      try {
+        contentBuffer = await fh.readFile();
+      } finally {
+        await fh.close();
+      }
+
       if (contentBuffer.includes(0x00)) {
         findings.push({
           rule: 'unexpected-binary',
@@ -156,6 +168,10 @@ export class BuiltinScanner implements Scanner {
     for (const entry of entries) {
       const fullPath = join(dir, entry.name);
       if (entry.isDirectory()) {
+        // Re-check with lstat to guard against a directory being swapped
+        // for a symlink between the readdir() and this point.
+        const stat = await lstat(fullPath);
+        if (stat.isSymbolicLink()) continue;
         await this.walkFiles(fullPath, rootDir, callback);
       } else {
         await callback(fullPath, relative(rootDir, fullPath));

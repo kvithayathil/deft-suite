@@ -50,7 +50,7 @@ async function main(): Promise<void> {
 
   // Seed config file on first run so users have a file to inspect/edit
   if (!rawConfig) {
-    await configStore.save(config);
+    await configStore.save({ schemaVersion: 1 });
   }
 
   // Logger
@@ -101,6 +101,7 @@ async function main(): Promise<void> {
     trustEvaluator,
     manifestBuilder,
     config,
+    rawConfig: rawConfig ? structuredClone(rawConfig) : {},
     logger,
     resilience,
     isOffline: () => {
@@ -124,6 +125,7 @@ async function main(): Promise<void> {
 
   ctx.onConfigReload = async () => {
     const newRaw = await configStore.load();
+    ctx.rawConfig = newRaw ? structuredClone(newRaw) : {};
     const newProject = await discoverProjectConfig(
       process.cwd(),
       newRaw?.projectConfigPaths as string[] | undefined,

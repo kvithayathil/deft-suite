@@ -7,6 +7,18 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.0.0-beta.4] — 2026-03-24
+
+### Fixed
+- **save_config corrupts array fields** — `save_config` now persists user overrides (`rawConfig`) instead of the fully-merged config, preventing array duplication on save/reload cycles for `sources` and `projectConfigPaths` (#5, #6)
+- **update_config changes lost on save** — `update_config` now mirrors in-memory changes into `rawConfig` so they are persisted by `save_config`
+- **First-run config seed** — writes minimal `{ schemaVersion: 1 }` instead of full merged defaults, preventing array duplication on next startup
+
+### Security
+- **TOCTOU race in config-discovery** — removed redundant `access()` check before `readFile()` that created a time-of-check-to-time-of-use window (CodeQL)
+- **TOCTOU race in builtin-scanner** — replaced `lstat()`+`readFile()` with `open(O_NOFOLLOW)`+`fh.readFile()` on a single file descriptor, atomically rejecting symlinks and closing the race window where a file could be swapped for a symlink between check and read (CodeQL)
+- **Directory symlink traversal in builtin-scanner** — added `lstat()` guard before recursing into directories in `walkFiles()` to detect directory-to-symlink swaps
+
 ## [1.0.0-beta.3] — 2026-03-24
 
 ### Fixed

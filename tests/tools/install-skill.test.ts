@@ -40,6 +40,7 @@ function makeContext(
     trustEvaluator: new TrustEvaluator(security),
     manifestBuilder: new ManifestBuilder(DEFAULT_CONFIG.manifest),
     config: { ...DEFAULT_CONFIG, security },
+    rawConfig: {},
     logger,
     ...overrides,
   };

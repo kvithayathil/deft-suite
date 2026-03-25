@@ -11,7 +11,7 @@ export class FileConfigStore implements ConfigStore {
     catch { return null; }
   }
 
-  async save(config: Config): Promise<void> {
+  async save(config: Partial<Config>): Promise<void> {
     await mkdir(dirname(this.filePath), { recursive: true });
     await writeFile(this.filePath, JSON.stringify(config, null, 2) + '\n', 'utf-8');
   }

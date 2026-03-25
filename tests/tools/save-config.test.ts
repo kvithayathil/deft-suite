@@ -30,6 +30,7 @@ function makeContext(): ToolContext {
     trustEvaluator: new TrustEvaluator(DEFAULT_CONFIG.security),
     manifestBuilder: new ManifestBuilder(DEFAULT_CONFIG.manifest),
     config: { ...DEFAULT_CONFIG },
+    rawConfig: {},
     logger,
   };
 }
@@ -51,5 +52,50 @@ describe('handleSaveConfig', () => {
     const result = await handleSaveConfig({}, ctx);
     const body = JSON.parse(result.content[0].text);
     expect(body.saved).toBe(true);
+  });
+
+  it('persists rawConfig (user overrides) instead of fully merged config', async () => {
+    const ctx = makeContext();
+    const userOverrides = { sources: [{ type: 'git' as const, url: 'https://example.com/skills.git' }] };
+    ctx.rawConfig = userOverrides;
+
+    await handleSaveConfig({}, ctx);
+
+    const saved = await ctx.configStore.load();
+    expect(saved).toEqual(userOverrides);
+  });
+
+  it('does not duplicate CONCAT_ARRAY_KEYS across save/reload cycles (issue #6)', async () => {
+    const configStore = new InMemoryConfigStore();
+    const ctx = makeContext();
+    (ctx as unknown as { configStore: InMemoryConfigStore }).configStore = configStore;
+
+    ctx.rawConfig = {
+      projectConfigPaths: ['.custom'],
+    };
+
+    // Simulate multiple save/reload cycles
+    for (let i = 0; i < 3; i++) {
+      await handleSaveConfig({}, ctx);
+      // Simulate reload: load from store, update rawConfig
+      const loaded = await configStore.load();
+      ctx.rawConfig = loaded ?? {};
+    }
+
+    const persisted = await configStore.load();
+    expect(persisted?.projectConfigPaths).toEqual(['.custom']);
+  });
+
+  it('preserves array types through save cycle — no string conversion (issue #6)', async () => {
+    const ctx = makeContext();
+    const sources = [{ type: 'git' as const, url: 'https://example.com/a.git' }];
+    ctx.rawConfig = { sources };
+
+    await handleSaveConfig({}, ctx);
+
+    const saved = await ctx.configStore.load();
+    expect(Array.isArray(saved?.sources)).toBe(true);
+    expect(typeof saved?.sources).not.toBe('string');
+    expect(saved?.sources).toEqual(sources);
   });
 });

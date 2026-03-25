@@ -26,6 +26,7 @@ export interface ToolContext {
   trustEvaluator: TrustEvaluator;
   manifestBuilder: ManifestBuilder;
   config: Config;
+  rawConfig: Partial<Config>;
   logger: Logger;
   resilience?: ResilienceContext;
   catalogStores?: Map<string, CatalogStore>;

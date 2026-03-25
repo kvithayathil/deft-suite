@@ -34,6 +34,17 @@ export const handleUpdateConfig: ToolHandler<UpdateConfigParams> = async (params
   }
   current[parts[parts.length - 1]] = params.value;
 
+  // Mirror the change into rawConfig so save_config persists it
+  let rawCurrent: Record<string, unknown> = ctx.rawConfig as Record<string, unknown>;
+  for (let i = 0; i < parts.length - 1; i++) {
+    const value = rawCurrent[parts[i]];
+    if (typeof value !== 'object' || value === null) {
+      rawCurrent[parts[i]] = {};
+    }
+    rawCurrent = rawCurrent[parts[i]] as Record<string, unknown>;
+  }
+  rawCurrent[parts[parts.length - 1]] = params.value;
+
   return {
     content: [{
       type: 'text',

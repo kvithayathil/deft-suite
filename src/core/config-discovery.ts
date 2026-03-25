@@ -1,4 +1,4 @@
-import { readFile, access } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { Config } from './types.js';
 
@@ -22,7 +22,6 @@ export async function discoverProjectConfig(
   for (const relPath of paths) {
     const configPath = join(projectRoot, relPath, 'config.json');
     try {
-      await access(configPath);
       const raw = await readFile(configPath, 'utf-8');
       const config = JSON.parse(raw) as Partial<Config>;
       return { path: configPath, config };

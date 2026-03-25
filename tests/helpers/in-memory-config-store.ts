@@ -12,7 +12,7 @@ export class InMemoryConfigStore implements ConfigStore {
     return this.config;
   }
 
-  async save(config: Config): Promise<void> {
+  async save(config: Partial<Config>): Promise<void> {
     this.config = config;
   }
 
