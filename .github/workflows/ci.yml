@@ -67,6 +67,37 @@ jobs:
           path: coverage/
           retention-days: 14
 
+      - name: Upload to Codecov
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 22
+        uses: codecov/codecov-action@v5
+        with:
+          files: coverage/coverage-final.json
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      # --- Gist-backed dynamic badge (disabled) ---
+      # To enable: create a secret gist, set COVERAGE_GIST_ID and GIST_TOKEN secrets,
+      # and uncomment both steps below.
+      # - name: Extract coverage summary
+      #   id: coverage-summary
+      #   if: matrix.os == 'ubuntu-latest' && matrix.node-version == 22 && github.ref == 'refs/heads/main'
+      #   run: |
+      #     LINES=$(node -e "const s=require('./coverage/coverage-summary.json');console.log(s.total.lines.pct)")
+      #     echo "lines=$LINES" >> "$GITHUB_OUTPUT"
+      # - name: Update coverage badge (gist)
+      #   if: matrix.os == 'ubuntu-latest' && matrix.node-version == 22 && github.ref == 'refs/heads/main'
+      #   uses: schneegans/dynamic-badges-action@v1.7.0
+      #   with:
+      #     auth: ${{ secrets.GIST_TOKEN }}
+      #     gistID: ${{ secrets.COVERAGE_GIST_ID }}
+      #     filename: coverage-badge.json
+      #     label: coverage
+      #     message: ${{ steps.coverage-summary.outputs.lines }}%
+      #     valColorRange: ${{ steps.coverage-summary.outputs.lines }}
+      #     minColorRange: 50
+      #     maxColorRange: 90
+      #     namedLogo: vitest
+
   build:
     name: Build
     runs-on: ubuntu-latest

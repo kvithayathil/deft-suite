@@ -16,6 +16,7 @@ export default defineConfig({
         'src/tools/context.ts',
         'src/tools/types.ts',
       ],
+      reporter: ['text', 'json-summary', 'json'],
       thresholds: { lines: 80, functions: 80, branches: 75 },
     },
   },
