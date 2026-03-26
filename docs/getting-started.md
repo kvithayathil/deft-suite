@@ -154,14 +154,13 @@ The first path found is loaded and merged over global config.
 
 ## 11) Configure Team Catalogs (Optional)
 
-Add registry sources to your config to include team-maintained catalogs in unified search:
+Add catalog sources to your config to include team-maintained catalogs in unified search:
 
 ```json
 {
-  "registries": {
-    "cacheMinutes": 60,
-    "sources": [
-      { "type": "static", "url": "https://example.com/skill-catalog.json" },
+  "sources": {
+    "catalogs": [
+      { "type": "static", "url": "https://example.com/skill-catalog.json", "cacheMinutes": 60 },
       { "type": "git", "url": "https://github.com/acme/skill-catalog.git" }
     ]
   }

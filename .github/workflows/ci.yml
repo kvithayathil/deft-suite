@@ -115,6 +115,9 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Check schema and docs are up to date
+        run: npm run check:schema
+
       - name: Verify dist output exists
         run: |
           test -f dist/index.js || (echo "dist/index.js not found" && exit 1)

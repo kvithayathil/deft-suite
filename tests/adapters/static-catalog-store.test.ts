@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { StaticCatalogStore } from '../../src/adapters/driven/static-catalog-store.js';
-import type { CatalogEntry, RegistrySource } from '../../src/core/types.js';
+import type { CatalogEntry, CatalogSourceConfig } from '../../src/core/types.js';
 
 describe('StaticCatalogStore', () => {
-  const source: RegistrySource = {
+  const source: CatalogSourceConfig = {
     type: 'static',
     url: 'https://example.com/skills/catalog.json',
   };

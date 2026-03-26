@@ -351,7 +351,8 @@ async function defaultCreateCliContext(): Promise<ToolContext> {
   const bundledStore = new FsSkillStore(bundledDir);
   const searchIndex = new MemorySearchIndex();
   const scanner = new BuiltinScanner();
-  const resolver = new SkillResolver(skillStore, bundledStore, config.sources, logger);
+  const { flattenSourcesForResolver } = await import('../../core/types.js');
+  const resolver = new SkillResolver(skillStore, bundledStore, flattenSourcesForResolver(config.sources), logger);
   const trustEvaluator = new TrustEvaluator(config.security);
   const lifecycle = new SkillLifecycle(logger);
   const lockStore = new FileSkillLockStore(join(configDir, 'skill-lock.json'));

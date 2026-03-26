@@ -2,7 +2,7 @@ import { isAbsolute, join } from 'node:path';
 import type { Logger } from './core/ports/logger.js';
 import type { ToolContext } from './tools/context.js';
 import type { CatalogStore, GitHubSearch, UsageStore } from './core/ports/index.js';
-import type { RegistrySource } from './core/types.js';
+import type { CatalogSourceConfig } from './core/types.js';
 import type { TokenBucket } from './resilience/token-bucket.js';
 import { GitCatalogStore } from './adapters/driven/git-catalog-store.js';
 import { StaticCatalogStore } from './adapters/driven/static-catalog-store.js';
@@ -36,7 +36,7 @@ export async function wireOptionalAdapters(
 ): Promise<void> {
   const factories = options.factories ?? {};
 
-  ctx.catalogStores = createCatalogStores(ctx.config.registries?.sources ?? [], options.configDir, factories);
+  ctx.catalogStores = createCatalogStores(ctx.config.sources.catalogs ?? [], options.configDir, factories);
 
   if (ctx.config.github?.search === true) {
     const createGitHubSearch = factories.createGitHubSearch
@@ -77,7 +77,7 @@ function resolveUsageDbPath(configDir: string, configuredPath: string): string {
 }
 
 function createCatalogStores(
-  sources: RegistrySource[],
+  sources: CatalogSourceConfig[],
   configDir: string,
   factories: OptionalAdapterFactories,
 ): Map<string, CatalogStore> | undefined {

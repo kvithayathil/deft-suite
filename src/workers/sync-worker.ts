@@ -7,6 +7,21 @@ interface Source {
   path?: string;
 }
 
+interface LocalSourceConfig {
+  path: string;
+  sync?: string;
+}
+
+interface RemoteSourceConfig {
+  url: string;
+  type: string;
+}
+
+interface SourcesConfig {
+  local?: LocalSourceConfig[];
+  remote?: RemoteSourceConfig[];
+}
+
 interface SyncSettings {
   intervalMinutes: number;
   autoUpdate: boolean;
@@ -14,10 +29,21 @@ interface SyncSettings {
 
 interface FullConfig {
   sync?: SyncSettings;
-  sources?: Source[];
+  sources?: SourcesConfig;
 }
 
 let syncTimer: ReturnType<typeof setInterval> | null = null;
+
+function flattenSources(sources: SourcesConfig): Source[] {
+  const result: Source[] = [];
+  for (const local of sources.local ?? []) {
+    result.push({ type: local.sync === 'git' ? 'git' : 'local', path: local.path });
+  }
+  for (const remote of sources.remote ?? []) {
+    result.push({ type: remote.type, url: remote.url });
+  }
+  return result;
+}
 
 function startSyncLoop(intervalMinutes: number, sources: Source[]): void {
   const intervalMs = intervalMinutes * 60 * 1000;
@@ -25,7 +51,7 @@ function startSyncLoop(intervalMinutes: number, sources: Source[]): void {
   const runSync = (): void => {
     const updated: string[] = [];
     for (const source of sources) {
-      if (source.type === 'git' || source.type === 'registry') {
+      if (source.type === 'git' || source.type === 'hosted') {
         // Placeholder until remote adapters are wired.
       }
     }
@@ -50,7 +76,7 @@ if (parentPort) {
         syncTimer = null;
       }
       if (config.sync) {
-        startSyncLoop(config.sync.intervalMinutes, config.sources ?? []);
+        startSyncLoop(config.sync.intervalMinutes, flattenSources(config.sources ?? {}));
       }
       parentPort!.postMessage({ type: 'ready' } satisfies WorkerMessage);
     }

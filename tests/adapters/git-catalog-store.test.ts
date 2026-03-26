@@ -10,10 +10,10 @@ vi.mock('node:child_process', () => ({
 
 import { execFile } from 'node:child_process';
 import { GitCatalogStore } from '../../src/adapters/driven/git-catalog-store.js';
-import type { CatalogEntry, RegistrySource } from '../../src/core/types.js';
+import type { CatalogEntry, CatalogSourceConfig } from '../../src/core/types.js';
 
 describe('GitCatalogStore', () => {
-  const source: RegistrySource = {
+  const source: CatalogSourceConfig = {
     type: 'git',
     url: 'https://github.com/acme/skill-catalog.git',
   };

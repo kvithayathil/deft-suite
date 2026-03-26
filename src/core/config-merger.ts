@@ -1,4 +1,5 @@
 import { TrustLevel, type Config } from './types.js';
+import { validateConfig } from './config-validator.js';
 
 export const DEFAULT_CONFIG: Config = {
   schemaVersion: 1,
@@ -7,8 +8,7 @@ export const DEFAULT_CONFIG: Config = {
     maxManifestSize: 10,
     warnThreshold: 8,
   },
-  sources: [],
-  registries: { cacheMinutes: 60, sources: [] },
+  sources: { local: [], remote: [], catalogs: [] },
   github: { search: false, topics: ['mcp-skill', 'agent-skill'] },
   usage: { pruneThreshold: 10000, sessionCap: 3, ceilingPercent: 20, dbPath: '' },
   sync: { intervalMinutes: 60, autoUpdate: true },
@@ -46,26 +46,93 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-// Top-level array keys that use concatenation semantics (all others replace)
-const CONCAT_ARRAY_KEYS = new Set(['sources', 'projectConfigPaths']);
+/**
+ * Auto-migrate legacy config shapes to the current structure.
+ * Mutates and returns the same object for convenience.
+ *
+ * Handles:
+ *  - `sources` as flat array → split into `{ local, remote, catalogs }`
+ *  - `registries.sources` → moved into `sources.catalogs`
+ *  - `registries.cacheMinutes` → folded into each catalog entry
+ */
+export function migrateConfig(raw: Record<string, unknown>): Record<string, unknown> {
+  // 1. Flat sources array → structured object
+  if (Array.isArray(raw.sources)) {
+    const local: Record<string, unknown>[] = [];
+    const remote: Record<string, unknown>[] = [];
 
-function deepMerge(base: Record<string, unknown>, override: Record<string, unknown>, topLevel = false): Record<string, unknown> {
+    for (const entry of raw.sources as Record<string, unknown>[]) {
+      const type = entry.type as string | undefined;
+      if (type === 'local' || type === 'bundled') {
+        const migrated: Record<string, unknown> = {};
+        if (entry.path) migrated.path = entry.path;
+        if (entry.trust) migrated.trust = entry.trust;
+        local.push(migrated);
+      } else if (type === 'git' || type === 'registry' || type === 'hosted') {
+        const migrated: Record<string, unknown> = {
+          type: type === 'registry' ? 'hosted' : type,
+        };
+        if (entry.url) migrated.url = entry.url;
+        if (entry.branch) migrated.branch = entry.branch;
+        if (entry.ref) migrated.ref = entry.ref;
+        if (entry.trust) migrated.trust = entry.trust;
+        remote.push(migrated);
+      }
+    }
+
+    raw.sources = { local, remote, catalogs: [] };
+  }
+
+  // 2. registries → sources.catalogs
+  if (isPlainObject(raw.registries)) {
+    const reg = raw.registries as Record<string, unknown>;
+    const regSources = reg.sources as Record<string, unknown>[] | undefined;
+    const cacheMinutes = reg.cacheMinutes as number | undefined;
+
+    if (Array.isArray(regSources) && regSources.length > 0) {
+      const catalogs = regSources.map((s) => {
+        const migrated = { ...s };
+        if (cacheMinutes !== undefined && migrated.cacheMinutes === undefined) {
+          migrated.cacheMinutes = cacheMinutes;
+        }
+        return migrated;
+      });
+
+      // Ensure sources is an object before assigning catalogs
+      if (!isPlainObject(raw.sources)) {
+        raw.sources = { local: [], remote: [], catalogs };
+      } else {
+        (raw.sources as Record<string, unknown>).catalogs = catalogs;
+      }
+    }
+
+    delete raw.registries;
+  }
+
+  return raw;
+}
+
+// Array paths that use concatenation semantics (all others replace)
+const CONCAT_ARRAY_PATHS = new Set(['projectConfigPaths', 'sources.local', 'sources.remote']);
+
+function deepMerge(base: Record<string, unknown>, override: Record<string, unknown>, pathPrefix = ''): Record<string, unknown> {
   const result = { ...base };
   for (const key of Object.keys(override)) {
     if (key.endsWith(':replace')) continue;
     const baseVal = base[key];
     const overrideVal = override[key];
+    const fullPath = pathPrefix.length > 0 ? `${pathPrefix}.${key}` : key;
     if (Array.isArray(baseVal) && Array.isArray(overrideVal)) {
       const replaceKey = `${key}:replace`;
       if (override[replaceKey] === true) {
         result[key] = overrideVal;
-      } else if (topLevel && CONCAT_ARRAY_KEYS.has(key)) {
+      } else if (CONCAT_ARRAY_PATHS.has(fullPath)) {
         result[key] = [...baseVal, ...overrideVal];
       } else {
         result[key] = overrideVal;
       }
     } else if (isPlainObject(baseVal) && isPlainObject(overrideVal)) {
-      result[key] = deepMerge(baseVal, overrideVal, false);
+      result[key] = deepMerge(baseVal, overrideVal, fullPath);
     } else if (overrideVal !== undefined) {
       result[key] = overrideVal;
     }
@@ -77,17 +144,28 @@ export function mergeConfigs(global?: Partial<Config> | null, project?: Partial<
   let result = { ...DEFAULT_CONFIG } as Record<string, unknown>;
   const envOverrides = loadEnvOverrides();
   if (envOverrides) {
-    result = deepMerge(result, envOverrides as Record<string, unknown>, true);
+    result = deepMerge(result, envOverrides as Record<string, unknown>);
   }
   if (global) {
-    result = deepMerge(result, global as Record<string, unknown>, true);
+    result = deepMerge(result, migrateConfig({ ...global as Record<string, unknown> }));
   }
   if (project) {
-    result = deepMerge(result, project as Record<string, unknown>, true);
+    result = deepMerge(result, migrateConfig({ ...project as Record<string, unknown> }));
     enforceAccessControlPrecedence(result, global);
   }
   return result as unknown as Config;
 }
+
+export function mergeAndValidateConfigs(
+  global?: Partial<Config> | null,
+  project?: Partial<Config> | null,
+): { config: Config; validation: ReturnType<typeof validateConfig> } {
+  const config = mergeConfigs(global, project);
+  const validation = validateConfig(config);
+  return { config, validation };
+}
+
+export { validateConfig, formatValidationIssues } from './config-validator.js';
 
 function loadEnvOverrides(): Partial<Config> | null {
   const overrides: Record<string, unknown> = {};

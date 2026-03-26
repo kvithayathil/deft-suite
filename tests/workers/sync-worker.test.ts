@@ -32,15 +32,15 @@ describe('sync-worker', () => {
         reject(err);
       });
 
-      // Send config matching the real Config shape: sources at top level, not inside sync
+      // Send config matching the real Config shape: sources at top level with local/remote/catalogs
       worker!.postMessage({
         type: 'start',
         config: {
           sync: { intervalMinutes: 60, autoUpdate: true },
-          sources: [
-            { type: 'git', url: 'https://example.com/skills.git' },
-            { type: 'local', path: '/tmp/skills' },
-          ],
+          sources: {
+            local: [{ path: '/tmp/skills' }],
+            remote: [{ url: 'https://example.com/skills.git', type: 'git' }],
+          },
         },
       });
     });

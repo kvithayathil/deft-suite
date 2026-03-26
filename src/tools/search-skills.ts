@@ -2,7 +2,7 @@ import type { ToolHandler } from './types.js';
 import { blendScores, normalizeFrecency } from '../core/frecency.js';
 import { searchCatalog } from '../core/catalog-searcher.js';
 import { invalidQuery } from '../core/errors.js';
-import type { LocalSearchResult, UnifiedSearchResult, RegistrySource } from '../core/types.js';
+import type { LocalSearchResult, UnifiedSearchResult, CatalogSourceConfig } from '../core/types.js';
 
 interface SearchParams {
   query: string;
@@ -54,21 +54,22 @@ export const handleSearchSkills: ToolHandler<SearchParams> = async (params, ctx)
     ctx.usageStore?.recordSearch(params.query, unified.local.length, 'local');
   }
 
-  const registries = ctx.config.registries?.sources ?? [];
-  if (requestedSources.has('catalog') && registries.length > 0 && ctx.catalogStores?.size) {
-    for (const registry of registries) {
-      const store = ctx.catalogStores.get(registry.url);
+  const catalogs = ctx.config.sources.catalogs ?? [];
+  if (requestedSources.has('catalog') && catalogs.length > 0 && ctx.catalogStores?.size) {
+    for (const catalogSource of catalogs) {
+      const store = ctx.catalogStores.get(catalogSource.url);
       if (!store) {
         continue;
       }
 
-      const sourceKey = getRegistryKey(registry);
+      const sourceKey = getCatalogKey(catalogSource);
 
       try {
-        const shouldFetch = params.refresh || !store.isFresh(registry, ctx.config.registries?.cacheMinutes ?? 60);
+        const cacheMinutes = catalogSource.cacheMinutes ?? 60;
+        const shouldFetch = params.refresh || !store.isFresh(catalogSource, cacheMinutes);
         const catalog = shouldFetch
-          ? await store.fetch(registry)
-          : await store.getCached(registry) ?? await store.fetch(registry);
+          ? await store.fetch(catalogSource)
+          : await store.getCached(catalogSource) ?? await store.fetch(catalogSource);
 
         const catalogResults = searchCatalog(catalog.skills, params.query, catalog.name);
         unified.catalogs[sourceKey] = typeof limit === 'number'
@@ -83,7 +84,7 @@ export const handleSearchSkills: ToolHandler<SearchParams> = async (params, ctx)
         });
         let fallbackResultsCount = 0;
         try {
-          const cachedCatalog = await store.getCached(registry);
+          const cachedCatalog = await store.getCached(catalogSource);
           if (cachedCatalog) {
             const cachedResults = searchCatalog(cachedCatalog.skills, params.query, cachedCatalog.name);
             unified.catalogs[sourceKey] = typeof limit === 'number'
@@ -127,6 +128,6 @@ export const handleSearchSkills: ToolHandler<SearchParams> = async (params, ctx)
   };
 };
 
-function getRegistryKey(source: RegistrySource): string {
+function getCatalogKey(source: CatalogSourceConfig): string {
   return source.url.replace(/^https?:\/\//, '').replace(/[^a-zA-Z0-9._-]+/g, '-');
 }

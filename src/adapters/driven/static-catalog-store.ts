@@ -1,5 +1,5 @@
 import type { CatalogStore } from '../../core/ports/catalog-store.js';
-import type { CatalogEntry, RegistrySource } from '../../core/types.js';
+import type { CatalogEntry, CatalogSourceConfig } from '../../core/types.js';
 
 interface CacheEntry {
   catalog: CatalogEntry;
@@ -11,7 +11,7 @@ interface CacheEntry {
 export class StaticCatalogStore implements CatalogStore {
   private readonly cache = new Map<string, CacheEntry>();
 
-  async fetch(source: RegistrySource): Promise<CatalogEntry> {
+  async fetch(source: CatalogSourceConfig): Promise<CatalogEntry> {
     const key = source.url;
     const cached = this.cache.get(key);
 
@@ -59,11 +59,11 @@ export class StaticCatalogStore implements CatalogStore {
     return catalog;
   }
 
-  async getCached(source: RegistrySource): Promise<CatalogEntry | null> {
+  async getCached(source: CatalogSourceConfig): Promise<CatalogEntry | null> {
     return this.cache.get(source.url)?.catalog ?? null;
   }
 
-  isFresh(source: RegistrySource, maxAgeMinutes: number): boolean {
+  isFresh(source: CatalogSourceConfig, maxAgeMinutes: number): boolean {
     const cached = this.cache.get(source.url);
     if (!cached) {
       return false;
@@ -73,7 +73,7 @@ export class StaticCatalogStore implements CatalogStore {
     return ageMs <= maxAgeMinutes * 60_000;
   }
 
-  clearCache(source?: RegistrySource): void {
+  clearCache(source?: CatalogSourceConfig): void {
     if (!source) {
       this.cache.clear();
       return;

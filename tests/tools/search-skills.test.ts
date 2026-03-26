@@ -16,7 +16,7 @@ import { SkillLifecycle } from '../../src/core/skill-lifecycle.js';
 import { SkillLockManager } from '../../src/core/skill-lock.js';
 import { ManifestBuilder } from '../../src/core/manifest-builder.js';
 import { DEFAULT_CONFIG } from '../../src/core/config-merger.js';
-import type { RegistrySource } from '../../src/core/types.js';
+import type { CatalogSourceConfig } from '../../src/core/types.js';
 import type { ToolContext } from '../../src/tools/context.js';
 
 function makeContext(overrides: Partial<ToolContext> = {}): ToolContext {
@@ -25,9 +25,10 @@ function makeContext(overrides: Partial<ToolContext> = {}): ToolContext {
   const logger = new NoopLogger();
   const config = {
     ...DEFAULT_CONFIG,
-    registries: {
-      cacheMinutes: 60,
-      sources: [{ url: 'https://catalog.test/skills.json', type: 'static' as const }],
+    sources: {
+      local: [],
+      remote: [],
+      catalogs: [{ url: 'https://catalog.test/skills.json', type: 'static' as const }],
     },
     github: {
       search: true,
@@ -52,7 +53,7 @@ function makeContext(overrides: Partial<ToolContext> = {}): ToolContext {
   };
 }
 
-const CATALOG_SOURCE: RegistrySource = { url: 'https://catalog.test/skills.json', type: 'static' };
+const CATALOG_SOURCE: CatalogSourceConfig = { url: 'https://catalog.test/skills.json', type: 'static' };
 
 describe('handleSearchSkills', () => {
   it('returns grouped local-only response when remotes are not configured', async () => {
@@ -167,12 +168,12 @@ describe('handleSearchSkills', () => {
       fetchCalls = 0;
       cachedCalls = 0;
 
-      async fetch(source: RegistrySource) {
+      async fetch(source: CatalogSourceConfig) {
         this.fetchCalls += 1;
         return super.fetch(source);
       }
 
-      async getCached(source: RegistrySource) {
+      async getCached(source: CatalogSourceConfig) {
         this.cachedCalls += 1;
         return super.getCached(source);
       }

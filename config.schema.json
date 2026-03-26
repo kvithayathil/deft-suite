@@ -1,0 +1,505 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "number"
+    },
+    "manifest": {
+      "$ref": "#/definitions/ManifestConfig"
+    },
+    "sources": {
+      "$ref": "#/definitions/SourcesConfig"
+    },
+    "github": {
+      "$ref": "#/definitions/GitHubConfig"
+    },
+    "usage": {
+      "$ref": "#/definitions/UsageConfig"
+    },
+    "sync": {
+      "$ref": "#/definitions/SyncConfig"
+    },
+    "security": {
+      "$ref": "#/definitions/SecurityConfig"
+    },
+    "platformDirectories": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "projectConfigPaths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "push": {
+      "$ref": "#/definitions/PushConfig"
+    },
+    "logging": {
+      "$ref": "#/definitions/LoggingConfig"
+    },
+    "telemetry": {
+      "$ref": "#/definitions/TelemetryConfig"
+    },
+    "resilience": {
+      "$ref": "#/definitions/ResilienceConfig"
+    },
+    "backup": {
+      "$ref": "#/definitions/BackupConfig"
+    },
+    "metadata": {
+      "$ref": "#/definitions/ConfigMetadata"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "manifest",
+    "sources",
+    "sync",
+    "security",
+    "platformDirectories",
+    "projectConfigPaths",
+    "push",
+    "logging",
+    "telemetry",
+    "resilience",
+    "backup",
+    "metadata"
+  ],
+  "definitions": {
+    "ManifestConfig": {
+      "type": "object",
+      "properties": {
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "maxManifestSize": {
+          "type": "number"
+        },
+        "warnThreshold": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "skills",
+        "maxManifestSize",
+        "warnThreshold"
+      ]
+    },
+    "SourcesConfig": {
+      "type": "object",
+      "properties": {
+        "local": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LocalSourceConfig"
+          }
+        },
+        "remote": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RemoteSourceConfig"
+          }
+        },
+        "catalogs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CatalogSourceConfig"
+          }
+        }
+      },
+      "required": [
+        "local",
+        "remote",
+        "catalogs"
+      ]
+    },
+    "LocalSourceConfig": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "trust": {
+          "$ref": "#/definitions/TrustLevel"
+        },
+        "sync": {
+          "type": "string",
+          "const": "git"
+        }
+      },
+      "required": [
+        "path"
+      ]
+    },
+    "TrustLevel": {
+      "type": "string",
+      "enum": [
+        "unknown",
+        "community",
+        "self-approved",
+        "verified",
+        "bundled"
+      ]
+    },
+    "RemoteSourceConfig": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/RemoteSourceType"
+        },
+        "branch": {
+          "type": "string"
+        },
+        "ref": {
+          "type": "string"
+        },
+        "trust": {
+          "$ref": "#/definitions/TrustLevel"
+        }
+      },
+      "required": [
+        "url",
+        "type"
+      ]
+    },
+    "RemoteSourceType": {
+      "type": "string",
+      "enum": [
+        "git",
+        "hosted"
+      ]
+    },
+    "CatalogSourceConfig": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/CatalogSourceType"
+        },
+        "cacheMinutes": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "url",
+        "type"
+      ]
+    },
+    "CatalogSourceType": {
+      "type": "string",
+      "enum": [
+        "git",
+        "static"
+      ]
+    },
+    "GitHubConfig": {
+      "type": "object",
+      "properties": {
+        "search": {
+          "type": "boolean"
+        },
+        "topics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "search",
+        "topics"
+      ]
+    },
+    "UsageConfig": {
+      "type": "object",
+      "properties": {
+        "pruneThreshold": {
+          "type": "number"
+        },
+        "sessionCap": {
+          "type": "number"
+        },
+        "ceilingPercent": {
+          "type": "number"
+        },
+        "dbPath": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "pruneThreshold",
+        "sessionCap",
+        "ceilingPercent",
+        "dbPath"
+      ]
+    },
+    "SyncConfig": {
+      "type": "object",
+      "properties": {
+        "intervalMinutes": {
+          "type": "number"
+        },
+        "autoUpdate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "intervalMinutes",
+        "autoUpdate"
+      ]
+    },
+    "SecurityConfig": {
+      "type": "object",
+      "properties": {
+        "minTrustLevel": {
+          "$ref": "#/definitions/TrustLevel"
+        },
+        "scanOnInstall": {
+          "type": "boolean"
+        },
+        "periodicScanIntervalHours": {
+          "type": "number"
+        },
+        "accessControl": {
+          "$ref": "#/definitions/AccessControlConfig"
+        }
+      },
+      "required": [
+        "minTrustLevel",
+        "scanOnInstall",
+        "periodicScanIntervalHours",
+        "accessControl"
+      ]
+    },
+    "AccessControlConfig": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "blocklist",
+            "allowlist"
+          ]
+        },
+        "blocked": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AccessControlEntry"
+          }
+        },
+        "allowed": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AccessControlEntry"
+          }
+        }
+      },
+      "required": [
+        "mode",
+        "blocked",
+        "allowed"
+      ]
+    },
+    "AccessControlEntry": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "source",
+            "skill"
+          ]
+        },
+        "url": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "PushConfig": {
+      "type": "object",
+      "properties": {
+        "remote": {
+          "type": "string"
+        },
+        "branch": {
+          "type": "string"
+        },
+        "autoCommit": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "remote",
+        "branch",
+        "autoCommit"
+      ]
+    },
+    "LoggingConfig": {
+      "type": "object",
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": [
+            "error",
+            "info",
+            "debug"
+          ]
+        },
+        "file": {
+          "type": "string"
+        },
+        "maxFileSize": {
+          "type": "string"
+        },
+        "maxFiles": {
+          "type": "number"
+        },
+        "structured": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "level",
+        "file",
+        "maxFileSize",
+        "maxFiles",
+        "structured"
+      ]
+    },
+    "TelemetryConfig": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "exporterEndpoint": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "exporterProtocol": {
+          "type": "string",
+          "enum": [
+            "grpc",
+            "http"
+          ]
+        },
+        "serviceName": {
+          "type": "string"
+        },
+        "sampleRate": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "enabled",
+        "exporterEndpoint",
+        "exporterProtocol",
+        "serviceName",
+        "sampleRate"
+      ]
+    },
+    "ResilienceConfig": {
+      "type": "object",
+      "properties": {
+        "rateLimits": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "bucketSize": {
+                "type": "number"
+              },
+              "refillPerMinute": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "bucketSize",
+              "refillPerMinute"
+            ]
+          }
+        }
+      },
+      "required": [
+        "rateLimits"
+      ]
+    },
+    "BackupConfig": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "target": {
+          "type": "string"
+        },
+        "interval": {
+          "type": "string",
+          "enum": [
+            "daily",
+            "weekly",
+            "manual"
+          ]
+        },
+        "onConfigChange": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enabled",
+        "target",
+        "interval",
+        "onConfigChange"
+      ]
+    },
+    "ConfigMetadata": {
+      "type": "object",
+      "properties": {
+        "createdOn": {
+          "type": "string"
+        },
+        "createdBy": {
+          "type": "string"
+        },
+        "platforms": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "arch": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "createdOn",
+        "createdBy",
+        "platforms",
+        "arch"
+      ]
+    }
+  },
+  "$id": "https://deft.dev/config.schema.json",
+  "title": "deft configuration",
+  "description": "Configuration schema for deft-mcp. Auto-generated from src/core/types.ts."
+}

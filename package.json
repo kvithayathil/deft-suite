@@ -22,6 +22,8 @@
     "postinstall": "git config core.hooksPath .githooks || true",
     "generate:notices": "node scripts/generate-notices.mjs",
     "check:notices": "node scripts/generate-notices.mjs --check",
+    "generate:schema": "node scripts/generate-schema.mjs",
+    "check:schema": "node scripts/generate-schema.mjs --check",
     "dev": "tsc --watch",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -57,6 +59,7 @@
     "eslint": "^10.0.3",
     "eslint-plugin-security": "^4.0.0",
     "license-checker": "^25.0.1",
+    "ts-json-schema-generator": "^2.4.0",
     "typescript": "^5.9.3",
     "vitest": "^4.1.0"
   }

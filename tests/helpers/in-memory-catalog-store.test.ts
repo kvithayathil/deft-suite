@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { InMemoryCatalogStore } from './in-memory-catalog-store.js';
-import type { CatalogEntry, RegistrySource } from '../../src/core/types.js';
+import type { CatalogEntry, CatalogSourceConfig } from '../../src/core/types.js';
 
 describe('InMemoryCatalogStore', () => {
-  const source: RegistrySource = { type: 'static', url: 'https://example.com/catalog.json' };
+  const source: CatalogSourceConfig = { type: 'static', url: 'https://example.com/catalog.json' };
 
   const fixture: CatalogEntry = {
     name: 'example-catalog',

@@ -18,6 +18,7 @@ import { TokenBucket } from './resilience/token-bucket.js';
 import { CircuitBreaker } from './resilience/circuit-breaker.js';
 import type { ResilienceContext } from './resilience/tool-wrapper.js';
 import { WorkerManager } from './workers/worker-manager.js';
+import { flattenSourcesForResolver } from './core/types.js';
 import type { ToolContext } from './tools/context.js';
 import type { ToolHandler } from './tools/types.js';
 import { wireOptionalAdapters } from './bootstrap.js';
@@ -68,7 +69,8 @@ async function main(): Promise<void> {
   const searchIndex = new MemorySearchIndex();
 
   // Core services
-  const resolver = new SkillResolver(skillStore, bundledStore, config.sources, logger);
+  const allSources = flattenSourcesForResolver(config.sources);
+  const resolver = new SkillResolver(skillStore, bundledStore, allSources, logger);
   const trustEvaluator = new TrustEvaluator(config.security);
   const lifecycle = new SkillLifecycle(logger);
   const lockPath = join(homedir(), '.config', 'deft', 'skill-lock.json');
@@ -82,7 +84,7 @@ async function main(): Promise<void> {
     rateLimiters.set(tool, new TokenBucket(limits.bucketSize, limits.refillPerMinute));
   }
   const circuitBreakers = new Map<string, CircuitBreaker>();
-  for (const source of config.sources) {
+  for (const source of allSources) {
     const key = source.url ?? source.path ?? 'unknown';
     circuitBreakers.set(key, new CircuitBreaker());
   }

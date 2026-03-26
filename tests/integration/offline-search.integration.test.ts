@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { ToolContext } from '../../src/tools/context.js';
-import type { CatalogEntry, RegistrySource } from '../../src/core/types.js';
+import type { CatalogEntry, CatalogSourceConfig } from '../../src/core/types.js';
 import { InMemorySkillStore } from '../helpers/in-memory-skill-store.js';
 import { InMemoryConfigStore } from '../helpers/in-memory-config-store.js';
 import { InMemorySearchIndex } from '../helpers/in-memory-search-index.js';
@@ -16,7 +16,7 @@ import { ManifestBuilder } from '../../src/core/manifest-builder.js';
 import { DEFAULT_CONFIG } from '../../src/core/config-merger.js';
 import { handleSearchSkills } from '../../src/tools/search-skills.js';
 
-const CATALOG_SOURCE: RegistrySource = { url: 'https://catalog.test/skills.json', type: 'static' };
+const CATALOG_SOURCE: CatalogSourceConfig = { url: 'https://catalog.test/skills.json', type: 'static' };
 
 class FlakyCatalogStore {
   private readonly entry: CatalogEntry;
@@ -35,7 +35,7 @@ class FlakyCatalogStore {
     this.entry = entry;
   }
 
-  async fetch(_source: RegistrySource): Promise<CatalogEntry> {
+  async fetch(_source: CatalogSourceConfig): Promise<CatalogEntry> {
     this.fetchCalls += 1;
     if (this.failFetch) {
       throw new Error('remote unavailable');
@@ -44,12 +44,12 @@ class FlakyCatalogStore {
     return this.entry;
   }
 
-  async getCached(_source: RegistrySource): Promise<CatalogEntry | null> {
+  async getCached(_source: CatalogSourceConfig): Promise<CatalogEntry | null> {
     this.cachedCalls += 1;
     return this.cached;
   }
 
-  isFresh(_source: RegistrySource, _maxAgeMinutes: number): boolean {
+  isFresh(_source: CatalogSourceConfig, _maxAgeMinutes: number): boolean {
     return this.fresh;
   }
 
@@ -73,9 +73,10 @@ function makeContext(overrides: Partial<ToolContext> = {}): ToolContext {
 
   const config = {
     ...DEFAULT_CONFIG,
-    registries: {
-      cacheMinutes: 60,
-      sources: [CATALOG_SOURCE],
+    sources: {
+      local: [],
+      remote: [],
+      catalogs: [CATALOG_SOURCE],
     },
     github: {
       search: true,

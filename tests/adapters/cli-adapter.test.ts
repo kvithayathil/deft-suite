@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { CliAdapter } from '../../src/adapters/driving/cli-adapter.js';
 import { InMemoryUsageStore } from '../helpers/in-memory-usage-store.js';
 import { mergeConfigs } from '../../src/core/config-merger.js';
+import { flattenSourcesForResolver } from '../../src/core/types.js';
 import type { ToolContext } from '../../src/tools/context.js';
 import { InMemorySkillStore } from '../helpers/in-memory-skill-store.js';
 import { InMemoryConfigStore } from '../helpers/in-memory-config-store.js';
@@ -38,7 +39,7 @@ function makeContext(overrides: Partial<ToolContext> = {}): ToolContext {
     searchIndex: new InMemorySearchIndex(),
     lockManager: new SkillLockManager(new InMemorySkillLockStore(), logger),
     lifecycle: new SkillLifecycle(logger),
-    resolver: new SkillResolver(skillStore, bundledStore, config.sources, logger),
+    resolver: new SkillResolver(skillStore, bundledStore, flattenSourcesForResolver(config.sources), logger),
     trustEvaluator: new TrustEvaluator(config.security),
     manifestBuilder: new ManifestBuilder(config.manifest),
     config,

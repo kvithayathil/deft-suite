@@ -1,5 +1,5 @@
 import type { CatalogStore } from '../../src/core/ports/catalog-store.js';
-import type { CatalogEntry, RegistrySource } from '../../src/core/types.js';
+import type { CatalogEntry, CatalogSourceConfig } from '../../src/core/types.js';
 
 export class InMemoryCatalogStore implements CatalogStore {
   private readonly fixtures: Record<string, CatalogEntry>;
@@ -11,7 +11,7 @@ export class InMemoryCatalogStore implements CatalogStore {
     this.fresh = options?.fresh ?? true;
   }
 
-  async fetch(source: RegistrySource): Promise<CatalogEntry> {
+  async fetch(source: CatalogSourceConfig): Promise<CatalogEntry> {
     const entry = this.fixtures[source.url];
     if (!entry) {
       throw new Error(`Catalog fixture not found for source: ${source.url}`);
@@ -21,15 +21,15 @@ export class InMemoryCatalogStore implements CatalogStore {
     return entry;
   }
 
-  async getCached(source: RegistrySource): Promise<CatalogEntry | null> {
+  async getCached(source: CatalogSourceConfig): Promise<CatalogEntry | null> {
     return this.cache.get(source.url) ?? this.fixtures[source.url] ?? null;
   }
 
-  isFresh(_source: RegistrySource, _maxAgeMinutes: number): boolean {
+  isFresh(_source: CatalogSourceConfig, _maxAgeMinutes: number): boolean {
     return this.fresh;
   }
 
-  clearCache(source?: RegistrySource): void {
+  clearCache(source?: CatalogSourceConfig): void {
     if (!source) {
       this.cache.clear();
       return;

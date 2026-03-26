@@ -17,7 +17,7 @@ import { handleSearchSkills } from '../../src/tools/search-skills.js';
 import { handleInstallSkill } from '../../src/tools/install-skill.js';
 import { handlePushSkills } from '../../src/tools/push-skills.js';
 import { SkillMcpError, ErrorCode } from '../../src/core/errors.js';
-import { TrustLevel, SkillState } from '../../src/core/types.js';
+import { TrustLevel, SkillState, flattenSourcesForResolver } from '../../src/core/types.js';
 
 function makeContext(overrides: Partial<ToolContext> = {}): ToolContext {
   const logger = new NoopLogger();
@@ -29,7 +29,7 @@ function makeContext(overrides: Partial<ToolContext> = {}): ToolContext {
   const searchIndex = new InMemorySearchIndex();
   const lockStore = new InMemorySkillLockStore();
 
-  const resolver = new SkillResolver(skillStore, bundledStore, config.sources, logger);
+  const resolver = new SkillResolver(skillStore, bundledStore, flattenSourcesForResolver(config.sources), logger);
   const trustEvaluator = new TrustEvaluator(config.security);
   const lifecycle = new SkillLifecycle(logger);
   const lockManager = new SkillLockManager(lockStore, logger);

@@ -17,7 +17,7 @@ import { SkillLockManager } from '../../src/core/skill-lock.js';
 import { ManifestBuilder } from '../../src/core/manifest-builder.js';
 import { handleInstallSkill } from '../../src/tools/install-skill.js';
 import { handleSearchSkills } from '../../src/tools/search-skills.js';
-import { TrustLevel, SkillState } from '../../src/core/types.js';
+import { TrustLevel, SkillState, flattenSourcesForResolver } from '../../src/core/types.js';
 
 function makeContext(): ToolContext {
   const logger = new NoopLogger();
@@ -29,7 +29,7 @@ function makeContext(): ToolContext {
   const searchIndex = new InMemorySearchIndex();
   const lockStore = new InMemorySkillLockStore();
 
-  const resolver = new SkillResolver(skillStore, bundledStore, config.sources, logger);
+  const resolver = new SkillResolver(skillStore, bundledStore, flattenSourcesForResolver(config.sources), logger);
   const trustEvaluator = new TrustEvaluator(config.security);
   const lifecycle = new SkillLifecycle(logger);
   const lockManager = new SkillLockManager(lockStore, logger);

@@ -67,7 +67,7 @@ export interface Skill {
 
 // --- Source Types ---
 
-export type SourceType = 'local' | 'git' | 'registry' | 'bundled';
+export type SourceType = 'local' | 'git' | 'hosted' | 'bundled';
 
 export interface Source {
   type: SourceType;
@@ -97,14 +97,53 @@ export interface CatalogEntry {
   skills: CatalogSkill[];
 }
 
-export interface RegistrySource {
-  url: string;
-  type: 'git' | 'static';
+// --- Structured Sources Config ---
+
+export interface LocalSourceConfig {
+  path: string;
+  trust?: TrustLevel;
+  sync?: 'git';
 }
 
-export interface RegistryConfig {
-  cacheMinutes: number;
-  sources: RegistrySource[];
+export type RemoteSourceType = 'git' | 'hosted';
+
+export interface RemoteSourceConfig {
+  url: string;
+  type: RemoteSourceType;
+  branch?: string;
+  ref?: string;
+  trust?: TrustLevel;
+}
+
+export type CatalogSourceType = 'git' | 'static';
+
+export interface CatalogSourceConfig {
+  url: string;
+  type: CatalogSourceType;
+  cacheMinutes?: number;
+}
+
+export interface SourcesConfig {
+  local: LocalSourceConfig[];
+  remote: RemoteSourceConfig[];
+  catalogs: CatalogSourceConfig[];
+}
+
+export function flattenSourcesForResolver(sources: SourcesConfig): Source[] {
+  const result: Source[] = [];
+  for (const local of sources.local) {
+    result.push({ type: 'local', path: local.path, trust: local.trust });
+  }
+  for (const remote of sources.remote) {
+    result.push({
+      type: remote.type === 'git' ? 'git' : 'hosted',
+      url: remote.url,
+      branch: remote.branch,
+      ref: remote.ref,
+      trust: remote.trust,
+    });
+  }
+  return result;
 }
 
 // --- Skill Lock (Spec Section 6a) ---
@@ -233,8 +272,7 @@ export interface ConfigMetadata {
 export interface Config {
   schemaVersion: number;
   manifest: ManifestConfig;
-  sources: Source[];
-  registries?: RegistryConfig;
+  sources: SourcesConfig;
   github?: GitHubConfig;
   usage?: UsageConfig;
   sync: SyncConfig;

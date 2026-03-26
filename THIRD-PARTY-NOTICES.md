@@ -1753,7 +1753,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-## hono (4.12.7)
+## hono (4.12.9)
 
 - License: MIT
 - Repository: https://github.com/honojs/hono
@@ -2010,7 +2010,7 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ```
 
-## jose (6.2.1)
+## jose (6.2.2)
 
 - License: MIT
 - Repository: https://github.com/panva/jose
@@ -3813,7 +3813,7 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ```
 
-## yaml (2.8.2)
+## yaml (2.8.3)
 
 - License: ISC
 - Repository: https://github.com/eemeli/yaml

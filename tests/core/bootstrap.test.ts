@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { wireOptionalAdapters } from '../../src/bootstrap.js';
 import { mergeConfigs } from '../../src/core/config-merger.js';
+import { flattenSourcesForResolver } from '../../src/core/types.js';
 import type { ToolContext } from '../../src/tools/context.js';
 import { InMemorySkillStore } from '../helpers/in-memory-skill-store.js';
 import { InMemoryConfigStore } from '../helpers/in-memory-config-store.js';
@@ -31,7 +32,7 @@ function makeContext(overrides: Partial<ToolContext> = {}): ToolContext {
     searchIndex: new InMemorySearchIndex(),
     lockManager: new SkillLockManager(new InMemorySkillLockStore(), logger),
     lifecycle: new SkillLifecycle(logger),
-    resolver: new SkillResolver(skillStore, bundledStore, config.sources, logger),
+    resolver: new SkillResolver(skillStore, bundledStore, flattenSourcesForResolver(config.sources), logger),
     trustEvaluator: new TrustEvaluator(config.security),
     manifestBuilder: new ManifestBuilder(config.manifest),
     config,
@@ -44,13 +45,10 @@ function makeContext(overrides: Partial<ToolContext> = {}): ToolContext {
 describe('wireOptionalAdapters', () => {
   it('wires usage, catalog, and github adapters from config', async () => {
     const ctx = makeContext();
-    ctx.config.registries = {
-      cacheMinutes: 60,
-      sources: [
-        { url: 'https://example.com/catalog.git', type: 'git' },
-        { url: 'https://example.com/catalog.json', type: 'static' },
-      ],
-    };
+    ctx.config.sources.catalogs = [
+      { url: 'https://example.com/catalog.git', type: 'git' },
+      { url: 'https://example.com/catalog.json', type: 'static' },
+    ];
     ctx.config.github = { search: true, topics: ['mcp'] };
     ctx.config.usage = { ...ctx.config.usage!, dbPath: 'custom-usage.db' };
 
