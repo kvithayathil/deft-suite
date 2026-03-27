@@ -1,5 +1,5 @@
 import { readFile, writeFile, readdir, mkdir, rm, access } from 'node:fs/promises';
-import { join, relative } from 'node:path';
+import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { createHash } from 'node:crypto';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import type { SkillStore } from '../../core/ports/skill-store.js';
@@ -9,13 +9,33 @@ import { TrustLevel, SkillState } from '../../core/types.js';
 export class FsSkillStore implements SkillStore {
   constructor(private readonly basePath: string) {}
 
+  private resolveSafePath(baseDir: string, targetPath: string): string {
+    if (isAbsolute(targetPath)) {
+      throw new Error(`Invalid absolute path: ${targetPath}`);
+    }
+
+    const resolvedBase = resolve(baseDir);
+    const resolvedTarget = resolve(baseDir, targetPath);
+    const relativePath = relative(resolvedBase, resolvedTarget);
+
+    if (
+      relativePath === '..'
+      || relativePath.startsWith(`..${sep}`)
+      || isAbsolute(relativePath)
+    ) {
+      throw new Error(`Invalid path traversal detected: ${targetPath}`);
+    }
+
+    return resolvedTarget;
+  }
+
   async get(name: string): Promise<Skill | null> {
     try {
-      const raw = await readFile(join(this.basePath, name, 'SKILL.md'), 'utf-8');
-      const { metadata, content } = this.parseSkillMd(raw);
-      const resources = await this.listResources(join(this.basePath, name));
-      return { metadata, content, resources, trustLevel: TrustLevel.Unknown, state: SkillState.Active, sourcePath: join(this.basePath, name) };
-    } catch { return null; }
+      const safePath = this.resolveSafePath(this.basePath, name);
+      return this.readSkillFromDir(safePath);
+    } catch {
+      return null;
+    }
   }
 
   async listMetadata(): Promise<SkillMetadata[]> {
@@ -26,26 +46,60 @@ export class FsSkillStore implements SkillStore {
   }
 
   async exists(name: string): Promise<boolean> {
-    try { await access(join(this.basePath, name, 'SKILL.md')); return true; } catch { return false; }
+    try { 
+      const safePath = this.resolveSafePath(this.basePath, name);
+      await access(join(safePath, 'SKILL.md')); 
+      return true; 
+    } catch { 
+      return false; 
+    }
   }
 
-  async write(name: string, skill: Skill): Promise<void> {
-    const dir = join(this.basePath, name);
+  async write(name: string, skill: Skill, resources?: Record<string, string>): Promise<void> {
+    const dir = this.resolveSafePath(this.basePath, name);
     await mkdir(dir, { recursive: true });
     const fm = stringifyYaml(skill.metadata).trim();
     await writeFile(join(dir, 'SKILL.md'), `---\n${fm}\n---\n${skill.content}`, 'utf-8');
+
+    if (resources) {
+      for (const [resourcePath, content] of Object.entries(resources)) {
+        const safeResourcePath = this.resolveSafePath(dir, resourcePath);
+        await mkdir(resolve(safeResourcePath, '..'), { recursive: true });
+        await writeFile(safeResourcePath, content, 'utf-8');
+      }
+    }
   }
 
-  async delete(name: string): Promise<void> { await rm(join(this.basePath, name), { recursive: true, force: true }); }
+  async delete(name: string): Promise<void> { 
+    try {
+      const safePath = this.resolveSafePath(this.basePath, name);
+      await rm(safePath, { recursive: true, force: true }); 
+    } catch {
+      // Ignore if path is invalid or already deleted
+    }
+  }
 
   async getResource(skillName: string, resourcePath: string): Promise<string | null> {
-    try { return await readFile(join(this.basePath, skillName, resourcePath), 'utf-8'); } catch { return null; }
+    try { 
+      const safeSkillPath = this.resolveSafePath(this.basePath, skillName);
+      const safeResourcePath = this.resolveSafePath(safeSkillPath, resourcePath);
+      return await readFile(safeResourcePath, 'utf-8'); 
+    } catch { 
+      return null; 
+    }
   }
 
   async fetch(name: string, source: Source): Promise<Skill | null> {
-    void name;
-    void source;
-    return null;
+    if (source.type !== 'local' || !source.path) {
+      return null;
+    }
+
+    try {
+      const safePath = this.resolveSafePath(source.path, name);
+      return this.readSkillFromDir(safePath);
+    } catch {
+      return null;
+    }
   }
 
   async listNames(): Promise<string[]> {
@@ -58,8 +112,27 @@ export class FsSkillStore implements SkillStore {
   }
 
   async computeHash(name: string): Promise<string> {
-    const content = await readFile(join(this.basePath, name, 'SKILL.md'), 'utf-8');
+    const safePath = this.resolveSafePath(this.basePath, name);
+    const content = await readFile(join(safePath, 'SKILL.md'), 'utf-8');
     return `sha256:${createHash('sha256').update(content).digest('hex')}`;
+  }
+
+  private async readSkillFromDir(skillPath: string): Promise<Skill | null> {
+    try {
+      const raw = await readFile(join(skillPath, 'SKILL.md'), 'utf-8');
+      const { metadata, content } = this.parseSkillMd(raw);
+      const resources = await this.listResources(skillPath);
+      return {
+        metadata,
+        content,
+        resources,
+        trustLevel: TrustLevel.Unknown,
+        state: SkillState.Active,
+        sourcePath: skillPath,
+      };
+    } catch {
+      return null;
+    }
   }
 
   private parseSkillMd(raw: string): { metadata: SkillMetadata; content: string } {

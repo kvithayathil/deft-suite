@@ -18,6 +18,7 @@ import { TokenBucket } from './resilience/token-bucket.js';
 import { CircuitBreaker } from './resilience/circuit-breaker.js';
 import type { ResilienceContext } from './resilience/tool-wrapper.js';
 import { WorkerManager } from './workers/worker-manager.js';
+import { GitCatalogStore } from './adapters/driven/git-catalog-store.js';
 import { flattenSourcesForResolver } from './core/types.js';
 import type { ToolContext } from './tools/context.js';
 import type { ToolHandler } from './tools/types.js';
@@ -35,7 +36,7 @@ import { handleSaveConfig } from './tools/save-config.js';
 import { handleGetStatus } from './tools/get-status.js';
 import { createMcpServer, startStdioServer } from './adapters/driving/mcp-server.js';
 
-export const VERSION = '1.0.0-beta.3';
+export const VERSION = '1.0.0-beta.4';
 
 async function main(): Promise<void> {
   // Config
@@ -51,7 +52,7 @@ async function main(): Promise<void> {
 
   // Seed config file on first run so users have a file to inspect/edit
   if (!rawConfig) {
-    await configStore.save({ schemaVersion: 1 });
+    await configStore.save(config);
   }
 
   // Logger
@@ -70,7 +71,20 @@ async function main(): Promise<void> {
 
   // Core services
   const allSources = flattenSourcesForResolver(config.sources);
-  const resolver = new SkillResolver(skillStore, bundledStore, allSources, logger);
+
+  // Catalog stores — one per catalog source URL
+  const catalogBaseDir = join(homedir(), '.local', 'share', 'deft', 'catalogs');
+  const catalogStores = new Map<string, InstanceType<typeof GitCatalogStore>>();
+  for (const catalogSource of config.sources.catalogs ?? []) {
+    if (!catalogStores.has(catalogSource.url)) {
+      catalogStores.set(catalogSource.url, new GitCatalogStore(catalogBaseDir));
+    }
+  }
+
+  const resolver = new SkillResolver(skillStore, bundledStore, allSources, logger, {
+    catalogSources: config.sources.catalogs,
+    catalogStores,
+  });
   const trustEvaluator = new TrustEvaluator(config.security);
   const lifecycle = new SkillLifecycle(logger);
   const lockPath = join(homedir(), '.config', 'deft', 'skill-lock.json');
@@ -83,10 +97,17 @@ async function main(): Promise<void> {
   for (const [tool, limits] of Object.entries(config.resilience.rateLimits)) {
     rateLimiters.set(tool, new TokenBucket(limits.bucketSize, limits.refillPerMinute));
   }
+  const circuitBreakerCooldownMs = config.resilience.circuitBreakerCooldownMs;
+  const cbOptions = circuitBreakerCooldownMs ? { cooldownMs: circuitBreakerCooldownMs } : undefined;
   const circuitBreakers = new Map<string, CircuitBreaker>();
   for (const source of allSources) {
     const key = source.url ?? source.path ?? 'unknown';
-    circuitBreakers.set(key, new CircuitBreaker());
+    circuitBreakers.set(key, new CircuitBreaker(cbOptions));
+  }
+  for (const catalogSource of config.sources.catalogs ?? []) {
+    if (!circuitBreakers.has(catalogSource.url)) {
+      circuitBreakers.set(catalogSource.url, new CircuitBreaker(cbOptions));
+    }
   }
   const resilience: ResilienceContext = { rateLimiters, circuitBreakers };
 
@@ -103,9 +124,10 @@ async function main(): Promise<void> {
     trustEvaluator,
     manifestBuilder,
     config,
-    rawConfig: rawConfig ? structuredClone(rawConfig) : {},
+    rawConfig: rawConfig ?? {},
     logger,
     resilience,
+    catalogStores,
     isOffline: () => {
       if (resilience.circuitBreakers.size === 0) {
         return false;
@@ -127,7 +149,6 @@ async function main(): Promise<void> {
 
   ctx.onConfigReload = async () => {
     const newRaw = await configStore.load();
-    ctx.rawConfig = newRaw ? structuredClone(newRaw) : {};
     const newProject = await discoverProjectConfig(
       process.cwd(),
       newRaw?.projectConfigPaths as string[] | undefined,
@@ -184,6 +205,21 @@ async function main(): Promise<void> {
   const shutdown = async (): Promise<void> => {
     logger.info('Shutting down deft-mcp server...');
     await workerManager.shutdown();
+
+    // Prune stale catalog clones
+    const pruneMaxAgeDays = Number(process.env.DEFT_CATALOG_PRUNE_MAX_AGE_DAYS) || 30;
+    for (const store of catalogStores.values()) {
+      try {
+        const pruned = await store.prune(pruneMaxAgeDays);
+        if (pruned > 0) {
+          logger.info(`Pruned ${pruned} stale catalog clone(s)`);
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        logger.warn(`Failed to prune catalog clones: ${msg}`);
+      }
+    }
+
     await server.close();
     process.exit(0);
   };

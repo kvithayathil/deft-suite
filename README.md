@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/kvithayathil/deft-suite/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/kvithayathil/deft-suite/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/kvithayathil/deft-suite/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/kvithayathil/deft-suite/actions/workflows/codeql.yml)
+[![Secret Scanning](https://github.com/kvithayathil/deft-suite/actions/workflows/gitleaks.yml/badge.svg?branch=main)](https://github.com/kvithayathil/deft-suite/actions/workflows/gitleaks.yml)
+[![codecov](https://codecov.io/gh/kvithayathil/deft-suite/branch/main/graph/badge.svg)](https://codecov.io/gh/kvithayathil/deft-suite)
 [![npm version](https://img.shields.io/npm/v/deft-mcp)](https://www.npmjs.com/package/deft-mcp)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen)](https://nodejs.org)
@@ -10,6 +12,9 @@
 <!-- Gist-backed dynamic badge (disabled) — uncomment after setting up the gist workflow
 [![coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/kvithayathil/GIST_ID/raw/coverage-badge.json)](https://github.com/kvithayathil/deft-suite/actions/workflows/ci.yml)
 -->
+
+[![coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/kvithayathil/c6e1b113c3ce1aa0729dd3fa9e24476/raw/coverage-badge.json)](https://github.com/kvithayathil/deft-suite/actions/workflows/ci.yml)
+[![duplication](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/kvithayathil/c6e1b113c3ce1aa0729dd3fa9e24476/raw/duplication-badge.json)](https://github.com/kvithayathil/deft-suite/actions/workflows/ci.yml)
 
 <!-- GitLab badges — uncomment and replace YOUR_GROUP/deft-suite with your GitLab project path
 [![GitLab Pipeline](https://gitlab.com/YOUR_GROUP/deft-suite/badges/main/pipeline.svg)](https://gitlab.com/YOUR_GROUP/deft-suite/-/pipelines)
@@ -198,6 +203,35 @@ deft usage reset --all
 ## Contributing
 
 Contributions welcome. Add tests for behavioral changes and keep docs aligned with implementation.
+
+### Development Setup
+
+```bash
+git clone https://github.com/kvithayathil/deft-suite.git
+cd deft-suite
+npm install        # also configures git hooks and checks prerequisites
+npm run build
+```
+
+**Recommended**: Install [gitleaks](https://github.com/gitleaks/gitleaks) for pre-commit secret scanning:
+
+```bash
+brew install gitleaks   # macOS
+```
+
+### Quality Checks
+
+All checks run automatically via pre-commit hook and CI:
+
+| Check | Command | Gate |
+|-------|---------|------|
+| Type safety | `npm run typecheck` | 0 errors |
+| Lint (includes SonarJS) | `npm run lint` | 0 errors |
+| Code duplication | `npm run check:duplication` | < 6% |
+| Tests | `npm test` | Pass |
+| Secret scanning | `gitleaks protect --staged` | 0 leaks |
+
+See [SECURITY.md](SECURITY.md) for the full security tooling overview.
 <!-- THIRD-PARTY-START -->
 
 ## Third-Party Notices

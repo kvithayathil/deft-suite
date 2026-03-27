@@ -220,6 +220,7 @@ export interface TelemetryConfig {
 
 export interface ResilienceConfig {
   rateLimits: Record<string, { bucketSize: number; refillPerMinute: number }>;
+  circuitBreakerCooldownMs?: number;
 }
 
 export interface BackupConfig {

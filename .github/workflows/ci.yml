@@ -19,9 +19,9 @@ jobs:
     name: Lint & Typecheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
@@ -37,6 +37,30 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Check code duplication
+        run: npm run check:duplication
+
+      - name: Extract duplication percentage
+        id: duplication-summary
+        if: github.ref == 'refs/heads/main'
+        run: |
+          PCT=$(node -e "const r=JSON.parse(require('fs').readFileSync('reports/jscpd/jscpd-report.json','utf8'));console.log(r.statistics.total.percentage.toFixed(1))")
+          echo "pct=$PCT" >> "$GITHUB_OUTPUT"
+      - name: Update duplication badge (gist)
+        if: github.ref == 'refs/heads/main'
+        env:
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+          GIST_ID: ${{ secrets.DUPLICATION_GIST_ID }}
+        run: |
+          PCT="${{ steps.duplication-summary.outputs.pct }}"
+          COLOR=$(node -e "const v=$PCT,lo=0,hi=10;const t=Math.min(Math.max((v-lo)/(hi-lo),0),1);const r=Math.round(255*t),g=Math.round(255*(1-t));console.log(r.toString(16).padStart(2,'0')+g.toString(16).padStart(2,'0')+'00')")
+          JSON_PAYLOAD=$(jq -n --arg label duplication --arg message "${PCT}%" --arg color "$COLOR" --arg logo eslint \
+            '{($label + ".json"): {content: ({schemaVersion:1,label:$label,message:$message,color:$color,namedLogo:$logo} | tojson)}}')
+          curl -sf -X PATCH "https://api.github.com/gists/${GIST_ID}" \
+            -H "Authorization: token ${GIST_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -d "{\"files\": ${JSON_PAYLOAD}}"
+
   test:
     name: Test (Node ${{ matrix.node-version }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -45,11 +69,11 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
-        node-version: [20, 22]
+        node-version: [22]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
@@ -61,7 +85,7 @@ jobs:
 
       - name: Upload coverage artifact
         if: matrix.os == 'ubuntu-latest' && matrix.node-version == 22
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-report
           path: coverage/
@@ -75,37 +99,35 @@ jobs:
           fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
 
-      # --- Gist-backed dynamic badge (disabled) ---
-      # To enable: create a secret gist, set COVERAGE_GIST_ID and GIST_TOKEN secrets,
-      # and uncomment both steps below.
-      # - name: Extract coverage summary
-      #   id: coverage-summary
-      #   if: matrix.os == 'ubuntu-latest' && matrix.node-version == 22 && github.ref == 'refs/heads/main'
-      #   run: |
-      #     LINES=$(node -e "const s=require('./coverage/coverage-summary.json');console.log(s.total.lines.pct)")
-      #     echo "lines=$LINES" >> "$GITHUB_OUTPUT"
-      # - name: Update coverage badge (gist)
-      #   if: matrix.os == 'ubuntu-latest' && matrix.node-version == 22 && github.ref == 'refs/heads/main'
-      #   uses: schneegans/dynamic-badges-action@v1.7.0
-      #   with:
-      #     auth: ${{ secrets.GIST_TOKEN }}
-      #     gistID: ${{ secrets.COVERAGE_GIST_ID }}
-      #     filename: coverage-badge.json
-      #     label: coverage
-      #     message: ${{ steps.coverage-summary.outputs.lines }}%
-      #     valColorRange: ${{ steps.coverage-summary.outputs.lines }}
-      #     minColorRange: 50
-      #     maxColorRange: 90
-      #     namedLogo: vitest
+      - name: Extract coverage summary
+        id: coverage-summary
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 22 && github.ref == 'refs/heads/main'
+        run: |
+          LINES=$(node -e "const s=require('./coverage/coverage-summary.json');console.log(s.total.lines.pct)")
+          echo "lines=$LINES" >> "$GITHUB_OUTPUT"
+      - name: Update coverage badge (gist)
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == 22 && github.ref == 'refs/heads/main'
+        env:
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+          GIST_ID: ${{ secrets.COVERAGE_GIST_ID }}
+        run: |
+          LINES="${{ steps.coverage-summary.outputs.lines }}"
+          COLOR=$(node -e "const v=$LINES,lo=50,hi=90;const t=Math.min(Math.max((v-lo)/(hi-lo),0),1);const r=Math.round(255*(1-t)),g=Math.round(255*t);console.log(r.toString(16).padStart(2,'0')+g.toString(16).padStart(2,'0')+'00')")
+          JSON_PAYLOAD=$(jq -n --arg label coverage --arg message "${LINES}%" --arg color "$COLOR" --arg logo vitest \
+            '{($label + "-badge.json"): {content: ({schemaVersion:1,label:$label,message:$message,color:$color,namedLogo:$logo} | tojson)}}')
+          curl -sf -X PATCH "https://api.github.com/gists/${GIST_ID}" \
+            -H "Authorization: token ${GIST_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -d "{\"files\": ${JSON_PAYLOAD}}"
 
   build:
     name: Build
     runs-on: ubuntu-latest
     needs: lint-and-typecheck
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
@@ -124,7 +146,7 @@ jobs:
           test -f dist/cli.js || (echo "dist/cli.js not found" && exit 1)
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist/

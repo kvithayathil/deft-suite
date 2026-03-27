@@ -1,0 +1,19 @@
+# Gitleaks configuration
+# https://github.com/gitleaks/gitleaks
+
+title = "deft-mcp gitleaks config"
+
+[extend]
+# Use the default gitleaks rules as the base
+# https://github.com/gitleaks/gitleaks/blob/master/config/gitleaks.toml
+
+[allowlist]
+description = "Global allowlist"
+paths = [
+  '''node_modules/''',
+  '''dist/''',
+  '''coverage/''',
+  '''reports/''',
+  '''package-lock\.json''',
+  '''THIRD-PARTY-NOTICES\.md''',
+]

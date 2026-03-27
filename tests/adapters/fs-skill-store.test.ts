@@ -1,9 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdtemp, rm, mkdir, writeFile, readdir } from 'node:fs/promises';
+import { mkdtemp, rm, mkdir, writeFile, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { FsSkillStore } from '../../src/adapters/driven/fs-skill-store.js';
 import { TrustLevel, SkillState } from '../../src/core/types.js';
+import type { Source } from '../../src/core/types.js';
 
 describe('FsSkillStore', () => {
   let testDir: string;
@@ -79,5 +80,87 @@ describe('FsSkillStore', () => {
     const names = await store.listNames();
     expect(names).toContain('skill-a');
     expect(names).toContain('skill-b');
+  });
+
+  it('fetch returns skill from local source path', async () => {
+    const localDir = await mkdtemp(join(tmpdir(), 'deft-local-'));
+    const skillDir = join(localDir, 'my-local-skill');
+    await mkdir(skillDir, { recursive: true });
+    await writeFile(join(skillDir, 'SKILL.md'), '---\nname: my-local-skill\ndescription: local\n---\nLocal content');
+
+    const source: Source = { type: 'local', path: localDir };
+    const skill = await store.fetch('my-local-skill', source);
+    expect(skill).not.toBeNull();
+    expect(skill!.metadata.name).toBe('my-local-skill');
+    expect(skill!.content).toContain('Local content');
+
+    await rm(localDir, { recursive: true, force: true });
+  });
+
+  it('fetch returns null for non-local source type', async () => {
+    const source: Source = { type: 'git', url: 'https://example.com/repo.git' };
+    const skill = await store.fetch('anything', source);
+    expect(skill).toBeNull();
+  });
+
+  it('fetch returns null when skill does not exist in local path', async () => {
+    const localDir = await mkdtemp(join(tmpdir(), 'deft-empty-'));
+    const source: Source = { type: 'local', path: localDir };
+    const skill = await store.fetch('nonexistent', source);
+    expect(skill).toBeNull();
+    await rm(localDir, { recursive: true, force: true });
+  });
+
+  it('rejects path traversal with ../ in skill name', async () => {
+    const result = await store.get('../etc');
+    expect(result).toBeNull();
+  });
+
+  it('rejects absolute path injection in skill name', async () => {
+    const result = await store.get('/etc/passwd');
+    expect(result).toBeNull();
+  });
+
+  it('rejects path traversal in fetch source path', async () => {
+    const localDir = await mkdtemp(join(tmpdir(), 'deft-trav-'));
+    const source: Source = { type: 'local', path: localDir };
+    const result = await store.fetch('../../etc/passwd', source);
+    expect(result).toBeNull();
+    await rm(localDir, { recursive: true, force: true });
+  });
+
+  it('writes resources alongside SKILL.md', async () => {
+    await store.write('res-skill', {
+      metadata: { name: 'res-skill', description: 'with resources' },
+      content: '# Skill',
+      resources: [],
+      trustLevel: TrustLevel.SelfApproved,
+      state: SkillState.Active,
+      sourcePath: join(testDir, 'res-skill'),
+    }, {
+      'scripts/setup.sh': '#!/bin/bash\necho hello',
+      'README.md': '# README',
+    });
+
+    const setupContent = await readFile(join(testDir, 'res-skill', 'scripts', 'setup.sh'), 'utf-8');
+    expect(setupContent).toContain('echo hello');
+
+    const readmeContent = await readFile(join(testDir, 'res-skill', 'README.md'), 'utf-8');
+    expect(readmeContent).toBe('# README');
+  });
+
+  it('rejects path traversal in resource paths during write', async () => {
+    await expect(
+      store.write('safe-skill', {
+        metadata: { name: 'safe-skill', description: 'test' },
+        content: '# Skill',
+        resources: [],
+        trustLevel: TrustLevel.SelfApproved,
+        state: SkillState.Active,
+        sourcePath: join(testDir, 'safe-skill'),
+      }, {
+        '../../../etc/evil': 'pwned',
+      }),
+    ).rejects.toThrow(/path traversal/i);
   });
 });

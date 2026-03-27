@@ -1,18 +1,20 @@
 import type { ToolHandler } from './types.js';
-import type { SourceStrategy } from '../core/skill-resolver.js';
+import { parseSourceString } from '../core/skill-resolver.js';
 import type { Source } from '../core/types.js';
 import { alreadyInstalled, skillNotFound, permissionDenied, scanFailed, validationFailed } from '../core/errors.js';
 import { validateSkillMetadata } from '../core/validator.js';
+import { rebuildSearchIndex } from './rebuild-search-index.js';
 
 interface InstallSkillParams {
   skill: string;
   target_dir?: string;
   platform?: string;
-  source?: SourceStrategy;
+  source?: string;
 }
 
 export const handleInstallSkill: ToolHandler<InstallSkillParams> = async (params, ctx) => {
   const { skill: name, platform, source } = params;
+  const resolveOptions = source ? parseSourceString(source) : undefined;
 
   // 1. Duplicate check
   const existing = await ctx.skillStore.exists(name);
@@ -26,7 +28,7 @@ export const handleInstallSkill: ToolHandler<InstallSkillParams> = async (params
   }
 
   // 3. Resolve skill
-  const resolved = await ctx.resolver.resolve(name, { source });
+  const resolved = await ctx.resolver.resolve(name, resolveOptions);
   if (!resolved) {
     throw skillNotFound(name, [source ?? 'default']);
   }
@@ -61,6 +63,8 @@ export const handleInstallSkill: ToolHandler<InstallSkillParams> = async (params
     trustLevel: resolved.trustLevel,
     source: { type: 'local' } as Source,
   });
+
+  await rebuildSearchIndex(ctx);
 
   ctx.usageStore?.recordAccess(name);
 

@@ -1,5 +1,42 @@
 #!/bin/sh
 set -e
 
+# Block commits containing forbidden patterns (loaded from local config)
+PATTERNS_FILE="$(git rev-parse --show-toplevel)/.git-forbidden-patterns"
+if [ -f "$PATTERNS_FILE" ]; then
+  # Check git author/committer metadata
+  AUTHOR_EMAIL=$(git var GIT_AUTHOR_IDENT | sed 's/.*<\(.*\)>.*/\1/')
+  COMMITTER_EMAIL=$(git var GIT_COMMITTER_IDENT | sed 's/.*<\(.*\)>.*/\1/')
+  while IFS= read -r pattern || [ -n "$pattern" ]; do
+    case "$pattern" in \#*|"") continue ;; esac
+    if echo "$AUTHOR_EMAIL $COMMITTER_EMAIL" | grep -iE "$pattern" >/dev/null 2>&1; then
+      echo "error: git author/committer email matches forbidden pattern: $pattern"
+      echo "       author=$AUTHOR_EMAIL committer=$COMMITTER_EMAIL"
+      echo "       Fix: git config user.email <personal-email>"
+      exit 1
+    fi
+  done < "$PATTERNS_FILE"
+
+  # Check staged file contents
+  while IFS= read -r pattern || [ -n "$pattern" ]; do
+    case "$pattern" in \#*|"") continue ;; esac
+    matches=$(git diff --cached --diff-filter=ACMR -z -- . | xargs -0 grep -ilE "$pattern" 2>/dev/null || true)
+    if [ -n "$matches" ]; then
+      echo "error: staged files match forbidden pattern: $pattern"
+      echo "       files: $matches"
+      exit 1
+    fi
+  done < "$PATTERNS_FILE"
+fi
+
 npm run generate:notices
 git add THIRD-PARTY-NOTICES.md README.md
+
+npm run check:duplication
+
+# Secret scanning — requires gitleaks (brew install gitleaks)
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks protect --staged --config .gitleaks.toml --verbose
+else
+  echo "warning: gitleaks not installed — skipping secret scan (brew install gitleaks)"
+fi

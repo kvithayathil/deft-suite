@@ -438,6 +438,9 @@
               "refillPerMinute"
             ]
           }
+        },
+        "circuitBreakerCooldownMs": {
+          "type": "number"
         }
       },
       "required": [
