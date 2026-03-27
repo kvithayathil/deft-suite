@@ -1,34 +1,27 @@
 # Deft Suite — Project Conventions
 
-## Runtime Convention
-
 **Use `bun` as the default runner. Use `bunx` instead of `npx`.**
 
-- Fallback order: `bun` → `pnpm` → `npm`
-- Never default to `npm` or `npx` when `bun`/`bunx` is available
-- Runtime versions pinned in `mise.toml` (node, bun, deno, pnpm)
+## Detailed Docs
 
-## Commands
+| Topic | Doc |
+|-------|-----|
+| Project Conventions | [docs/agents/project-conventions.md](docs/agents/project-conventions.md) |
+| Architecture | [docs/agents/architecture.md](docs/agents/architecture.md) |
+| Toolchain | [docs/agents/toolchain.md](docs/agents/toolchain.md) |
+| Code Style | [docs/agents/code-style.md](docs/agents/code-style.md) |
 
-All commands use `bun run`:
+## Essential Commands
 
-| Task | Command |
-|------|---------|
-| Test | `bun run test` |
-| Build | `bun run build` |
-| Lint | `bun run lint` (oxlint + ESLint) |
-| Format | `bun run fmt` (oxfmt, single quotes) |
-| Type check | `bun run typecheck` |
-| Duplication | `bun run check:duplication` |
+```bash
+bun run test          # vitest
+bun run build         # tsc
+bun run lint          # oxlint + eslint
+bun run fmt           # oxfmt
+bun run typecheck     # tsc --noEmit
+```
 
-## Toolchain
-
-- **Formatter**: oxfmt (single quotes) — `.oxfmtrc.json`
-- **Linter**: oxlint (primary) + ESLint (security/sonarjs) — `.oxlintrc.json` + `eslint.config.js`
-- **Test runner**: vitest — `vitest.config.ts`
-- **Scripts**: TypeScript via tsx — `scripts/*.ts`
-
-## Code Style
+## Key Rules
 
 - No `any` types — use `unknown` + type guards
 - TDD: failing test first, then minimal implementation
