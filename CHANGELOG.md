@@ -7,6 +7,19 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [Unreleased]
+
+### Added
+- **Code duplication detection** — `jscpd` (v4.0.8) with 6% threshold gate, `npm run check:duplication` script, CI step, and pre-commit hook
+- **ESLint SonarJS rules** — `eslint-plugin-sonarjs` (v4.0.2) for cognitive complexity, function-level duplication, and code smell detection
+- **Secret scanning** — `gitleaks` (v8.30.1) pre-commit hook with graceful fallback, dedicated CI workflow (`.github/workflows/gitleaks.yml`)
+- **Gist-backed dynamic badges** — duplication and coverage percentages auto-published to shields.io via gist on main branch pushes
+- **Postinstall prerequisite check** — warns contributors about missing system tools (e.g., gitleaks) after `npm install`
+
+### Security
+- **Hardened `.gitignore`** — added patterns for `.env*`, `*.pem`, `*.key`, `*.p12`, `*.pfx`, `*.jks`, `*.keystore`, `.npmrc`, and `**/secrets/`
+- **Three-layer secret defense** — pre-commit (gitleaks protect), CI (gitleaks-action), server-side (GitHub Secret Scanning + Push Protection)
+
 ## [1.0.0-beta.4] — 2026-03-24
 
 ### Fixed

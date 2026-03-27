@@ -85,4 +85,36 @@ describe('CircuitBreaker', () => {
     vi.advanceTimersByTime(1000);
     expect(cb.isAllowed()).toBe(true);
   });
+
+  it('reset() returns open breaker to closed state', () => {
+    const cb = new CircuitBreaker({ failureThreshold: 1 });
+    cb.recordFailure();
+    expect(cb.getState()).toBe(CircuitState.Open);
+
+    cb.reset();
+    expect(cb.getState()).toBe(CircuitState.Closed);
+    expect(cb.isAllowed()).toBe(true);
+  });
+
+  it('reset() clears failure count so threshold is fresh', () => {
+    const cb = new CircuitBreaker({ failureThreshold: 3 });
+    cb.recordFailure();
+    cb.recordFailure();
+    cb.reset();
+
+    cb.recordFailure();
+    expect(cb.getState()).toBe(CircuitState.Closed);
+  });
+
+  it('respects custom cooldownMs option', () => {
+    const cb = new CircuitBreaker({ failureThreshold: 1, cooldownMs: 10_000 });
+    cb.recordFailure();
+    expect(cb.getState()).toBe(CircuitState.Open);
+
+    vi.advanceTimersByTime(5000);
+    expect(cb.getState()).toBe(CircuitState.Open);
+
+    vi.advanceTimersByTime(5000);
+    expect(cb.getState()).toBe(CircuitState.HalfOpen);
+  });
 });

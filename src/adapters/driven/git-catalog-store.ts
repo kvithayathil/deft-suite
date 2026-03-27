@@ -1,8 +1,9 @@
 import { execFile } from 'node:child_process';
-import { access, mkdir, readFile } from 'node:fs/promises';
+import { access, mkdir, readFile, readdir, rm, stat } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { parse as parseYaml } from 'yaml';
 import type { CatalogStore } from '../../core/ports/catalog-store.js';
 import type { CatalogEntry, CatalogSourceConfig } from '../../core/types.js';
 
@@ -56,6 +57,35 @@ export class GitCatalogStore implements CatalogStore {
     this.cache.delete(source.url);
   }
 
+  async prune(maxAgeDays: number): Promise<number> {
+    if (!(await this.pathExists(this.baseDir))) {
+      return 0;
+    }
+
+    const entries = await readdir(this.baseDir, { withFileTypes: true });
+    const cutoffMs = Date.now() - maxAgeDays * 86_400_000;
+    let pruned = 0;
+
+    for (const entry of entries) {
+      if (!entry.isDirectory()) {
+        continue;
+      }
+
+      const dirPath = join(this.baseDir, entry.name);
+      try {
+        const info = await stat(dirPath);
+        if (info.mtimeMs < cutoffMs) {
+          await rm(dirPath, { recursive: true, force: true });
+          pruned++;
+        }
+      } catch {
+        continue;
+      }
+    }
+
+    return pruned;
+  }
+
   private async runGit(args: string[]): Promise<void> {
     await new Promise<void>((resolve, reject) => {
       execFile('git', args, (error) => {
@@ -86,7 +116,53 @@ export class GitCatalogStore implements CatalogStore {
       }
     }
 
-    throw new Error(`No catalog file found for ${sourceUrl}; expected skill-catalog.json or marketplace.json`);
+    // Fallback: scan skills/ directory for SKILL.md files
+    return this.scanSkillDirectories(repoDir, sourceUrl);
+  }
+
+  private async scanSkillDirectories(repoDir: string, sourceUrl: string): Promise<CatalogEntry> {
+    const skillsDir = join(repoDir, 'skills');
+    if (!(await this.pathExists(skillsDir))) {
+      return {
+        name: inferCatalogName(sourceUrl),
+        skills: [],
+      };
+    }
+
+    const entries = await readdir(skillsDir, { withFileTypes: true });
+    const skills: CatalogEntry['skills'] = [];
+
+    for (const entry of entries) {
+      if (!entry.isDirectory()) {
+        continue;
+      }
+
+      const skillDir = join(skillsDir, entry.name);
+      const skillFile = join(skillDir, 'SKILL.md');
+      if (!(await this.pathExists(skillFile))) {
+        continue;
+      }
+
+      try {
+        const raw = await readFile(skillFile, 'utf-8');
+        const metadata = parseSkillFrontmatter(raw);
+        skills.push({
+          name: metadata.name,
+          description: metadata.description,
+          source: {
+            type: 'path',
+            path: `skills/${entry.name}`,
+          },
+        });
+      } catch {
+        continue;
+      }
+    }
+
+    return {
+      name: inferCatalogName(sourceUrl),
+      skills,
+    };
   }
 
   private async pathExists(path: string): Promise<boolean> {
@@ -136,4 +212,24 @@ function validateCatalogEntry(value: unknown, sourceUrl: string): CatalogEntry {
   }
 
   return entry as CatalogEntry;
+}
+
+function parseSkillFrontmatter(raw: string): { name: string; description: string } {
+  const normalized = raw.replace(/\r\n/g, '\n');
+  const match = normalized.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) {
+    throw new Error('No frontmatter found in SKILL.md');
+  }
+
+  const parsed = parseYaml(match[1]) as Record<string, unknown>;
+  if (typeof parsed?.name !== 'string' || typeof parsed?.description !== 'string') {
+    throw new Error('SKILL.md frontmatter missing name or description');
+  }
+
+  return { name: parsed.name, description: parsed.description };
+}
+
+function inferCatalogName(url: string): string {
+  const match = url.match(/\/([^/]+?)(?:\.git)?$/);
+  return match?.[1] ?? 'unknown-catalog';
 }

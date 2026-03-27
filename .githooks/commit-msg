@@ -1,0 +1,13 @@
+#!/bin/sh
+# Block commit messages containing forbidden patterns (loaded from local config)
+PATTERNS_FILE="$(git rev-parse --show-toplevel)/.git-forbidden-patterns"
+if [ -f "$PATTERNS_FILE" ]; then
+  while IFS= read -r pattern || [ -n "$pattern" ]; do
+    case "$pattern" in \#*|"") continue ;; esac
+    if grep -iE "$pattern" "$1" >/dev/null 2>&1; then
+      echo "error: commit message matches forbidden pattern: $pattern"
+      echo "       Please rewrite your commit message."
+      exit 1
+    fi
+  done < "$PATTERNS_FILE"
+fi

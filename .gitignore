@@ -1,6 +1,7 @@
 node_modules/
 dist/
 coverage/
+reports/
 .superpowers/
 .worktrees/
 *.tsbuildinfo
@@ -11,3 +12,19 @@ AGENTS.md
 docs/superpowers/specs/
 .eslintrc.json
 .envrc
+
+# Secrets and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.secret
+*.credentials
+**/secrets/
+# .npmrc is tracked — contains only public registry URL, no auth tokens
+.git-forbidden-patterns

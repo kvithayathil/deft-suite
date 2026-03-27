@@ -64,6 +64,10 @@ export const handleSearchSkills: ToolHandler<SearchParams> = async (params, ctx)
 
       const sourceKey = getCatalogKey(catalogSource);
 
+      if (params.refresh) {
+        ctx.resilience?.circuitBreakers.get(catalogSource.url)?.reset();
+      }
+
       try {
         const cacheMinutes = catalogSource.cacheMinutes ?? 60;
         const shouldFetch = params.refresh || !store.isFresh(catalogSource, cacheMinutes);

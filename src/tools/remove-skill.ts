@@ -1,5 +1,6 @@
 import type { ToolHandler } from './types.js';
 import { skillNotFound, validationFailed } from '../core/errors.js';
+import { rebuildSearchIndex } from './rebuild-search-index.js';
 
 interface RemoveSkillParams { name: string; }
 
@@ -21,6 +22,8 @@ export const handleRemoveSkill: ToolHandler<RemoveSkillParams> = async (params, 
 
   // Remove from lifecycle
   ctx.lifecycle.remove(params.name);
+
+  await rebuildSearchIndex(ctx);
 
   return {
     content: [{

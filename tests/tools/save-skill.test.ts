@@ -1,40 +1,12 @@
 import { describe, it, expect } from 'vitest';
+import { makeTestContext } from '../helpers/make-context.js';
 import { handleSaveSkill } from '../../src/tools/save-skill.js';
-import { InMemorySkillStore } from '../helpers/in-memory-skill-store.js';
-import { InMemoryConfigStore } from '../helpers/in-memory-config-store.js';
 import { StubScanner } from '../helpers/stub-scanner.js';
-import { InMemorySearchIndex } from '../helpers/in-memory-search-index.js';
-import { InMemorySkillLockStore } from '../helpers/in-memory-skill-lock-store.js';
-import { NoopLogger } from '../helpers/noop-logger.js';
-import { SkillResolver } from '../../src/core/skill-resolver.js';
-import { TrustEvaluator } from '../../src/core/trust-evaluator.js';
-import { SkillLifecycle } from '../../src/core/skill-lifecycle.js';
-import { SkillLockManager } from '../../src/core/skill-lock.js';
-import { ManifestBuilder } from '../../src/core/manifest-builder.js';
-import { DEFAULT_CONFIG } from '../../src/core/config-merger.js';
 import { SkillMcpError, ErrorCode } from '../../src/core/errors.js';
 import { TrustLevel, SkillState } from '../../src/core/types.js';
-import type { ToolContext } from '../../src/tools/context.js';
 
-function makeContext(): ToolContext {
-  const skillStore = new InMemorySkillStore();
-  const bundledStore = new InMemorySkillStore();
-  const logger = new NoopLogger();
-  return {
-    skillStore,
-    bundledStore,
-    configStore: new InMemoryConfigStore(),
-    scanner: new StubScanner(),
-    searchIndex: new InMemorySearchIndex(),
-    lockManager: new SkillLockManager(new InMemorySkillLockStore(), logger),
-    lifecycle: new SkillLifecycle(logger),
-    resolver: new SkillResolver(skillStore, bundledStore, [], logger),
-    trustEvaluator: new TrustEvaluator(DEFAULT_CONFIG.security),
-    manifestBuilder: new ManifestBuilder(DEFAULT_CONFIG.manifest),
-    config: DEFAULT_CONFIG,
-    rawConfig: {},
-    logger,
-  };
+function makeContext() {
+  return makeTestContext();
 }
 
 describe('handleSaveSkill', () => {
@@ -133,5 +105,48 @@ describe('handleSaveSkill', () => {
 
     const body = JSON.parse(result.content[0].text);
     expect(body.saved).toBe('good-skill');
+  });
+
+  it('passes resources to skill store during save', async () => {
+    const ctx = makeContext();
+    const result = await handleSaveSkill(
+      {
+        name: 'res-skill',
+        content: '---\nname: res-skill\ndescription: skill with resources\n---\nBody',
+        description: 'skill with resources',
+        resources: {
+          'scripts/setup.sh': '#!/bin/bash\necho hello',
+          'README.md': '# Resource readme',
+        },
+      },
+      ctx,
+    );
+
+    const body = JSON.parse(result.content[0].text);
+    expect(body.saved).toBe('res-skill');
+
+    const stored = await ctx.skillStore.get('res-skill');
+    expect(stored).not.toBeNull();
+    expect(stored!.resources).toContain('scripts/setup.sh');
+    expect(stored!.resources).toContain('README.md');
+
+    const setupContent = await ctx.skillStore.getResource('res-skill', 'scripts/setup.sh');
+    expect(setupContent).toContain('echo hello');
+  });
+
+  it('rebuilds search index after successful save', async () => {
+    const ctx = makeTestContext();
+
+    await handleSaveSkill(
+      {
+        name: 'searchable-skill',
+        content: '---\nname: searchable-skill\ndescription: can be found\n---\nBody',
+        description: 'can be found',
+      },
+      ctx,
+    );
+
+    const results = await ctx.searchIndex.search('searchable-skill');
+    expect(results.some((r) => r.name === 'searchable-skill')).toBe(true);
   });
 });

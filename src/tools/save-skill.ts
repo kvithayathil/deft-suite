@@ -4,11 +4,13 @@ import { validateSkillMetadata } from '../core/validator.js';
 import { TrustLevel, SkillState } from '../core/types.js';
 import type { Source } from '../core/types.js';
 import { parse as parseYaml } from 'yaml';
+import { rebuildSearchIndex } from './rebuild-search-index.js';
 
 interface SaveSkillParams {
   name: string;
   content: string;
   description?: string;
+  resources?: Record<string, string>;
 }
 
 export const handleSaveSkill: ToolHandler<SaveSkillParams> = async (params, ctx) => {
@@ -66,7 +68,7 @@ export const handleSaveSkill: ToolHandler<SaveSkillParams> = async (params, ctx)
   };
 
   // 5. Write to store first (scanner needs filesystem path)
-  await ctx.skillStore.write(params.name, skill);
+  await ctx.skillStore.write(params.name, skill, params.resources);
 
   // 6. Read back to get the real filesystem sourcePath
   const stored = await ctx.skillStore.get(params.name);
@@ -77,6 +79,7 @@ export const handleSaveSkill: ToolHandler<SaveSkillParams> = async (params, ctx)
   const scanResult = await ctx.scanner.scanSkill(scanPath, params.name);
   if (!scanResult.passed) {
     await ctx.skillStore.delete(params.name);
+    await rebuildSearchIndex(ctx);
     ctx.lifecycle.markQuarantined(params.name, scanResult.findings.map((f) => f.message));
     throw scanFailed(params.name, scanResult.findings);
   }
@@ -95,6 +98,8 @@ export const handleSaveSkill: ToolHandler<SaveSkillParams> = async (params, ctx)
     trustLevel: TrustLevel.SelfApproved,
     source: { type: 'local' } as Source,
   });
+
+  await rebuildSearchIndex(ctx);
 
   return {
     content: [{
