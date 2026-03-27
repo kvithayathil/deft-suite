@@ -4,16 +4,26 @@
 
 Hexagonal (ports & adapters). Core domain in `src/core/` has **zero external dependencies** — only port interfaces. All I/O is in adapters.
 
-```
-  Driving Adapters  →  Tool Handlers  →  Core Domain
-  (MCP Server, CLI)    (search, install,   (types, errors,
-                        save, remove, ...)  resolver, lifecycle)
-                                               ↓
-                                          Port Interfaces
-                                               ↓
-                                         Driven Adapters
-                                         (Fs, Git, SQLite,
-                                          GitHub, Scanner)
+```mermaid
+graph TD
+  subgraph Driving["Driving Adapters (inbound)"]
+    MCP["MCP Server"]
+    CLI["CLI"]
+  end
+  subgraph Tools["Tool Handlers"]
+    TH["search · install · save · remove · get · push"]
+  end
+  subgraph Core["Core Domain (zero deps)"]
+    CD["types · errors · resolver · lifecycle · trust · frecency"]
+  end
+  subgraph Ports["Port Interfaces"]
+    PI["SkillStore · CatalogStore · Scanner · SearchIndex · ..."]
+  end
+  subgraph Driven["Driven Adapters (outbound)"]
+    DA["Fs · Git · SQLite · GitHub · Scanner"]
+  end
+  Driving --> Tools --> Core --> Ports
+  Driven -.->|implements| Ports
 ```
 
 ## Source tree (from `src/`)
@@ -54,6 +64,47 @@ src/
 | `skill-store` | `SkillStore` |
 | `usage-store` | `UsageStore` |
 <!-- END:ports -->
+
+### Port → Adapter wiring (auto-generated)
+
+<!-- BEGIN:port-adapter-diagram -->
+```mermaid
+graph LR
+  subgraph Ports["Port Interfaces"]
+    CatalogStore["CatalogStore"]
+    ConfigStore["ConfigStore"]
+    GitHubSearch["GitHubSearch"]
+    Logger["Logger"]
+    Scanner["Scanner"]
+    SearchIndex["SearchIndex"]
+    SkillLockStore["SkillLockStore"]
+    SkillStore["SkillStore"]
+    UsageStore["UsageStore"]
+  end
+  subgraph Driven["Driven Adapters (outbound)"]
+    BuiltinScanner["BuiltinScanner"]
+    ConsoleLogger["ConsoleLogger"]
+    FileConfigStore["FileConfigStore"]
+    FileSkillLockStore["FileSkillLockStore"]
+    FsSkillStore["FsSkillStore"]
+    GitCatalogStore["GitCatalogStore"]
+    GitHubSearchAdapter["GitHubSearchAdapter"]
+    MemorySearchIndex["MemorySearchIndex"]
+    SqliteUsageStore["SqliteUsageStore"]
+    StaticCatalogStore["StaticCatalogStore"]
+  end
+  BuiltinScanner -.->|implements| Scanner
+  ConsoleLogger -.->|implements| Logger
+  FileConfigStore -.->|implements| ConfigStore
+  FileSkillLockStore -.->|implements| SkillLockStore
+  FsSkillStore -.->|implements| SkillStore
+  GitCatalogStore -.->|implements| CatalogStore
+  GitHubSearchAdapter -.->|implements| GitHubSearch
+  MemorySearchIndex -.->|implements| SearchIndex
+  SqliteUsageStore -.->|implements| UsageStore
+  StaticCatalogStore -.->|implements| CatalogStore
+```
+<!-- END:port-adapter-diagram -->
 
 Dependency direction: adapters → ports. Never the reverse.
 

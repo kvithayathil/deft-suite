@@ -274,6 +274,105 @@ function genPortInterfaces(): string {
   return `| Port | Interface |\n|------|-----------|\n${rows.join('\n')}`;
 }
 
+/** Scan adapter files for `implements <Interface>` and build a Mermaid class diagram */
+function genPortAdapterDiagram(): string {
+  const adapterDirs = ['src/adapters/driven', 'src/adapters/driving'];
+  const links: Array<{ adapter: string; iface: string; dir: string }> = [];
+
+  for (const dir of adapterDirs) {
+    for (const f of listTsFiles(dir)) {
+      const content = readText(`${dir}/${f}`);
+      const match = content.match(/export class (\w+) implements (\w+)/);
+      if (match) {
+        links.push({
+          adapter: match[1],
+          iface: match[2],
+          dir: dir.includes('driven') ? 'driven' : 'driving',
+        });
+      }
+    }
+  }
+
+  const lines: string[] = [
+    '```mermaid',
+    'graph LR',
+    '  subgraph Ports["Port Interfaces"]',
+  ];
+
+  const ifaces = [...new Set(links.map((l) => l.iface))].sort();
+  for (const iface of ifaces) {
+    lines.push(`    ${iface}["${iface}"]`);
+  }
+  lines.push('  end');
+
+  const driven = links.filter((l) => l.dir === 'driven');
+  const driving = links.filter((l) => l.dir === 'driving');
+
+  if (driven.length > 0) {
+    lines.push('  subgraph Driven["Driven Adapters (outbound)"]');
+    for (const l of driven) {
+      lines.push(`    ${l.adapter}["${l.adapter}"]`);
+    }
+    lines.push('  end');
+  }
+
+  if (driving.length > 0) {
+    lines.push('  subgraph Driving["Driving Adapters (inbound)"]');
+    for (const l of driving) {
+      lines.push(`    ${l.adapter}["${l.adapter}"]`);
+    }
+    lines.push('  end');
+  }
+
+  for (const l of links) {
+    lines.push(`  ${l.adapter} -.->|implements| ${l.iface}`);
+  }
+
+  lines.push('```');
+  return lines.join('\n');
+}
+
+/** Generate a Mermaid flowchart for the npm version lifecycle */
+function genVersionLifecycle(scripts: Record<string, string>): string {
+  const lines: string[] = [
+    '```mermaid',
+    'flowchart TD',
+    '  A["npm version"] --> B["preversion"]',
+  ];
+
+  // Parse preversion
+  const preversion = scripts.preversion;
+  if (preversion) {
+    const cmds = preversion.split('&&').map((s) => s.trim().replace(/^npm run /, ''));
+    for (let i = 0; i < cmds.length; i++) {
+      const id = `B${i}`;
+      lines.push(`  B --> ${id}["${cmds[i]}"]`);
+    }
+  }
+
+  lines.push('  B --> C["bump package.json"]');
+  lines.push('  C --> D["version hook"]');
+
+  // Parse version hook
+  const version = scripts.version;
+  if (version) {
+    const parts = version.split('&&').map((s) => s.trim().replace(/^npm run /, ''));
+    // Filter out git add
+    const cmds = parts.filter((p) => !p.startsWith('git add'));
+    for (let i = 0; i < cmds.length; i++) {
+      const id = `D${i}`;
+      lines.push(`  D --> ${id}["${cmds[i]}"]`);
+    }
+    if (parts.some((p) => p.startsWith('git add'))) {
+      lines.push('  D --> E["git add changed files"]');
+    }
+  }
+
+  lines.push('  E --> F["git commit + tag"]');
+  lines.push('```');
+  return lines.join('\n');
+}
+
 // ── Main ─────────────────────────────────────────────────────────────
 
 const pkg = readJson<PkgJson>('package.json');
@@ -284,6 +383,7 @@ const injections: Record<string, Record<string, string>> = {
     commands: genCommandsTable(pkg.scripts),
     'mise-versions': genMiseVersions(mise.tools),
     'mise-tasks': genMiseTasks(mise.tasks),
+    'version-lifecycle': genVersionLifecycle(pkg.scripts),
   },
   'toolchain.md': {
     scripts: genScriptsList(),
@@ -295,6 +395,7 @@ const injections: Record<string, Record<string, string>> = {
   'architecture.md': {
     'src-tree': genSrcTree(),
     ports: genPortInterfaces(),
+    'port-adapter-diagram': genPortAdapterDiagram(),
   },
 };
 

@@ -32,6 +32,8 @@ Prefix all commands with `bun run`. Substitute `npm run` only if bun is unavaila
 | `bun run generate:dev-reference` | `tsx scripts/generate-dev-reference.ts` |
 | `bun run check:dev-reference` | `tsx scripts/generate-dev-reference.ts --check` |
 | `bun run sync:version` | `tsx scripts/sync-version.ts` |
+| `bun run generate:agent-docs` | `tsx scripts/generate-agent-docs.ts` |
+| `bun run check:agent-docs` | `tsx scripts/generate-agent-docs.ts --check` |
 | `bun run check:version` | `tsx scripts/sync-version.ts --check` |
 | `bun run dev` | `tsc --watch` |
 | `bun run test` | `vitest run` |
@@ -55,6 +57,28 @@ Prefix all commands with `bun run`. Substitute `npm run` only if bun is unavaila
 | `mise run check` | Run all checks (fmt, typecheck, lint) |
 | `mise run ci` | Full CI pipeline locally |
 <!-- END:mise-tasks -->
+
+## Version Lifecycle
+
+Running `npm version` triggers this automated chain:
+
+<!-- BEGIN:version-lifecycle -->
+```mermaid
+flowchart TD
+  A["npm version"] --> B["preversion"]
+  B --> B0["typecheck"]
+  B --> B1["lint"]
+  B --> C["bump package.json"]
+  C --> D["version hook"]
+  D --> D0["sync:version"]
+  D --> D1["generate:agent-docs"]
+  D --> D2["generate:dev-reference"]
+  D --> D3["generate:schema"]
+  D --> D4["generate:notices"]
+  D --> E["git add changed files"]
+  E --> F["git commit + tag"]
+```
+<!-- END:version-lifecycle -->
 
 ## Git
 
