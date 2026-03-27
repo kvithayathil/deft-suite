@@ -79,10 +79,7 @@ function countTsFiles(dir: string): number {
 function inject(content: string, key: string, block: string): string {
   const beginTag = `<!-- BEGIN:${key} -->`;
   const endTag = `<!-- END:${key} -->`;
-  const re = new RegExp(
-    `${beginTag}[\\s\\S]*?${endTag}`,
-    'g',
-  );
+  const re = new RegExp(`${beginTag}[\\s\\S]*?${endTag}`, 'g');
   const replacement = `${beginTag}\n${block.trimEnd()}\n${endTag}`;
   return content.replace(re, replacement);
 }
@@ -111,7 +108,9 @@ function parseMiseToml(text: string): {
   }
 
   // Parse [tasks.*]
-  const taskMatches = text.matchAll(/\[tasks\.(\w+)\]\ndescription\s*=\s*"(.+)"\nrun\s*=\s*(?:"(.+)"|"""([\s\S]*?)""")/g);
+  const taskMatches = text.matchAll(
+    /\[tasks\.(\w+)\]\ndescription\s*=\s*"(.+)"\nrun\s*=\s*(?:"(.+)"|"""([\s\S]*?)""")/g,
+  );
   for (const m of taskMatches) {
     tasks.push({
       name: m[1],
@@ -127,8 +126,16 @@ function parseMiseToml(text: string): {
 
 /** Visible npm scripts (exclude lifecycle hooks) */
 const LIFECYCLE_SCRIPTS = new Set([
-  'prepare', 'prepublishOnly', 'preversion', 'version', 'postversion',
-  'postinstall', 'preinstall', 'install', 'preuninstall', 'uninstall',
+  'prepare',
+  'prepublishOnly',
+  'preversion',
+  'version',
+  'postversion',
+  'postinstall',
+  'preinstall',
+  'install',
+  'preuninstall',
+  'uninstall',
 ]);
 
 function genCommandsTable(scripts: Record<string, string>): string {
@@ -141,16 +148,12 @@ function genCommandsTable(scripts: Record<string, string>): string {
 }
 
 function genMiseVersions(tools: Record<string, string>): string {
-  const rows = Object.entries(tools).map(
-    ([name, ver]) => `| ${name} | ${ver} |`,
-  );
+  const rows = Object.entries(tools).map(([name, ver]) => `| ${name} | ${ver} |`);
   return `| Tool | Version |\n|------|---------|\n${rows.join('\n')}`;
 }
 
 function genMiseTasks(tasks: Array<{ name: string; description: string }>): string {
-  const rows = tasks.map(
-    (t) => `| \`mise run ${t.name}\` | ${t.description} |`,
-  );
+  const rows = tasks.map((t) => `| \`mise run ${t.name}\` | ${t.description} |`);
   return `| Command | Description |\n|---------|-------------|\n${rows.join('\n')}`;
 }
 
@@ -202,10 +205,18 @@ function genSrcTree(): string {
   function walk(dir: string, prefix: string, isLast: boolean): void {
     const entries = listDir(dir);
     const dirs = entries.filter((e) => {
-      try { return statSync(join(ROOT, dir, e)).isDirectory(); } catch { return false; }
+      try {
+        return statSync(join(ROOT, dir, e)).isDirectory();
+      } catch {
+        return false;
+      }
     });
     const files = entries.filter((e) => {
-      try { return statSync(join(ROOT, dir, e)).isFile(); } catch { return false; }
+      try {
+        return statSync(join(ROOT, dir, e)).isFile();
+      } catch {
+        return false;
+      }
     });
 
     // Show files
@@ -228,10 +239,18 @@ function genSrcTree(): string {
   // Top-level src/ directories and files
   const topEntries = listDir('src');
   const topDirs = topEntries.filter((e) => {
-    try { return statSync(join(ROOT, 'src', e)).isDirectory(); } catch { return false; }
+    try {
+      return statSync(join(ROOT, 'src', e)).isDirectory();
+    } catch {
+      return false;
+    }
   });
   const topFiles = topEntries.filter((e) => {
-    try { return statSync(join(ROOT, 'src', e)).isFile(); } catch { return false; }
+    try {
+      return statSync(join(ROOT, 'src', e)).isFile();
+    } catch {
+      return false;
+    }
   });
 
   const all = [...topDirs, ...topFiles];
@@ -293,11 +312,7 @@ function genPortAdapterDiagram(): string {
     }
   }
 
-  const lines: string[] = [
-    '```mermaid',
-    'graph LR',
-    '  subgraph Ports["Port Interfaces"]',
-  ];
+  const lines: string[] = ['```mermaid', 'graph LR', '  subgraph Ports["Port Interfaces"]'];
 
   const ifaces = [...new Set(links.map((l) => l.iface))].sort();
   for (const iface of ifaces) {
@@ -334,11 +349,7 @@ function genPortAdapterDiagram(): string {
 
 /** Generate a Mermaid flowchart for the npm version lifecycle */
 function genVersionLifecycle(scripts: Record<string, string>): string {
-  const lines: string[] = [
-    '```mermaid',
-    'flowchart TD',
-    '  A["npm version"] --> B["preversion"]',
-  ];
+  const lines: string[] = ['```mermaid', 'flowchart TD', '  A["npm version"] --> B["preversion"]'];
 
   // Parse preversion
   const preversion = scripts.preversion;
