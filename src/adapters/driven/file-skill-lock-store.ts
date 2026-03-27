@@ -7,8 +7,11 @@ export class FileSkillLockStore implements SkillLockStore {
   constructor(private readonly filePath: string) {}
 
   async load(): Promise<SkillLock | null> {
-    try { return JSON.parse(await readFile(this.filePath, 'utf-8')); }
-    catch { return null; }
+    try {
+      return JSON.parse(await readFile(this.filePath, 'utf-8'));
+    } catch {
+      return null;
+    }
   }
 
   async save(lock: SkillLock): Promise<void> {
@@ -17,8 +20,15 @@ export class FileSkillLockStore implements SkillLockStore {
   }
 
   async exists(): Promise<boolean> {
-    try { await access(this.filePath); return true; } catch { return false; }
+    try {
+      await access(this.filePath);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
-  getPath(): string { return this.filePath; }
+  getPath(): string {
+    return this.filePath;
+  }
 }

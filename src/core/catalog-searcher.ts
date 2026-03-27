@@ -19,7 +19,7 @@ export function searchCatalog(
       let score = 0;
       const nameLower = skill.name.toLowerCase();
       const descriptionLower = skill.description.toLowerCase();
-      const tagsLower = (skill.tags ?? []).map(tag => tag.toLowerCase());
+      const tagsLower = (skill.tags ?? []).map((tag) => tag.toLowerCase());
 
       for (const term of terms) {
         if (nameLower.includes(term)) {
@@ -28,7 +28,7 @@ export function searchCatalog(
         if (descriptionLower.includes(term)) {
           score += DESCRIPTION_WEIGHT;
         }
-        if (tagsLower.some(tag => tag.includes(term))) {
+        if (tagsLower.some((tag) => tag.includes(term))) {
           score += TAG_WEIGHT;
         }
       }
@@ -41,7 +41,7 @@ export function searchCatalog(
         score,
       } satisfies CatalogSearchResult;
     })
-    .filter(result => result.score > 0)
+    .filter((result) => result.score > 0)
     .sort((a, b) => {
       if (b.score !== a.score) {
         return b.score - a.score;

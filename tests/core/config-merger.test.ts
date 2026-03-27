@@ -47,10 +47,18 @@ describe('mergeConfigs', () => {
 
   it('concatenates sources.remote arrays by default', () => {
     const global: Partial<Config> = {
-      sources: { local: [], remote: [{ url: 'https://github.com/org/a.git', type: 'git' }], catalogs: [] },
+      sources: {
+        local: [],
+        remote: [{ url: 'https://github.com/org/a.git', type: 'git' }],
+        catalogs: [],
+      },
     };
     const project: Partial<Config> = {
-      sources: { local: [], remote: [{ url: 'https://github.com/org/b.git', type: 'git' }], catalogs: [] },
+      sources: {
+        local: [],
+        remote: [{ url: 'https://github.com/org/b.git', type: 'git' }],
+        catalogs: [],
+      },
     };
     const result = mergeConfigs(global, project);
     expect(result.sources.remote).toHaveLength(2);
@@ -60,13 +68,23 @@ describe('mergeConfigs', () => {
 
   it('replaces sources.catalogs instead of concatenating', () => {
     const global: Partial<Config> = {
-      sources: { local: [], remote: [], catalogs: [{ url: 'https://github.com/org/one.git', type: 'git' }] },
+      sources: {
+        local: [],
+        remote: [],
+        catalogs: [{ url: 'https://github.com/org/one.git', type: 'git' }],
+      },
     };
     const project: Partial<Config> = {
-      sources: { local: [], remote: [], catalogs: [{ url: 'https://example.com/catalog.json', type: 'static' }] },
+      sources: {
+        local: [],
+        remote: [],
+        catalogs: [{ url: 'https://example.com/catalog.json', type: 'static' }],
+      },
     };
     const result = mergeConfigs(global, project);
-    expect(result.sources.catalogs).toEqual([{ url: 'https://example.com/catalog.json', type: 'static' }]);
+    expect(result.sources.catalogs).toEqual([
+      { url: 'https://example.com/catalog.json', type: 'static' },
+    ]);
   });
 
   it('deep merges nested objects', () => {
@@ -85,7 +103,12 @@ describe('mergeConfigs', () => {
     const result = mergeConfigs();
     expect(result.sources).toEqual({ local: [], remote: [], catalogs: [] });
     expect(result.github).toEqual({ search: false, topics: ['mcp-skill', 'agent-skill'] });
-    expect(result.usage).toEqual({ pruneThreshold: 10000, sessionCap: 3, ceilingPercent: 20, dbPath: '' });
+    expect(result.usage).toEqual({
+      pruneThreshold: 10000,
+      sessionCap: 3,
+      ceilingPercent: 20,
+      dbPath: '',
+    });
   });
 
   it('deep merges github partial overrides', () => {
@@ -101,22 +124,20 @@ describe('mergeConfigs', () => {
       sources: {
         local: [],
         remote: [],
-        catalogs: [
-          { type: 'git', url: 'https://github.com/org/one.git' },
-        ],
+        catalogs: [{ type: 'git', url: 'https://github.com/org/one.git' }],
       },
     };
     const project: Partial<Config> = {
       sources: {
         local: [],
         remote: [],
-        catalogs: [
-          { type: 'static', url: 'https://example.com/catalog.json' },
-        ],
+        catalogs: [{ type: 'static', url: 'https://example.com/catalog.json' }],
       },
     };
     const result = mergeConfigs(global, project);
-    expect(result.sources.catalogs).toEqual([{ type: 'static', url: 'https://example.com/catalog.json' }]);
+    expect(result.sources.catalogs).toEqual([
+      { type: 'static', url: 'https://example.com/catalog.json' },
+    ]);
   });
 });
 
@@ -159,10 +180,7 @@ describe('migrateConfig', () => {
     const migrated = migrateConfig({ ...legacy });
 
     expect(migrated.sources).toEqual({
-      local: [
-        { path: '/home/user/skills', trust: 'verified' },
-        { path: '/opt/bundled' },
-      ],
+      local: [{ path: '/home/user/skills', trust: 'verified' }, { path: '/opt/bundled' }],
       remote: [
         { type: 'git', url: 'https://github.com/org/skills.git', branch: 'main' },
         { type: 'hosted', url: 'https://api.example.com/skills' },
@@ -197,14 +215,10 @@ describe('migrateConfig', () => {
 
   it('handles both flat sources and registries together', () => {
     const legacy = {
-      sources: [
-        { type: 'local', path: './skills' },
-      ],
+      sources: [{ type: 'local', path: './skills' }],
       registries: {
         cacheMinutes: 60,
-        sources: [
-          { url: 'https://catalog.test/index.json', type: 'static' },
-        ],
+        sources: [{ url: 'https://catalog.test/index.json', type: 'static' }],
       },
     };
 
@@ -214,9 +228,7 @@ describe('migrateConfig', () => {
     expect(migrated.sources).toEqual({
       local: [{ path: './skills' }],
       remote: [],
-      catalogs: [
-        { url: 'https://catalog.test/index.json', type: 'static', cacheMinutes: 60 },
-      ],
+      catalogs: [{ url: 'https://catalog.test/index.json', type: 'static', cacheMinutes: 60 }],
     });
   });
 
@@ -237,14 +249,15 @@ describe('migrateConfig', () => {
     const legacy = {
       registries: {
         cacheMinutes: 60,
-        sources: [
-          { url: 'https://catalog.test', type: 'static', cacheMinutes: 15 },
-        ],
+        sources: [{ url: 'https://catalog.test', type: 'static', cacheMinutes: 15 }],
       },
     };
 
     const migrated = migrateConfig({ ...legacy });
-    const catalogs = (migrated.sources as Record<string, unknown>).catalogs as Record<string, unknown>[];
+    const catalogs = (migrated.sources as Record<string, unknown>).catalogs as Record<
+      string,
+      unknown
+    >[];
     expect(catalogs[0].cacheMinutes).toBe(15);
   });
 });
@@ -276,9 +289,7 @@ describe('mergeConfigs with legacy input', () => {
       sources: { local: [{ path: '/global' }], remote: [], catalogs: [] },
     };
     const legacyProject = {
-      sources: [
-        { type: 'local', path: './project' },
-      ],
+      sources: [{ type: 'local', path: './project' }],
     } as unknown as Partial<Config>;
 
     const result = mergeConfigs(newGlobal, legacyProject);

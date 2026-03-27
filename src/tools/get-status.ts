@@ -40,18 +40,24 @@ export const handleGetStatus: ToolHandler<Record<string, unknown>> = async (_par
   const network = ctx.isOffline?.() ? 'unavailable' : 'available';
 
   return {
-    content: [{
-      type: 'text',
-      text: JSON.stringify({
-        summary,
-        skills: states,
-        lock: {
-          lockedSkills,
-        },
-        circuitBreakers,
-        accessControl,
-        network,
-      }, null, 2),
-    }],
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify(
+          {
+            summary,
+            skills: states,
+            lock: {
+              lockedSkills,
+            },
+            circuitBreakers,
+            accessControl,
+            network,
+          },
+          null,
+          2,
+        ),
+      },
+    ],
   };
 };

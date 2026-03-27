@@ -12,7 +12,11 @@ export interface OptionalAdapterFactories {
   createUsageStore?: (dbPath: string) => Promise<UsageStore>;
   createGitCatalogStore?: (baseDir: string) => CatalogStore;
   createStaticCatalogStore?: () => CatalogStore;
-  createGitHubSearch?: (options: { enabled: boolean; logger: Logger; tokenBucket?: TokenBucket }) => GitHubSearch;
+  createGitHubSearch?: (options: {
+    enabled: boolean;
+    logger: Logger;
+    tokenBucket?: TokenBucket;
+  }) => GitHubSearch;
 }
 
 export interface WireOptionalAdaptersOptions {
@@ -36,11 +40,17 @@ export async function wireOptionalAdapters(
 ): Promise<void> {
   const factories = options.factories ?? {};
 
-  ctx.catalogStores = createCatalogStores(ctx.config.sources.catalogs ?? [], options.configDir, factories);
+  ctx.catalogStores = createCatalogStores(
+    ctx.config.sources.catalogs ?? [],
+    options.configDir,
+    factories,
+  );
 
   if (ctx.config.github?.search === true) {
-    const createGitHubSearch = factories.createGitHubSearch
-      ?? ((adapterOptions: { enabled: boolean; logger: Logger; tokenBucket?: TokenBucket }) => new GitHubSearchAdapter(adapterOptions));
+    const createGitHubSearch =
+      factories.createGitHubSearch ??
+      ((adapterOptions: { enabled: boolean; logger: Logger; tokenBucket?: TokenBucket }) =>
+        new GitHubSearchAdapter(adapterOptions));
 
     ctx.githubSearch = createGitHubSearch({
       enabled: true,
@@ -71,9 +81,7 @@ function resolveUsageDbPath(configDir: string, configuredPath: string): string {
     return join(configDir, DEFAULT_USAGE_DB_NAME);
   }
 
-  return isAbsolute(trimmed)
-    ? trimmed
-    : join(configDir, trimmed);
+  return isAbsolute(trimmed) ? trimmed : join(configDir, trimmed);
 }
 
 function createCatalogStores(
@@ -86,10 +94,10 @@ function createCatalogStores(
   }
 
   const stores = new Map<string, CatalogStore>();
-  const createGitCatalogStore = factories.createGitCatalogStore
-    ?? ((baseDir: string) => new GitCatalogStore(baseDir));
-  const createStaticCatalogStore = factories.createStaticCatalogStore
-    ?? (() => new StaticCatalogStore());
+  const createGitCatalogStore =
+    factories.createGitCatalogStore ?? ((baseDir: string) => new GitCatalogStore(baseDir));
+  const createStaticCatalogStore =
+    factories.createStaticCatalogStore ?? (() => new StaticCatalogStore());
 
   for (const source of sources) {
     if (source.type === 'git') {

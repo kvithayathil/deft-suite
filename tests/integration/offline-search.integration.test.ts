@@ -16,7 +16,10 @@ import { ManifestBuilder } from '../../src/core/manifest-builder.js';
 import { DEFAULT_CONFIG } from '../../src/core/config-merger.js';
 import { handleSearchSkills } from '../../src/tools/search-skills.js';
 
-const CATALOG_SOURCE: CatalogSourceConfig = { url: 'https://catalog.test/skills.json', type: 'static' };
+const CATALOG_SOURCE: CatalogSourceConfig = {
+  url: 'https://catalog.test/skills.json',
+  type: 'static',
+};
 
 class FlakyCatalogStore {
   private readonly entry: CatalogEntry;

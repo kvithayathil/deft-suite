@@ -26,9 +26,20 @@ describe('FsSkillStore', () => {
   it('reads skill from SKILL.md with frontmatter', async () => {
     const skillDir = join(testDir, 'tdd-python');
     await mkdir(skillDir, { recursive: true });
-    await writeFile(join(skillDir, 'SKILL.md'), [
-      '---', 'name: tdd-python', 'description: Python TDD patterns', 'version: 1.0.0', '---', '', '# TDD Python', '', 'Write tests first.',
-    ].join('\n'));
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      [
+        '---',
+        'name: tdd-python',
+        'description: Python TDD patterns',
+        'version: 1.0.0',
+        '---',
+        '',
+        '# TDD Python',
+        '',
+        'Write tests first.',
+      ].join('\n'),
+    );
 
     const skill = await store.get('tdd-python');
     expect(skill).not.toBeNull();
@@ -40,7 +51,10 @@ describe('FsSkillStore', () => {
   it('lists resource files', async () => {
     const skillDir = join(testDir, 'my-skill');
     await mkdir(join(skillDir, 'scripts'), { recursive: true });
-    await writeFile(join(skillDir, 'SKILL.md'), '---\nname: my-skill\ndescription: test\n---\nContent');
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      '---\nname: my-skill\ndescription: test\n---\nContent',
+    );
     await writeFile(join(skillDir, 'scripts', 'setup.sh'), '#!/bin/bash');
 
     const skill = await store.get('my-skill');
@@ -51,7 +65,9 @@ describe('FsSkillStore', () => {
     await store.write('new-skill', {
       metadata: { name: 'new-skill', description: 'A new skill' },
       content: '# New Skill\n\nDo things.',
-      resources: [], trustLevel: TrustLevel.SelfApproved, state: SkillState.Active,
+      resources: [],
+      trustLevel: TrustLevel.SelfApproved,
+      state: SkillState.Active,
       sourcePath: join(testDir, 'new-skill'),
     });
     const loaded = await store.get('new-skill');
@@ -60,14 +76,20 @@ describe('FsSkillStore', () => {
 
   it('deletes a skill directory', async () => {
     await mkdir(join(testDir, 'to-delete'));
-    await writeFile(join(testDir, 'to-delete', 'SKILL.md'), '---\nname: to-delete\ndescription: bye\n---\n');
+    await writeFile(
+      join(testDir, 'to-delete', 'SKILL.md'),
+      '---\nname: to-delete\ndescription: bye\n---\n',
+    );
     await store.delete('to-delete');
     expect(await store.exists('to-delete')).toBe(false);
   });
 
   it('computes content hash', async () => {
     await mkdir(join(testDir, 'hashme'));
-    await writeFile(join(testDir, 'hashme', 'SKILL.md'), '---\nname: hashme\ndescription: test\n---\ncontent');
+    await writeFile(
+      join(testDir, 'hashme', 'SKILL.md'),
+      '---\nname: hashme\ndescription: test\n---\ncontent',
+    );
     const hash = await store.computeHash('hashme');
     expect(hash).toMatch(/^sha256:[a-f0-9]{64}$/);
   });
@@ -75,7 +97,10 @@ describe('FsSkillStore', () => {
   it('listNames returns all skill directories', async () => {
     for (const name of ['skill-a', 'skill-b']) {
       await mkdir(join(testDir, name));
-      await writeFile(join(testDir, name, 'SKILL.md'), `---\nname: ${name}\ndescription: ${name}\n---\n`);
+      await writeFile(
+        join(testDir, name, 'SKILL.md'),
+        `---\nname: ${name}\ndescription: ${name}\n---\n`,
+      );
     }
     const names = await store.listNames();
     expect(names).toContain('skill-a');
@@ -86,7 +111,10 @@ describe('FsSkillStore', () => {
     const localDir = await mkdtemp(join(tmpdir(), 'deft-local-'));
     const skillDir = join(localDir, 'my-local-skill');
     await mkdir(skillDir, { recursive: true });
-    await writeFile(join(skillDir, 'SKILL.md'), '---\nname: my-local-skill\ndescription: local\n---\nLocal content');
+    await writeFile(
+      join(skillDir, 'SKILL.md'),
+      '---\nname: my-local-skill\ndescription: local\n---\nLocal content',
+    );
 
     const source: Source = { type: 'local', path: localDir };
     const skill = await store.fetch('my-local-skill', source);
@@ -130,17 +158,21 @@ describe('FsSkillStore', () => {
   });
 
   it('writes resources alongside SKILL.md', async () => {
-    await store.write('res-skill', {
-      metadata: { name: 'res-skill', description: 'with resources' },
-      content: '# Skill',
-      resources: [],
-      trustLevel: TrustLevel.SelfApproved,
-      state: SkillState.Active,
-      sourcePath: join(testDir, 'res-skill'),
-    }, {
-      'scripts/setup.sh': '#!/bin/bash\necho hello',
-      'README.md': '# README',
-    });
+    await store.write(
+      'res-skill',
+      {
+        metadata: { name: 'res-skill', description: 'with resources' },
+        content: '# Skill',
+        resources: [],
+        trustLevel: TrustLevel.SelfApproved,
+        state: SkillState.Active,
+        sourcePath: join(testDir, 'res-skill'),
+      },
+      {
+        'scripts/setup.sh': '#!/bin/bash\necho hello',
+        'README.md': '# README',
+      },
+    );
 
     const setupContent = await readFile(join(testDir, 'res-skill', 'scripts', 'setup.sh'), 'utf-8');
     expect(setupContent).toContain('echo hello');
@@ -151,16 +183,20 @@ describe('FsSkillStore', () => {
 
   it('rejects path traversal in resource paths during write', async () => {
     await expect(
-      store.write('safe-skill', {
-        metadata: { name: 'safe-skill', description: 'test' },
-        content: '# Skill',
-        resources: [],
-        trustLevel: TrustLevel.SelfApproved,
-        state: SkillState.Active,
-        sourcePath: join(testDir, 'safe-skill'),
-      }, {
-        '../../../etc/evil': 'pwned',
-      }),
+      store.write(
+        'safe-skill',
+        {
+          metadata: { name: 'safe-skill', description: 'test' },
+          content: '# Skill',
+          resources: [],
+          trustLevel: TrustLevel.SelfApproved,
+          state: SkillState.Active,
+          sourcePath: join(testDir, 'safe-skill'),
+        },
+        {
+          '../../../etc/evil': 'pwned',
+        },
+      ),
     ).rejects.toThrow(/path traversal/i);
   });
 });

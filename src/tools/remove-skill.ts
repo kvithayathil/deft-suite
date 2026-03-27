@@ -2,7 +2,9 @@ import type { ToolHandler } from './types.js';
 import { skillNotFound, validationFailed } from '../core/errors.js';
 import { rebuildSearchIndex } from './rebuild-search-index.js';
 
-interface RemoveSkillParams { name: string; }
+interface RemoveSkillParams {
+  name: string;
+}
 
 export const handleRemoveSkill: ToolHandler<RemoveSkillParams> = async (params, ctx) => {
   if (!params.name) {
@@ -26,12 +28,18 @@ export const handleRemoveSkill: ToolHandler<RemoveSkillParams> = async (params, 
   await rebuildSearchIndex(ctx);
 
   return {
-    content: [{
-      type: 'text',
-      text: JSON.stringify({
-        removed: params.name,
-        message: `Skill '${params.name}' has been removed successfully.`,
-      }, null, 2),
-    }],
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify(
+          {
+            removed: params.name,
+            message: `Skill '${params.name}' has been removed successfully.`,
+          },
+          null,
+          2,
+        ),
+      },
+    ],
   };
 };

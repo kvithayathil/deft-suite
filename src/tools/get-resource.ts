@@ -1,7 +1,10 @@
 import type { ToolHandler } from './types.js';
 import { resourceNotFound, skillNotFound, validationFailed } from '../core/errors.js';
 
-interface GetResourceParams { skill: string; path: string; }
+interface GetResourceParams {
+  skill: string;
+  path: string;
+}
 
 export const handleGetResource: ToolHandler<GetResourceParams> = async (params, ctx) => {
   if (!params.skill) {
@@ -22,13 +25,19 @@ export const handleGetResource: ToolHandler<GetResourceParams> = async (params, 
   }
 
   return {
-    content: [{
-      type: 'text',
-      text: JSON.stringify({
-        skill: params.skill,
-        path: params.path,
-        content,
-      }, null, 2),
-    }],
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify(
+          {
+            skill: params.skill,
+            path: params.path,
+            content,
+          },
+          null,
+          2,
+        ),
+      },
+    ],
   };
 };

@@ -1,6 +1,10 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { CallToolRequestSchema, ListToolsRequestSchema, InitializeRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+  InitializeRequestSchema,
+} from '@modelcontextprotocol/sdk/types.js';
 import type { ToolContext } from '../../tools/context.js';
 import type { ToolHandler } from '../../tools/types.js';
 import { SkillMcpError } from '../../core/errors.js';
@@ -160,7 +164,9 @@ export async function createMcpServer(
         content: [
           {
             type: 'text' as const,
-            text: JSON.stringify({ error: { code: 'TOOL_NOT_FOUND', message: `Unknown tool: ${name}` } }),
+            text: JSON.stringify({
+              error: { code: 'TOOL_NOT_FOUND', message: `Unknown tool: ${name}` },
+            }),
           },
         ],
         isError: true,
@@ -180,7 +186,9 @@ export async function createMcpServer(
         content: [
           {
             type: 'text' as const,
-            text: JSON.stringify({ error: { code: 'INTERNAL_ERROR', message: 'An internal error occurred.' } }),
+            text: JSON.stringify({
+              error: { code: 'INTERNAL_ERROR', message: 'An internal error occurred.' },
+            }),
           },
         ],
         isError: true,

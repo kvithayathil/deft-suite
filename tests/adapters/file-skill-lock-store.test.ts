@@ -6,8 +6,12 @@ import { FileSkillLockStore } from '../../src/adapters/driven/file-skill-lock-st
 
 describe('FileSkillLockStore', () => {
   let testDir: string;
-  beforeEach(async () => { testDir = await mkdtemp(join(tmpdir(), 'deft-lock-')); });
-  afterEach(async () => { await rm(testDir, { recursive: true, force: true }); });
+  beforeEach(async () => {
+    testDir = await mkdtemp(join(tmpdir(), 'deft-lock-'));
+  });
+  afterEach(async () => {
+    await rm(testDir, { recursive: true, force: true });
+  });
 
   it('returns null when no lock file exists', async () => {
     const store = new FileSkillLockStore(join(testDir, 'skill-lock.json'));
@@ -16,7 +20,10 @@ describe('FileSkillLockStore', () => {
 
   it('loads existing lock file', async () => {
     const p = join(testDir, 'skill-lock.json');
-    await writeFile(p, JSON.stringify({ lockVersion: 1, generatedAt: '', generatedBy: '', skills: {} }));
+    await writeFile(
+      p,
+      JSON.stringify({ lockVersion: 1, generatedAt: '', generatedBy: '', skills: {} }),
+    );
     const store = new FileSkillLockStore(p);
     const lock = await store.load();
     expect(lock?.lockVersion).toBe(1);
@@ -25,7 +32,12 @@ describe('FileSkillLockStore', () => {
   it('saves and reads back', async () => {
     const p = join(testDir, 'skill-lock.json');
     const store = new FileSkillLockStore(p);
-    await store.save({ lockVersion: 1, generatedAt: '2026-03-13', generatedBy: 'test', skills: {} });
+    await store.save({
+      lockVersion: 1,
+      generatedAt: '2026-03-13',
+      generatedBy: 'test',
+      skills: {},
+    });
     const lock = await store.load();
     expect(lock?.generatedBy).toBe('test');
   });

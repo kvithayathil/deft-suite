@@ -38,7 +38,7 @@ describe('MemorySearchIndex', () => {
     ]);
     const results = await idx.search('react');
     expect(results.length).toBe(2);
-    expect(results.every(r => r.score > 0)).toBe(true);
+    expect(results.every((r) => r.score > 0)).toBe(true);
   });
 
   it('handles case-insensitive search', async () => {

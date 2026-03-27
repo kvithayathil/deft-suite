@@ -28,7 +28,11 @@ export function validateSkillMetadata(meta: Partial<SkillMetadata>): ValidationR
       errors.push({ field: 'name', message: 'Name must be 64 characters or fewer' });
     }
     if (!SKILL_NAME_PATTERN.test(meta.name)) {
-      errors.push({ field: 'name', message: 'Name must be lowercase letters, numbers, and hyphens only, starting with a letter' });
+      errors.push({
+        field: 'name',
+        message:
+          'Name must be lowercase letters, numbers, and hyphens only, starting with a letter',
+      });
     }
   }
 
@@ -46,7 +50,10 @@ export function validateSkillMetadata(meta: Partial<SkillMetadata>): ValidationR
 
   // compatibility: optional, max 500 chars
   if (meta.compatibility !== undefined && meta.compatibility.length > 500) {
-    errors.push({ field: 'compatibility', message: 'Compatibility must be 500 characters or fewer' });
+    errors.push({
+      field: 'compatibility',
+      message: 'Compatibility must be 500 characters or fewer',
+    });
   }
 
   return { valid: errors.length === 0, errors, warnings };
@@ -58,10 +65,17 @@ export function validateConfig(config: Record<string, unknown>): ValidationResul
 
   // schemaVersion
   if (config.schemaVersion !== undefined) {
-    if (typeof config.schemaVersion !== 'number' || !Number.isInteger(config.schemaVersion) || config.schemaVersion < 1) {
+    if (
+      typeof config.schemaVersion !== 'number' ||
+      !Number.isInteger(config.schemaVersion) ||
+      config.schemaVersion < 1
+    ) {
       errors.push({ field: 'schemaVersion', message: 'schemaVersion must be a positive integer' });
     } else if (config.schemaVersion > CURRENT_SCHEMA_VERSION) {
-      warnings.push({ field: 'schemaVersion', message: `Config schemaVersion ${config.schemaVersion} is newer than supported (${CURRENT_SCHEMA_VERSION}). Consider upgrading deft-mcp.` });
+      warnings.push({
+        field: 'schemaVersion',
+        message: `Config schemaVersion ${config.schemaVersion} is newer than supported (${CURRENT_SCHEMA_VERSION}). Consider upgrading deft-mcp.`,
+      });
     }
   }
 
@@ -69,15 +83,24 @@ export function validateConfig(config: Record<string, unknown>): ValidationResul
   const manifest = config.manifest as Record<string, unknown> | undefined;
   if (manifest?.maxManifestSize !== undefined) {
     if (typeof manifest.maxManifestSize !== 'number' || manifest.maxManifestSize < 0) {
-      errors.push({ field: 'manifest.maxManifestSize', message: 'maxManifestSize must be a non-negative number' });
+      errors.push({
+        field: 'manifest.maxManifestSize',
+        message: 'maxManifestSize must be a non-negative number',
+      });
     }
   }
 
   // security.minTrustLevel
   const security = config.security as Record<string, unknown> | undefined;
   if (security?.minTrustLevel !== undefined) {
-    if (typeof security.minTrustLevel !== 'string' || !VALID_TRUST_LEVELS.has(security.minTrustLevel as TrustLevel)) {
-      errors.push({ field: 'security.minTrustLevel', message: `Invalid trust level. Must be one of: ${Array.from(VALID_TRUST_LEVELS).join(', ')}` });
+    if (
+      typeof security.minTrustLevel !== 'string' ||
+      !VALID_TRUST_LEVELS.has(security.minTrustLevel as TrustLevel)
+    ) {
+      errors.push({
+        field: 'security.minTrustLevel',
+        message: `Invalid trust level. Must be one of: ${Array.from(VALID_TRUST_LEVELS).join(', ')}`,
+      });
     }
   }
 

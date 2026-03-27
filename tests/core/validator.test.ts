@@ -22,9 +22,7 @@ describe('validateSkillMetadata', () => {
       description: 'A skill',
     });
     expect(result.valid).toBe(false);
-    expect(result.errors).toContainEqual(
-      expect.objectContaining({ field: 'name' }),
-    );
+    expect(result.errors).toContainEqual(expect.objectContaining({ field: 'name' }));
   });
 
   it('rejects name > 64 chars', () => {
@@ -113,9 +111,7 @@ describe('validateConfig', () => {
   it('warns on unknown schemaVersion', () => {
     const result = validateConfig({ schemaVersion: 99 });
     expect(result.valid).toBe(true); // Still valid, but with warnings
-    expect(result.warnings).toContainEqual(
-      expect.objectContaining({ field: 'schemaVersion' }),
-    );
+    expect(result.warnings).toContainEqual(expect.objectContaining({ field: 'schemaVersion' }));
   });
 
   it('rejects invalid manifest maxManifestSize', () => {

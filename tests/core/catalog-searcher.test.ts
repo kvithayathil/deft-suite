@@ -54,7 +54,7 @@ describe('searchCatalog', () => {
     expect(results).toHaveLength(2);
     expect(results[0].score).toBe(2);
     expect(results[1].score).toBe(2);
-    expect(results.map(r => r.name)).toEqual(['delta', 'zeta']);
+    expect(results.map((r) => r.name)).toEqual(['delta', 'zeta']);
   });
 
   it('returns empty for empty query', () => {

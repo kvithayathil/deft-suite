@@ -27,9 +27,10 @@ export class InMemoryGitHubSearch implements GitHubSearch {
 
     return this.fixtures
       .filter((entry) => {
-        const queryMatch = normalizedQuery.length === 0
-          || entry.name.toLowerCase().includes(normalizedQuery)
-          || entry.description.toLowerCase().includes(normalizedQuery);
+        const queryMatch =
+          normalizedQuery.length === 0 ||
+          entry.name.toLowerCase().includes(normalizedQuery) ||
+          entry.description.toLowerCase().includes(normalizedQuery);
 
         const tagsLower = entry.tags.map((tag) => tag.toLowerCase());
         const topicsMatch = normalizedTopics.every((topic) => tagsLower.includes(topic));

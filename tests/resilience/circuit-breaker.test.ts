@@ -2,8 +2,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { CircuitBreaker, CircuitState } from '../../src/resilience/circuit-breaker.js';
 
 describe('CircuitBreaker', () => {
-  beforeEach(() => { vi.useFakeTimers(); });
-  afterEach(() => { vi.useRealTimers(); });
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
 
   it('starts in closed state', () => {
     const cb = new CircuitBreaker();

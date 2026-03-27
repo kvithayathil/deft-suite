@@ -28,7 +28,8 @@ function makeContext(): ToolContext {
   const bundledStore = new InMemorySkillStore();
   const logger = new NoopLogger();
   return {
-    skillStore, bundledStore,
+    skillStore,
+    bundledStore,
     configStore: new InMemoryConfigStore(),
     scanner: new StubScanner(),
     searchIndex: new InMemorySearchIndex(),
@@ -49,7 +50,11 @@ describe('handleGetResource', () => {
   it('returns resource content for existing skill and path', async () => {
     const ctx = makeContext();
     ctx.skillStore.seed('tdd-python', FIXTURE_SKILLS.tddPython);
-    (ctx.skillStore as InMemorySkillStore).seedResource('tdd-python', 'examples/basic.md', '# Basic example');
+    (ctx.skillStore as InMemorySkillStore).seedResource(
+      'tdd-python',
+      'examples/basic.md',
+      '# Basic example',
+    );
 
     const result = await handleGetResource({ skill: 'tdd-python', path: 'examples/basic.md' }, ctx);
     const parsed = JSON.parse(result.content[0].text);
@@ -62,22 +67,25 @@ describe('handleGetResource', () => {
     const ctx = makeContext();
     ctx.skillStore.seed('tdd-python', FIXTURE_SKILLS.tddPython);
 
-    await expect(handleGetResource({ skill: 'tdd-python', path: 'missing.md' }, ctx))
-      .rejects.toMatchObject({ code: ErrorCode.ResourceNotFound });
+    await expect(
+      handleGetResource({ skill: 'tdd-python', path: 'missing.md' }, ctx),
+    ).rejects.toMatchObject({ code: ErrorCode.ResourceNotFound });
   });
 
   it('throws SKILL_NOT_FOUND when skill does not exist', async () => {
     const ctx = makeContext();
 
-    await expect(handleGetResource({ skill: 'no-skill', path: 'anything.md' }, ctx))
-      .rejects.toMatchObject({ code: ErrorCode.SkillNotFound });
+    await expect(
+      handleGetResource({ skill: 'no-skill', path: 'anything.md' }, ctx),
+    ).rejects.toMatchObject({ code: ErrorCode.SkillNotFound });
   });
 
   it('throws VALIDATION_FAILED when skill param is missing', async () => {
     const ctx = makeContext();
 
-    await expect(handleGetResource({ skill: '', path: 'anything.md' }, ctx))
-      .rejects.toMatchObject({ code: ErrorCode.ValidationFailed });
+    await expect(handleGetResource({ skill: '', path: 'anything.md' }, ctx)).rejects.toMatchObject({
+      code: ErrorCode.ValidationFailed,
+    });
   });
 });
 
@@ -129,15 +137,17 @@ describe('handleRemoveSkill', () => {
   it('throws SKILL_NOT_FOUND when skill does not exist', async () => {
     const ctx = makeContext();
 
-    await expect(handleRemoveSkill({ name: 'no-such-skill' }, ctx))
-      .rejects.toMatchObject({ code: ErrorCode.SkillNotFound });
+    await expect(handleRemoveSkill({ name: 'no-such-skill' }, ctx)).rejects.toMatchObject({
+      code: ErrorCode.SkillNotFound,
+    });
   });
 
   it('throws VALIDATION_FAILED when name is missing', async () => {
     const ctx = makeContext();
 
-    await expect(handleRemoveSkill({ name: '' }, ctx))
-      .rejects.toMatchObject({ code: ErrorCode.ValidationFailed });
+    await expect(handleRemoveSkill({ name: '' }, ctx)).rejects.toMatchObject({
+      code: ErrorCode.ValidationFailed,
+    });
   });
 });
 
@@ -164,15 +174,17 @@ describe('handleSaveSkill', () => {
   it('throws VALIDATION_FAILED when name is missing', async () => {
     const ctx = makeContext();
 
-    await expect(handleSaveSkill({ name: '', content: '# content' }, ctx))
-      .rejects.toMatchObject({ code: ErrorCode.ValidationFailed });
+    await expect(handleSaveSkill({ name: '', content: '# content' }, ctx)).rejects.toMatchObject({
+      code: ErrorCode.ValidationFailed,
+    });
   });
 
   it('throws VALIDATION_FAILED when content is missing', async () => {
     const ctx = makeContext();
 
-    await expect(handleSaveSkill({ name: 'my-skill', content: '' }, ctx))
-      .rejects.toMatchObject({ code: ErrorCode.ValidationFailed });
+    await expect(handleSaveSkill({ name: 'my-skill', content: '' }, ctx)).rejects.toMatchObject({
+      code: ErrorCode.ValidationFailed,
+    });
   });
 });
 
@@ -183,16 +195,18 @@ describe('handlePushSkills', () => {
     const ctx = makeContext();
     ctx.isOffline = () => true;
 
-    await expect(handlePushSkills({}, ctx))
-      .rejects.toMatchObject({ code: ErrorCode.NetworkUnavailable });
+    await expect(handlePushSkills({}, ctx)).rejects.toMatchObject({
+      code: ErrorCode.NetworkUnavailable,
+    });
   });
 
   it('throws NETWORK_UNAVAILABLE as placeholder when online (not yet implemented)', async () => {
     const ctx = makeContext();
     ctx.isOffline = () => false;
 
-    await expect(handlePushSkills({}, ctx))
-      .rejects.toMatchObject({ code: ErrorCode.NetworkUnavailable });
+    await expect(handlePushSkills({}, ctx)).rejects.toMatchObject({
+      code: ErrorCode.NetworkUnavailable,
+    });
   });
 });
 
@@ -223,15 +237,17 @@ describe('handleUpdateConfig', () => {
   it('throws CONFIG_LOCKED for locked keys', async () => {
     const ctx = makeContext();
 
-    await expect(handleUpdateConfig({ key: 'schemaVersion', value: 99 }, ctx))
-      .rejects.toMatchObject({ code: ErrorCode.ConfigLocked });
+    await expect(
+      handleUpdateConfig({ key: 'schemaVersion', value: 99 }, ctx),
+    ).rejects.toMatchObject({ code: ErrorCode.ConfigLocked });
   });
 
   it('throws VALIDATION_FAILED when key is missing', async () => {
     const ctx = makeContext();
 
-    await expect(handleUpdateConfig({ key: '', value: 'x' }, ctx))
-      .rejects.toMatchObject({ code: ErrorCode.ValidationFailed });
+    await expect(handleUpdateConfig({ key: '', value: 'x' }, ctx)).rejects.toMatchObject({
+      code: ErrorCode.ValidationFailed,
+    });
   });
 });
 

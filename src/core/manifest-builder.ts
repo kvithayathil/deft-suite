@@ -16,7 +16,7 @@ export class ManifestBuilder {
   constructor(private readonly config: ManifestConfig) {}
 
   build(availableSkills: SkillMetadata[]): Manifest {
-    const skillMap = new Map(availableSkills.map(s => [s.name, s]));
+    const skillMap = new Map(availableSkills.map((s) => [s.name, s]));
     const skills: ManifestEntry[] = [];
     const missing: string[] = [];
 
@@ -30,9 +30,7 @@ export class ManifestBuilder {
     }
 
     const truncated = skills.length > this.config.maxManifestSize;
-    const finalSkills = truncated
-      ? skills.slice(0, this.config.maxManifestSize)
-      : skills;
+    const finalSkills = truncated ? skills.slice(0, this.config.maxManifestSize) : skills;
 
     let warning: string | undefined;
     if (finalSkills.length > this.config.warnThreshold) {
@@ -44,7 +42,7 @@ export class ManifestBuilder {
 
   toText(manifest: Manifest): string {
     const lines = [
-      `Available skills: ${manifest.skills.map(s => s.name).join(', ')}`,
+      `Available skills: ${manifest.skills.map((s) => s.name).join(', ')}`,
       'Use search_skills to find more. Use get_skill to load one.',
     ];
     if (manifest.warning) {

@@ -18,11 +18,7 @@ export class FsSkillStore implements SkillStore {
     const resolvedTarget = resolve(baseDir, targetPath);
     const relativePath = relative(resolvedBase, resolvedTarget);
 
-    if (
-      relativePath === '..'
-      || relativePath.startsWith(`..${sep}`)
-      || isAbsolute(relativePath)
-    ) {
+    if (relativePath === '..' || relativePath.startsWith(`..${sep}`) || isAbsolute(relativePath)) {
       throw new Error(`Invalid path traversal detected: ${targetPath}`);
     }
 
@@ -41,17 +37,20 @@ export class FsSkillStore implements SkillStore {
   async listMetadata(): Promise<SkillMetadata[]> {
     const names = await this.listNames();
     const results: SkillMetadata[] = [];
-    for (const n of names) { const s = await this.get(n); if (s) results.push(s.metadata); }
+    for (const n of names) {
+      const s = await this.get(n);
+      if (s) results.push(s.metadata);
+    }
     return results;
   }
 
   async exists(name: string): Promise<boolean> {
-    try { 
+    try {
       const safePath = this.resolveSafePath(this.basePath, name);
-      await access(join(safePath, 'SKILL.md')); 
-      return true; 
-    } catch { 
-      return false; 
+      await access(join(safePath, 'SKILL.md'));
+      return true;
+    } catch {
+      return false;
     }
   }
 
@@ -70,22 +69,22 @@ export class FsSkillStore implements SkillStore {
     }
   }
 
-  async delete(name: string): Promise<void> { 
+  async delete(name: string): Promise<void> {
     try {
       const safePath = this.resolveSafePath(this.basePath, name);
-      await rm(safePath, { recursive: true, force: true }); 
+      await rm(safePath, { recursive: true, force: true });
     } catch {
       // Ignore if path is invalid or already deleted
     }
   }
 
   async getResource(skillName: string, resourcePath: string): Promise<string | null> {
-    try { 
+    try {
       const safeSkillPath = this.resolveSafePath(this.basePath, skillName);
       const safeResourcePath = this.resolveSafePath(safeSkillPath, resourcePath);
-      return await readFile(safeResourcePath, 'utf-8'); 
-    } catch { 
-      return null; 
+      return await readFile(safeResourcePath, 'utf-8');
+    } catch {
+      return null;
     }
   }
 
@@ -106,9 +105,13 @@ export class FsSkillStore implements SkillStore {
     try {
       const entries = await readdir(this.basePath, { withFileTypes: true });
       const names: string[] = [];
-      for (const e of entries) { if (e.isDirectory() && await this.exists(e.name)) names.push(e.name); }
+      for (const e of entries) {
+        if (e.isDirectory() && (await this.exists(e.name))) names.push(e.name);
+      }
       return names;
-    } catch { return []; }
+    } catch {
+      return [];
+    }
   }
 
   async computeHash(name: string): Promise<string> {
@@ -141,7 +144,9 @@ export class FsSkillStore implements SkillStore {
     if (!m) return { metadata: { name: '', description: '' }, content: normalized };
     const metadata = parseYaml(m[1]) as SkillMetadata;
     if (!metadata.name || !metadata.description) {
-      throw new Error(`SKILL.md missing required fields: name=${metadata.name}, description=${metadata.description}`);
+      throw new Error(
+        `SKILL.md missing required fields: name=${metadata.name}, description=${metadata.description}`,
+      );
     }
     return { metadata, content: m[2].trim() };
   }

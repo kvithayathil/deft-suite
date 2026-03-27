@@ -67,11 +67,12 @@ describe('withToolResilience', () => {
       'test_tool',
       TimeoutTier.Local,
       resilience,
-      async (signal) => new Promise((_, reject) => {
-        signal?.addEventListener('abort', () => {
-          reject(signal.reason);
-        });
-      }),
+      async (signal) =>
+        new Promise((_, reject) => {
+          signal?.addEventListener('abort', () => {
+            reject(signal.reason);
+          });
+        }),
     ).catch((e: unknown) => e);
 
     expect(err).toBeInstanceOf(SkillMcpError);

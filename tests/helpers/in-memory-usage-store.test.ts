@@ -40,7 +40,7 @@ describe('InMemoryUsageStore', () => {
 
     store.prune(100);
 
-    const names = store.getRawData().map(entry => entry.name);
+    const names = store.getRawData().map((entry) => entry.name);
     expect(names).toContain('anchor');
     expect(names).not.toContain('low');
   });
@@ -53,7 +53,7 @@ describe('InMemoryUsageStore', () => {
     store.recordSearch('x', 1, 'local');
 
     store.reset('one');
-    expect(store.getRawData().map(entry => entry.name)).toEqual(['two']);
+    expect(store.getRawData().map((entry) => entry.name)).toEqual(['two']);
 
     store.resetAll();
     expect(store.getRawData()).toEqual([]);

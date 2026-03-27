@@ -80,11 +80,13 @@ describe('frecency', () => {
     });
 
     it('normalizes multiple entries into 0..1 range', () => {
-      const normalized = normalizeFrecency(new Map([
-        ['low', 2],
-        ['mid', 6],
-        ['high', 10],
-      ]));
+      const normalized = normalizeFrecency(
+        new Map([
+          ['low', 2],
+          ['mid', 6],
+          ['high', 10],
+        ]),
+      );
 
       expect(normalized.get('low')).toBe(0);
       expect(normalized.get('mid')).toBe(0.5);

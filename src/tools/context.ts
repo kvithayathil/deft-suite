@@ -32,7 +32,10 @@ export interface ToolContext {
   catalogStores?: Map<string, CatalogStore>;
   githubSearch?: GitHubSearch;
   usageStore?: UsageStore;
-  vendorConfigOverlay?: (skillName: string, skill: import('../core/types.js').Skill) => Promise<Record<string, unknown> | undefined>;
+  vendorConfigOverlay?: (
+    skillName: string,
+    skill: import('../core/types.js').Skill,
+  ) => Promise<Record<string, unknown> | undefined>;
   isOffline?: () => boolean;
   onConfigReload?: () => Promise<void>;
   clientInfo?: { name?: string; version?: string };

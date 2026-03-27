@@ -18,7 +18,10 @@ describe('sync-worker', () => {
     worker = new Worker(WORKER_PATH);
 
     const result = await new Promise<{ type: string }>((resolve, reject) => {
-      const timeout = setTimeout(() => reject(new Error('Worker did not respond within 3s')), 3_000);
+      const timeout = setTimeout(
+        () => reject(new Error('Worker did not respond within 3s')),
+        3_000,
+      );
 
       worker!.on('message', (msg: { type: string }) => {
         if (msg.type === 'ready') {
@@ -52,7 +55,10 @@ describe('sync-worker', () => {
     worker = new Worker(WORKER_PATH);
 
     const result = await new Promise<{ type: string }>((resolve, reject) => {
-      const timeout = setTimeout(() => reject(new Error('Worker did not respond within 3s')), 3_000);
+      const timeout = setTimeout(
+        () => reject(new Error('Worker did not respond within 3s')),
+        3_000,
+      );
 
       worker!.on('message', (msg: { type: string }) => {
         if (msg.type === 'ready') {
@@ -82,7 +88,10 @@ describe('sync-worker', () => {
     worker = new Worker(WORKER_PATH);
 
     const result = await new Promise<{ type: string }>((resolve, reject) => {
-      const timeout = setTimeout(() => reject(new Error('Worker did not respond within 3s')), 3_000);
+      const timeout = setTimeout(
+        () => reject(new Error('Worker did not respond within 3s')),
+        3_000,
+      );
 
       worker!.on('message', (msg: { type: string }) => {
         if (msg.type === 'pong') {

@@ -64,9 +64,10 @@ export class InMemoryUsageStore implements UsageStore {
     }
 
     const totalSearches = this.searchLog.length;
-    const avgResultCount = totalSearches === 0
-      ? 0
-      : this.searchLog.reduce((sum, item) => sum + item.resultCount, 0) / totalSearches;
+    const avgResultCount =
+      totalSearches === 0
+        ? 0
+        : this.searchLog.reduce((sum, item) => sum + item.resultCount, 0) / totalSearches;
 
     return { totalSearches, avgResultCount, sourceBreakdown };
   }
@@ -82,8 +83,8 @@ export class InMemoryUsageStore implements UsageStore {
       this.usage.set(entry.name, entry);
     }
 
-    const cutoff = Date.now() - (90 * 24 * 60 * 60 * 1000);
-    const retained = this.searchLog.filter(item => new Date(item.searchedAt).getTime() >= cutoff);
+    const cutoff = Date.now() - 90 * 24 * 60 * 60 * 1000;
+    const retained = this.searchLog.filter((item) => new Date(item.searchedAt).getTime() >= cutoff);
     this.searchLog.length = 0;
     this.searchLog.push(...retained);
   }
@@ -98,6 +99,6 @@ export class InMemoryUsageStore implements UsageStore {
   }
 
   getRawData(): UsageEntry[] {
-    return [...this.usage.values()].map(entry => ({ ...entry }));
+    return [...this.usage.values()].map((entry) => ({ ...entry }));
   }
 }

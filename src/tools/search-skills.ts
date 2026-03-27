@@ -28,7 +28,9 @@ export const handleSearchSkills: ToolHandler<SearchParams> = async (params, ctx)
 
   if (requestedSources.has('local')) {
     const localResults = await ctx.searchIndex.search(params.query, limit);
-    const frecencyScores = normalizeFrecency(ctx.usageStore?.getFrecencyScores() ?? new Map<string, number>());
+    const frecencyScores = normalizeFrecency(
+      ctx.usageStore?.getFrecencyScores() ?? new Map<string, number>(),
+    );
 
     const blendedResults: LocalSearchResult[] = localResults
       .map((result) => {
@@ -47,9 +49,8 @@ export const handleSearchSkills: ToolHandler<SearchParams> = async (params, ctx)
         return a.name.localeCompare(b.name);
       });
 
-    unified.local = typeof limit === 'number'
-      ? blendedResults.slice(0, Math.max(0, limit))
-      : blendedResults;
+    unified.local =
+      typeof limit === 'number' ? blendedResults.slice(0, Math.max(0, limit)) : blendedResults;
 
     ctx.usageStore?.recordSearch(params.query, unified.local.length, 'local');
   }
@@ -73,14 +74,17 @@ export const handleSearchSkills: ToolHandler<SearchParams> = async (params, ctx)
         const shouldFetch = params.refresh || !store.isFresh(catalogSource, cacheMinutes);
         const catalog = shouldFetch
           ? await store.fetch(catalogSource)
-          : await store.getCached(catalogSource) ?? await store.fetch(catalogSource);
+          : ((await store.getCached(catalogSource)) ?? (await store.fetch(catalogSource)));
 
         const catalogResults = searchCatalog(catalog.skills, params.query, catalog.name);
-        unified.catalogs[sourceKey] = typeof limit === 'number'
-          ? catalogResults.slice(0, Math.max(0, limit))
-          : catalogResults;
+        unified.catalogs[sourceKey] =
+          typeof limit === 'number' ? catalogResults.slice(0, Math.max(0, limit)) : catalogResults;
 
-        ctx.usageStore?.recordSearch(params.query, unified.catalogs[sourceKey].length, `catalog:${sourceKey}`);
+        ctx.usageStore?.recordSearch(
+          params.query,
+          unified.catalogs[sourceKey].length,
+          `catalog:${sourceKey}`,
+        );
       } catch (error) {
         ctx.logger.debug('Catalog search source unavailable', {
           source: sourceKey,
@@ -90,10 +94,15 @@ export const handleSearchSkills: ToolHandler<SearchParams> = async (params, ctx)
         try {
           const cachedCatalog = await store.getCached(catalogSource);
           if (cachedCatalog) {
-            const cachedResults = searchCatalog(cachedCatalog.skills, params.query, cachedCatalog.name);
-            unified.catalogs[sourceKey] = typeof limit === 'number'
-              ? cachedResults.slice(0, Math.max(0, limit))
-              : cachedResults;
+            const cachedResults = searchCatalog(
+              cachedCatalog.skills,
+              params.query,
+              cachedCatalog.name,
+            );
+            unified.catalogs[sourceKey] =
+              typeof limit === 'number'
+                ? cachedResults.slice(0, Math.max(0, limit))
+                : cachedResults;
             fallbackResultsCount = unified.catalogs[sourceKey].length;
           } else {
             unified.catalogs[sourceKey] = [];

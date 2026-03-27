@@ -55,8 +55,14 @@ describe('discoverProjectConfig', () => {
     const dir2 = join(tempDir, '.claude', 'deft');
     await mkdir(dir1, { recursive: true });
     await mkdir(dir2, { recursive: true });
-    await writeFile(join(dir1, 'config.json'), JSON.stringify({ schemaVersion: 1, manifest: { maxManifestSize: 5 } }));
-    await writeFile(join(dir2, 'config.json'), JSON.stringify({ schemaVersion: 1, manifest: { maxManifestSize: 99 } }));
+    await writeFile(
+      join(dir1, 'config.json'),
+      JSON.stringify({ schemaVersion: 1, manifest: { maxManifestSize: 5 } }),
+    );
+    await writeFile(
+      join(dir2, 'config.json'),
+      JSON.stringify({ schemaVersion: 1, manifest: { maxManifestSize: 99 } }),
+    );
 
     const result = await discoverProjectConfig(tempDir);
     expect(result!.path).toBe(join(dir1, 'config.json'));

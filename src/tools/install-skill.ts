@@ -1,7 +1,13 @@
 import type { ToolHandler } from './types.js';
 import { parseSourceString } from '../core/skill-resolver.js';
 import type { Source } from '../core/types.js';
-import { alreadyInstalled, skillNotFound, permissionDenied, scanFailed, validationFailed } from '../core/errors.js';
+import {
+  alreadyInstalled,
+  skillNotFound,
+  permissionDenied,
+  scanFailed,
+  validationFailed,
+} from '../core/errors.js';
 import { validateSkillMetadata } from '../core/validator.js';
 import { rebuildSearchIndex } from './rebuild-search-index.js';
 
@@ -45,7 +51,10 @@ export const handleInstallSkill: ToolHandler<InstallSkillParams> = async (params
   // 5. Scan
   const scanResult = await ctx.scanner.scanSkill(resolved.sourcePath ?? name, name);
   if (!scanResult.passed) {
-    ctx.lifecycle.markQuarantined(name, scanResult.findings.map(f => f.message));
+    ctx.lifecycle.markQuarantined(
+      name,
+      scanResult.findings.map((f) => f.message),
+    );
     throw scanFailed(name, scanResult.findings);
   }
 
@@ -69,14 +78,20 @@ export const handleInstallSkill: ToolHandler<InstallSkillParams> = async (params
   ctx.usageStore?.recordAccess(name);
 
   return {
-    content: [{
-      type: 'text',
-      text: JSON.stringify({
-        installed: name,
-        path: name,
-        platform: platform ?? 'generic',
-        registration: `Skill '${name}' installed successfully.`,
-      }, null, 2),
-    }],
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify(
+          {
+            installed: name,
+            path: name,
+            platform: platform ?? 'generic',
+            registration: `Skill '${name}' installed successfully.`,
+          },
+          null,
+          2,
+        ),
+      },
+    ],
   };
 };

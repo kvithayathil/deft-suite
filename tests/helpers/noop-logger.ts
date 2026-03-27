@@ -1,7 +1,8 @@
 import type { Logger } from '../../src/core/ports/logger.js';
 
 export class NoopLogger implements Logger {
-  readonly messages: Array<{ level: string; message: string; context?: Record<string, unknown> }> = [];
+  readonly messages: Array<{ level: string; message: string; context?: Record<string, unknown> }> =
+    [];
 
   error(message: string, context?: Record<string, unknown>): void {
     this.messages.push({ level: 'error', message, context });

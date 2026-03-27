@@ -37,7 +37,8 @@ function makeContext(overrides: Partial<ToolContext> = {}): ToolContext {
   };
 
   return {
-    skillStore, bundledStore,
+    skillStore,
+    bundledStore,
     configStore: new InMemoryConfigStore(),
     scanner: new StubScanner(),
     searchIndex: new InMemorySearchIndex(),
@@ -53,7 +54,10 @@ function makeContext(overrides: Partial<ToolContext> = {}): ToolContext {
   };
 }
 
-const CATALOG_SOURCE: CatalogSourceConfig = { url: 'https://catalog.test/skills.json', type: 'static' };
+const CATALOG_SOURCE: CatalogSourceConfig = {
+  url: 'https://catalog.test/skills.json',
+  type: 'static',
+};
 
 describe('handleSearchSkills', () => {
   it('returns grouped local-only response when remotes are not configured', async () => {
@@ -211,19 +215,24 @@ describe('handleSearchSkills', () => {
     expect(breaker.isAllowed()).toBe(false);
 
     const ctx = makeContext({
-      catalogStores: new Map([[CATALOG_SOURCE.url, new InMemoryCatalogStore({
-        [CATALOG_SOURCE.url]: {
-          name: 'team-catalog',
-          skills: [
-            {
-              name: 'catalog-python-skill',
-              description: 'Python tool from team catalog',
-              source: { type: 'url', url: 'https://catalog.test/python' },
-              tags: ['python'],
+      catalogStores: new Map([
+        [
+          CATALOG_SOURCE.url,
+          new InMemoryCatalogStore({
+            [CATALOG_SOURCE.url]: {
+              name: 'team-catalog',
+              skills: [
+                {
+                  name: 'catalog-python-skill',
+                  description: 'Python tool from team catalog',
+                  source: { type: 'url', url: 'https://catalog.test/python' },
+                  tags: ['python'],
+                },
+              ],
             },
-          ],
-        },
-      })]]),
+          }),
+        ],
+      ]),
       resilience: {
         rateLimiters: new Map(),
         circuitBreakers: new Map([[CATALOG_SOURCE.url, breaker]]),

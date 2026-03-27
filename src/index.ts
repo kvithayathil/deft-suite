@@ -224,8 +224,12 @@ async function main(): Promise<void> {
     process.exit(0);
   };
 
-  process.on('SIGINT', () => { void shutdown(); });
-  process.on('SIGTERM', () => { void shutdown(); });
+  process.on('SIGINT', () => {
+    void shutdown();
+  });
+  process.on('SIGTERM', () => {
+    void shutdown();
+  });
 
   await startStdioServer(server);
   logger.info(`deft-mcp v${VERSION} started`);

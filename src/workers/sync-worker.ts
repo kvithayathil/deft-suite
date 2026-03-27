@@ -57,7 +57,10 @@ function startSyncLoop(intervalMinutes: number, sources: Source[]): void {
     }
 
     if (updated.length > 0) {
-      parentPort?.postMessage({ type: 'sync_complete', skillsUpdated: updated } satisfies WorkerMessage);
+      parentPort?.postMessage({
+        type: 'sync_complete',
+        skillsUpdated: updated,
+      } satisfies WorkerMessage);
     }
   };
 

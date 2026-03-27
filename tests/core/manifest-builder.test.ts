@@ -20,7 +20,7 @@ describe('ManifestBuilder', () => {
     const builder = new ManifestBuilder(defaultConfig);
     const manifest = builder.build(allSkills);
     expect(manifest.skills).toHaveLength(3);
-    expect(manifest.skills.map(s => s.name)).toEqual(['skill-a', 'skill-b', 'skill-c']);
+    expect(manifest.skills.map((s) => s.name)).toEqual(['skill-a', 'skill-b', 'skill-c']);
   });
 
   it('includes description in manifest entries', () => {

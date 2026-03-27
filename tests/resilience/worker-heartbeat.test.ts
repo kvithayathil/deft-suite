@@ -25,8 +25,12 @@ class MockWorker implements HeartbeatTarget {
 }
 
 describe('WorkerHeartbeat', () => {
-  beforeEach(() => { vi.useFakeTimers(); });
-  afterEach(() => { vi.useRealTimers(); });
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
 
   it('does not terminate healthy workers', () => {
     const worker = new MockWorker();
@@ -38,7 +42,7 @@ describe('WorkerHeartbeat', () => {
 
     heartbeat.start();
     vi.advanceTimersByTime(1000); // Trigger ping
-    worker.simulatePong();        // Respond
+    worker.simulatePong(); // Respond
     vi.advanceTimersByTime(1000); // Next cycle
 
     expect(worker.terminated).toBe(false);
@@ -58,7 +62,7 @@ describe('WorkerHeartbeat', () => {
     heartbeat.start();
     vi.advanceTimersByTime(1000); // Trigger ping
     // No pong...
-    vi.advanceTimersByTime(500);  // Pong timeout
+    vi.advanceTimersByTime(500); // Pong timeout
 
     expect(worker.terminated).toBe(true);
     expect(onHung).toHaveBeenCalledWith('test-worker');
