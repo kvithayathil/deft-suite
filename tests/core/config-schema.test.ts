@@ -14,9 +14,7 @@ describe('config.schema.json', () => {
     const valid = validate(DEFAULT_CONFIG);
 
     if (!valid) {
-      const errors = validate.errors?.map(
-        (e) => `${e.instancePath || '/'}: ${e.message}`,
-      );
+      const errors = validate.errors?.map((e) => `${e.instancePath || '/'}: ${e.message}`);
       expect.fail(`DEFAULT_CONFIG does not match schema:\n${errors?.join('\n')}`);
     }
 

@@ -13,7 +13,7 @@ npm install -g github:kvithayathil/deft-suite
 Or pin a specific tag:
 
 ```bash
-npm install -g github:kvithayathil/deft-suite#v1.0.0-beta.3
+npm install -g github:kvithayathil/deft-suite#v1.0.0-beta.5
 ```
 
 ### From npm (once published)
@@ -27,8 +27,9 @@ npm install -g deft-mcp
 ```bash
 git clone https://github.com/kvithayathil/deft-suite.git
 cd deft-suite
-npm install
-npm run build
+mise install          # install pinned runtimes (optional but recommended)
+bun install           # or: npm install
+bun run build         # or: npm run build
 npm link
 ```
 
@@ -45,7 +46,9 @@ If the file does not exist yet, defaults from `src/core/config-merger.ts` are us
 ## 3) Run the MCP Server (stdio)
 
 ```bash
-node dist/index.js
+node dist/index.js          # Node.js
+bun dist/index.js           # Bun
+deno task run                # Deno
 ```
 
 The server communicates over stdio and is intended to be launched by an MCP client.

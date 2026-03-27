@@ -11,7 +11,7 @@ export class InMemorySkillStore implements SkillStore {
   }
 
   async listMetadata(): Promise<SkillMetadata[]> {
-    return Array.from(this.skills.values()).map(s => s.metadata);
+    return Array.from(this.skills.values()).map((s) => s.metadata);
   }
 
   async exists(name: string): Promise<boolean> {
@@ -22,7 +22,10 @@ export class InMemorySkillStore implements SkillStore {
     const resourceEntries = resources ? Object.entries(resources) : [];
     this.skills.set(name, {
       ...skill,
-      resources: resourceEntries.length > 0 ? resourceEntries.map(([resourcePath]) => resourcePath) : skill.resources,
+      resources:
+        resourceEntries.length > 0
+          ? resourceEntries.map(([resourcePath]) => resourcePath)
+          : skill.resources,
     });
 
     if (resourceEntries.length > 0) {

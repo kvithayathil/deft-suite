@@ -1,0 +1,66 @@
+{
+  "lsp": {
+    "deno": {
+      "settings": {
+        "deno": {
+          "enable": false,
+          "unstable": [
+            "sloppy-imports",
+            "node-globals"
+          ]
+        }
+      }
+    },
+    "typescript-language-server": {
+      "settings": {
+        "typescript": {
+          "tsdk": "node_modules/typescript/lib"
+        }
+      }
+    },
+    "oxc": {
+      "settings": {
+        "configPath": ".oxlintrc.json"
+      }
+    },
+    "eslint": {
+      "settings": {
+        "rulesCustomizations": []
+      }
+    }
+  },
+  "languages": {
+    "TypeScript": {
+      "language_servers": [
+        "typescript-language-server",
+        "oxc",
+        "eslint",
+        "..."
+      ],
+      "formatter": {
+        "external": {
+          "command": "bunx",
+          "arguments": [
+            "oxfmt",
+            "--stdin-filepath",
+            "{buffer_path}"
+          ]
+        }
+      },
+      "format_on_save": "on"
+    },
+    "JSON": {
+      "format_on_save": "on"
+    },
+    "Markdown": {
+      "format_on_save": "off"
+    }
+  },
+  "file_scan_exclusions": [
+    "**/dist/**",
+    "**/coverage/**",
+    "**/reports/**",
+    "**/node_modules/**",
+    "**/.DS_Store"
+  ]
+}

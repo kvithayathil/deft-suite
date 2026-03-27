@@ -20,6 +20,7 @@ import { handleInstallSkill } from '../../tools/install-skill.js';
 import type { ToolContext } from '../../tools/context.js';
 import type { SearchStats, UnifiedSearchResult, UsageEntry, UsageStats } from '../../core/types.js';
 import { wireOptionalAdapters } from '../../bootstrap.js';
+import { VERSION } from '../../version.js';
 
 interface CliAdapterOptions {
   createContext?: () => Promise<ToolContext>;
@@ -47,7 +48,7 @@ export class CliAdapter {
     this.promptSelection = options.promptSelection;
     this.stdout = options.stdout ?? process.stdout;
     this.stderr = options.stderr ?? process.stderr;
-    this.versionText = options.version ?? '1.0.0-beta.4';
+    this.versionText = options.version ?? VERSION;
   }
 
   async run(args: string[], flags: Record<string, unknown>): Promise<void> {
@@ -105,7 +106,9 @@ export class CliAdapter {
       return;
     }
 
-    const choice = (await this.prompt(`Install a skill? [number or 'q' to quit]: `)).trim().toLowerCase();
+    const choice = (await this.prompt(`Install a skill? [number or 'q' to quit]: `))
+      .trim()
+      .toLowerCase();
     if (choice === 'q' || choice.length === 0) {
       return;
     }
@@ -187,21 +190,27 @@ export class CliAdapter {
 
   private async help(command?: string): Promise<void> {
     const detail = command ? `\nHelp for command: ${command}` : '';
-    this.stdout.write([
-      'Usage: deft <command> [options]', '',
-      'Commands:',
-      '  search <query> [--refresh]           Search local/catalog/github skills',
-      '  usage export --format json|csv       Export usage/frecency data',
-      '  usage reset <name> [--all]           Reset usage for one skill or all',
-      '  stats                                Show usage and search statistics',
-      '  status                               Health check',
-      '  version                              Show version',
-      '  help [command]                       Show help', '',
-      'Options:',
-      '  --refresh                            Force catalog refresh during search',
-      '  --format <json|csv>                  Output format for usage export',
-      '  --all                                Reset all usage entries',
-    ].join('\n') + detail + '\n');
+    this.stdout.write(
+      [
+        'Usage: deft <command> [options]',
+        '',
+        'Commands:',
+        '  search <query> [--refresh]           Search local/catalog/github skills',
+        '  usage export --format json|csv       Export usage/frecency data',
+        '  usage reset <name> [--all]           Reset usage for one skill or all',
+        '  stats                                Show usage and search statistics',
+        '  status                               Health check',
+        '  version                              Show version',
+        '  help [command]                       Show help',
+        '',
+        'Options:',
+        '  --refresh                            Force catalog refresh during search',
+        '  --format <json|csv>                  Output format for usage export',
+        '  --all                                Reset all usage entries',
+      ].join('\n') +
+        detail +
+        '\n',
+    );
   }
 
   private renderSearchResults(result: UnifiedSearchResult): Array<{ name: string }> {
@@ -254,13 +263,15 @@ function asBoolean(value: unknown): boolean {
 
 function toCsv(entries: UsageEntry[]): string {
   const header = 'name,score,lastAccessed,firstAccessed,accessCount';
-  const rows = entries.map((entry) => [
-    csvField(entry.name),
-    csvField(entry.score),
-    csvField(entry.lastAccessed),
-    csvField(entry.firstAccessed),
-    csvField(entry.accessCount),
-  ].join(','));
+  const rows = entries.map((entry) =>
+    [
+      csvField(entry.name),
+      csvField(entry.score),
+      csvField(entry.lastAccessed),
+      csvField(entry.firstAccessed),
+      csvField(entry.accessCount),
+    ].join(','),
+  );
 
   return `${[header, ...rows].join('\n')}\n`;
 }

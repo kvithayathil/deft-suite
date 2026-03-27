@@ -37,14 +37,16 @@ export class SqliteUsageStore implements UsageStore {
 
   recordAccess(name: string): void {
     const now = new Date().toISOString();
-    this.db.prepare(
-      `INSERT INTO usage_entries (name, score, first_accessed, last_accessed, access_count)
+    this.db
+      .prepare(
+        `INSERT INTO usage_entries (name, score, first_accessed, last_accessed, access_count)
        VALUES (?, 1, ?, ?, 1)
        ON CONFLICT(name) DO UPDATE SET
          score = usage_entries.score + 1,
          last_accessed = excluded.last_accessed,
          access_count = usage_entries.access_count + 1`,
-    ).run(name, now, now);
+      )
+      .run(name, now, now);
   }
 
   getFrecencyScores(): Map<string, number> {
@@ -52,16 +54,20 @@ export class SqliteUsageStore implements UsageStore {
   }
 
   getStats(): UsageStats {
-    const totals = this.db.prepare(
-      'SELECT COUNT(*) AS total_skills, COALESCE(SUM(score), 0) AS total_score FROM usage_entries',
-    ).get() as { total_skills: number; total_score: number };
+    const totals = this.db
+      .prepare(
+        'SELECT COUNT(*) AS total_skills, COALESCE(SUM(score), 0) AS total_score FROM usage_entries',
+      )
+      .get() as { total_skills: number; total_score: number };
 
-    const topRows = this.db.prepare(
-      `SELECT name, score, first_accessed, last_accessed, access_count
+    const topRows = this.db
+      .prepare(
+        `SELECT name, score, first_accessed, last_accessed, access_count
        FROM usage_entries
        ORDER BY score DESC
        LIMIT 10`,
-    ).all() as UsageEntryRow[];
+      )
+      .all() as UsageEntryRow[];
 
     return {
       totalSkills: totals.total_skills,
@@ -72,17 +78,21 @@ export class SqliteUsageStore implements UsageStore {
   }
 
   getSearchStats(): SearchStats {
-    const aggregate = this.db.prepare(
-      `SELECT COUNT(*) AS total_searches,
+    const aggregate = this.db
+      .prepare(
+        `SELECT COUNT(*) AS total_searches,
               AVG(result_count) AS avg_result_count
        FROM search_log`,
-    ).get() as SearchStatsRow;
+      )
+      .get() as SearchStatsRow;
 
-    const rows = this.db.prepare(
-      `SELECT source, COUNT(*) AS count
+    const rows = this.db
+      .prepare(
+        `SELECT source, COUNT(*) AS count
        FROM search_log
        GROUP BY source`,
-    ).all() as SourceBreakdownRow[];
+      )
+      .all() as SourceBreakdownRow[];
 
     const sourceBreakdown: Record<string, number> = {};
     for (const row of rows) {
@@ -97,10 +107,12 @@ export class SqliteUsageStore implements UsageStore {
   }
 
   recordSearch(query: string, resultCount: number, source: string): void {
-    this.db.prepare(
-      `INSERT INTO search_log (query, result_count, source, searched_at)
+    this.db
+      .prepare(
+        `INSERT INTO search_log (query, result_count, source, searched_at)
        VALUES (?, ?, ?, ?)`,
-    ).run(query, resultCount, source, new Date().toISOString());
+      )
+      .run(query, resultCount, source, new Date().toISOString());
   }
 
   prune(threshold: number): void {
@@ -131,10 +143,12 @@ export class SqliteUsageStore implements UsageStore {
   }
 
   getRawData(): UsageEntry[] {
-    const rows = this.db.prepare(
-      `SELECT name, score, first_accessed, last_accessed, access_count
+    const rows = this.db
+      .prepare(
+        `SELECT name, score, first_accessed, last_accessed, access_count
        FROM usage_entries`,
-    ).all() as UsageEntryRow[];
+      )
+      .all() as UsageEntryRow[];
 
     return rows.map(this.mapUsageEntry);
   }

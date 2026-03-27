@@ -68,8 +68,8 @@ describe('SqliteUsageStore', () => {
     store.prune(100);
 
     const raw = store.getRawData();
-    expect(raw.some(entry => entry.name === 'high')).toBe(false);
-    expect(raw.some(entry => entry.name === 'anchor')).toBe(true);
+    expect(raw.some((entry) => entry.name === 'high')).toBe(false);
+    expect(raw.some((entry) => entry.name === 'anchor')).toBe(true);
     expect(store.getSearchStats().totalSearches).toBe(0);
   });
 
@@ -80,7 +80,7 @@ describe('SqliteUsageStore', () => {
     store.recordSearch('q', 1, 'local');
 
     store.reset('one');
-    expect(store.getRawData().map(entry => entry.name)).toEqual(['two']);
+    expect(store.getRawData().map((entry) => entry.name)).toEqual(['two']);
 
     store.resetAll();
     expect(store.getRawData()).toEqual([]);

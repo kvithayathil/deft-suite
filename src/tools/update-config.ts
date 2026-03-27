@@ -46,14 +46,20 @@ export const handleUpdateConfig: ToolHandler<UpdateConfigParams> = async (params
   rawCurrent[parts[parts.length - 1]] = params.value;
 
   return {
-    content: [{
-      type: 'text',
-      text: JSON.stringify({
-        updated: params.key,
-        value: params.value,
-        persisted: false,
-        message: `Config key '${params.key}' updated in session. Use save_config to persist.`,
-      }, null, 2),
-    }],
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify(
+          {
+            updated: params.key,
+            value: params.value,
+            persisted: false,
+            message: `Config key '${params.key}' updated in session. Use save_config to persist.`,
+          },
+          null,
+          2,
+        ),
+      },
+    ],
   };
 };

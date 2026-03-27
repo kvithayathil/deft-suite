@@ -4,12 +4,18 @@ export const handleListCategories: ToolHandler<Record<string, unknown>> = async 
   const categories = await ctx.searchIndex.listCategories();
 
   return {
-    content: [{
-      type: 'text',
-      text: JSON.stringify({
-        categories,
-        count: categories.length,
-      }, null, 2),
-    }],
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify(
+          {
+            categories,
+            count: categories.length,
+          },
+          null,
+          2,
+        ),
+      },
+    ],
   };
 };

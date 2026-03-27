@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env tsx
 import { readFile, writeFile } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,7 +17,14 @@ const CONFIG_SHAPE_END = '<!-- CONFIG_SHAPE_END -->';
 
 const isCheckMode = process.argv.includes('--check');
 
-function generateJsonSchema() {
+interface SchemaOutput {
+  $id?: string;
+  title?: string;
+  description?: string;
+  [key: string]: unknown;
+}
+
+function generateJsonSchema(): SchemaOutput {
   const generator = createGenerator({
     path: TYPES_PATH,
     tsconfig: TSCONFIG_PATH,
@@ -27,13 +34,11 @@ function generateJsonSchema() {
     additionalProperties: true,
   });
 
-  return generator.createSchema('Config');
+  return generator.createSchema('Config') as SchemaOutput;
 }
 
-async function getDefaultConfigJson() {
-  const { DEFAULT_CONFIG } = await import(
-    resolve(rootDir, 'dist', 'core', 'config-merger.js')
-  );
+async function getDefaultConfigJson(): Promise<string> {
+  const { DEFAULT_CONFIG } = await import(resolve(rootDir, 'dist', 'core', 'config-merger.js'));
 
   // Sanitize platform-specific values for docs
   const sanitized = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
@@ -46,7 +51,7 @@ async function getDefaultConfigJson() {
   return JSON.stringify(sanitized, null, 2);
 }
 
-function injectConfigShape(doc, configJson) {
+function injectConfigShape(doc: string, configJson: string): string {
   const start = doc.indexOf(CONFIG_SHAPE_START);
   const end = doc.indexOf(CONFIG_SHAPE_END);
 
@@ -61,7 +66,7 @@ function injectConfigShape(doc, configJson) {
   return `${before}\n\n\`\`\`json\n${configJson}\n\`\`\`\n\n${after}`;
 }
 
-async function main() {
+async function main(): Promise<void> {
   // 1. Generate JSON Schema from TypeScript types
   process.stdout.write('Generating JSON Schema from Config type...\n');
   const schema = generateJsonSchema();
@@ -88,7 +93,9 @@ async function main() {
         ...(schemaStale ? ['config.schema.json'] : []),
         ...(docStale ? ['docs/configuration.md'] : []),
       ];
-      process.stderr.write(`Schema/docs are out of date: ${staleFiles.join(', ')}\nRun: npm run generate:schema\n`);
+      process.stderr.write(
+        `Schema/docs are out of date: ${staleFiles.join(', ')}\nRun: npm run generate:schema\n`,
+      );
       process.exit(1);
     }
 
@@ -104,7 +111,7 @@ async function main() {
   process.stdout.write(`Updated docs/configuration.md Full Config Shape block.\n`);
 }
 
-main().catch((error) => {
+main().catch((error: Error) => {
   process.stderr.write(`Failed to generate schema: ${error.message}\n`);
   process.exit(1);
 });

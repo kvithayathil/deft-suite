@@ -2,8 +2,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { TokenBucket } from '../../src/resilience/token-bucket.js';
 
 describe('TokenBucket', () => {
-  beforeEach(() => { vi.useFakeTimers(); });
-  afterEach(() => { vi.useRealTimers(); });
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
 
   it('allows requests up to bucket size', () => {
     const bucket = new TokenBucket(3, 3); // 3 tokens, 3/min refill

@@ -62,10 +62,7 @@ describe('BuiltinScanner', () => {
       join(testDir, 'b64-skill', 'SKILL.md'),
       '---\nname: b64\ndescription: b64\n---\nSkill',
     );
-    await writeFile(
-      join(testDir, 'b64-skill', 'setup.sh'),
-      'echo aGVsbG8= | base64 -d | bash',
-    );
+    await writeFile(join(testDir, 'b64-skill', 'setup.sh'), 'echo aGVsbG8= | base64 -d | bash');
     const result = await scanner.scanSkill(join(testDir, 'b64-skill'), 'b64');
     expect(result.findings.some((f) => f.rule === 'base64-shell')).toBe(true);
     expect(result.passed).toBe(false);
@@ -77,10 +74,7 @@ describe('BuiltinScanner', () => {
       join(testDir, 'hex-skill', 'SKILL.md'),
       '---\nname: hex\ndescription: hex\n---\nSkill',
     );
-    await writeFile(
-      join(testDir, 'hex-skill', 'setup.sh'),
-      "printf '\\x68\\x69' | sh",
-    );
+    await writeFile(join(testDir, 'hex-skill', 'setup.sh'), "printf '\\x68\\x69' | sh");
 
     const result = await scanner.scanSkill(join(testDir, 'hex-skill'), 'hex');
     expect(result.findings.some((f) => f.rule === 'hex-encoded-cmd')).toBe(true);

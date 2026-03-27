@@ -112,7 +112,9 @@ export class GitCatalogStore implements CatalogStore {
         const parsed = JSON.parse(raw) as unknown;
         return validateCatalogEntry(parsed, sourceUrl);
       } catch (error) {
-        throw new Error(`Failed to parse catalog file ${fileName} for ${sourceUrl}: ${String(error)}`);
+        throw new Error(
+          `Failed to parse catalog file ${fileName} for ${sourceUrl}: ${String(error)}`,
+        );
       }
     }
 

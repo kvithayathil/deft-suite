@@ -115,7 +115,8 @@ export class BuiltinScanner implements Scanner {
           severity: 'warning',
           file: relativePath,
           line: 0,
-          message: 'Binary file detected in skill directory — skills should contain only text files',
+          message:
+            'Binary file detected in skill directory — skills should contain only text files',
         });
         return;
       }
@@ -142,7 +143,8 @@ export class BuiltinScanner implements Scanner {
     });
 
     const hash = `sha256:${createHash('sha256').update(allContent.join('')).digest('hex')}`;
-    const passed = findings.filter((f) => f.severity === 'critical' || f.severity === 'error').length === 0;
+    const passed =
+      findings.filter((f) => f.severity === 'critical' || f.severity === 'error').length === 0;
 
     return {
       skillName,
@@ -153,7 +155,11 @@ export class BuiltinScanner implements Scanner {
     };
   }
 
-  async scanDiff(skillPath: string, skillName: string, changedFiles: string[]): Promise<ScanResult> {
+  async scanDiff(
+    skillPath: string,
+    skillName: string,
+    changedFiles: string[],
+  ): Promise<ScanResult> {
     // v1: full re-scan on diff
     void changedFiles;
     return this.scanSkill(skillPath, skillName);

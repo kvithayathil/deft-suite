@@ -13,7 +13,7 @@ export class MemorySearchIndex implements SearchIndex {
     if (terms.length === 0) return [];
 
     return this.skills
-      .map(skill => {
+      .map((skill) => {
         let score = 0;
         const nameLower = skill.name.toLowerCase();
         const descLower = skill.description.toLowerCase();
@@ -26,11 +26,11 @@ export class MemorySearchIndex implements SearchIndex {
         return {
           name: skill.name,
           description: skill.description,
-          trustLevel: ('unknown' as TrustLevel),
+          trustLevel: 'unknown' as TrustLevel,
           score,
         };
       })
-      .filter(r => r.score > 0)
+      .filter((r) => r.score > 0)
       .sort((a, b) => b.score - a.score);
   }
 
@@ -48,11 +48,11 @@ export class MemorySearchIndex implements SearchIndex {
 
   async getByCategory(category: string): Promise<SearchResult[]> {
     return this.skills
-      .filter(skill => skill.tags?.includes(category))
-      .map(skill => ({
+      .filter((skill) => skill.tags?.includes(category))
+      .map((skill) => ({
         name: skill.name,
         description: skill.description,
-        trustLevel: ('unknown' as TrustLevel),
+        trustLevel: 'unknown' as TrustLevel,
         score: 1,
       }));
   }

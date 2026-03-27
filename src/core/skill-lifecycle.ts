@@ -56,7 +56,9 @@ export class SkillLifecycle {
   forceApprove(name: string): void {
     const existing = this.entries.get(name);
     if (!existing || existing.state !== SkillState.Quarantined) {
-      throw new Error(`Cannot force-approve '${name}': not in quarantined state (current: ${existing?.state ?? 'none'})`);
+      throw new Error(
+        `Cannot force-approve '${name}': not in quarantined state (current: ${existing?.state ?? 'none'})`,
+      );
     }
     this.entries.set(name, {
       ...existing,

@@ -29,7 +29,12 @@ function makeContext(overrides: Partial<ToolContext> = {}): ToolContext {
   const searchIndex = new InMemorySearchIndex();
   const lockStore = new InMemorySkillLockStore();
 
-  const resolver = new SkillResolver(skillStore, bundledStore, flattenSourcesForResolver(config.sources), logger);
+  const resolver = new SkillResolver(
+    skillStore,
+    bundledStore,
+    flattenSourcesForResolver(config.sources),
+    logger,
+  );
   const trustEvaluator = new TrustEvaluator(config.security);
   const lifecycle = new SkillLifecycle(logger);
   const lockManager = new SkillLockManager(lockStore, logger);
@@ -97,9 +102,7 @@ describe('Offline Fallback Integration', () => {
     it('returns offline: false when online', async () => {
       const ctx = makeContext({ isOffline: () => false });
 
-      await ctx.searchIndex.rebuild([
-        { name: 'tdd-python', description: 'Python TDD patterns' },
-      ]);
+      await ctx.searchIndex.rebuild([{ name: 'tdd-python', description: 'Python TDD patterns' }]);
 
       const result = await handleSearchSkills({ query: 'python' }, ctx);
       const parsed = JSON.parse(result.content[0].text);
@@ -147,7 +150,10 @@ describe('Offline Fallback Integration', () => {
         state: SkillState.Active,
         sourcePath: '.agents/skills/bundled-helper',
       });
-      (ctx.bundledStore as InstanceType<typeof InMemorySkillStore>).seed('bundled-helper', bundledSkill);
+      (ctx.bundledStore as InstanceType<typeof InMemorySkillStore>).seed(
+        'bundled-helper',
+        bundledSkill,
+      );
 
       const result = await handleInstallSkill({ skill: 'bundled-helper' }, ctx);
 
@@ -165,7 +171,10 @@ describe('Offline Fallback Integration', () => {
         state: SkillState.Active,
         sourcePath: '.agents/skills/offline-skill',
       });
-      (ctx.bundledStore as InstanceType<typeof InMemorySkillStore>).seed('offline-skill', bundledSkill);
+      (ctx.bundledStore as InstanceType<typeof InMemorySkillStore>).seed(
+        'offline-skill',
+        bundledSkill,
+      );
 
       await handleInstallSkill({ skill: 'offline-skill' }, ctx);
 
@@ -183,7 +192,10 @@ describe('Offline Fallback Integration', () => {
         state: SkillState.Active,
         sourcePath: '.agents/skills/cached-skill',
       });
-      (ctx.bundledStore as InstanceType<typeof InMemorySkillStore>).seed('cached-skill', bundledSkill);
+      (ctx.bundledStore as InstanceType<typeof InMemorySkillStore>).seed(
+        'cached-skill',
+        bundledSkill,
+      );
 
       await handleInstallSkill({ skill: 'cached-skill' }, ctx);
 
@@ -201,7 +213,10 @@ describe('Offline Fallback Integration', () => {
         state: SkillState.Active,
         sourcePath: '.agents/skills/active-skill',
       });
-      (ctx.bundledStore as InstanceType<typeof InMemorySkillStore>).seed('active-skill', bundledSkill);
+      (ctx.bundledStore as InstanceType<typeof InMemorySkillStore>).seed(
+        'active-skill',
+        bundledSkill,
+      );
 
       await handleInstallSkill({ skill: 'active-skill' }, ctx);
 

@@ -20,8 +20,12 @@ describe('TimeoutTier constants', () => {
 });
 
 describe('withTimeout', () => {
-  beforeEach(() => { vi.useFakeTimers(); });
-  afterEach(() => { vi.useRealTimers(); });
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
 
   it('resolves when operation completes before timeout', async () => {
     const op = async () => 'done';

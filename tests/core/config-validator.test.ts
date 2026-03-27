@@ -45,7 +45,7 @@ describe('validateConfig', () => {
     it('rejects array sources (legacy format)', () => {
       const result = validateConfig({ sources: [] });
       expect(result.valid).toBe(false);
-      expect(result.issues.some(i => i.message.includes('flat array'))).toBe(true);
+      expect(result.issues.some((i) => i.message.includes('flat array'))).toBe(true);
     });
 
     it('validates sources.local entries', () => {
@@ -54,7 +54,9 @@ describe('validateConfig', () => {
           local: [{ path: '' }],
         },
       });
-      expect(result.issues.some(i => i.path.includes('local') && i.message.includes('path'))).toBe(true);
+      expect(
+        result.issues.some((i) => i.path.includes('local') && i.message.includes('path')),
+      ).toBe(true);
     });
 
     it('accepts valid local source', () => {
@@ -72,7 +74,7 @@ describe('validateConfig', () => {
           local: [{ path: '/path', trust: 'invalid-trust' }],
         },
       });
-      expect(result.issues.some(i => i.path.includes('trust'))).toBe(true);
+      expect(result.issues.some((i) => i.path.includes('trust'))).toBe(true);
     });
 
     it('validates local source sync enum', () => {
@@ -81,7 +83,7 @@ describe('validateConfig', () => {
           local: [{ path: '/path', sync: 'invalid' }],
         },
       });
-      expect(result.issues.some(i => i.path.includes('sync'))).toBe(true);
+      expect(result.issues.some((i) => i.path.includes('sync'))).toBe(true);
     });
 
     it('validates sources.remote entries require url and type', () => {
@@ -90,8 +92,8 @@ describe('validateConfig', () => {
           remote: [{ url: 'not-a-url', type: 'invalid' }],
         },
       });
-      expect(result.issues.some(i => i.path.includes('url'))).toBe(true);
-      expect(result.issues.some(i => i.path.includes('type'))).toBe(true);
+      expect(result.issues.some((i) => i.path.includes('url'))).toBe(true);
+      expect(result.issues.some((i) => i.path.includes('type'))).toBe(true);
     });
 
     it('accepts valid remote source', () => {
@@ -109,7 +111,7 @@ describe('validateConfig', () => {
           remote: [{ url: 'https://example.com', type: 'git', branch: 123 }],
         },
       });
-      expect(result.issues.some(i => i.path.includes('branch'))).toBe(true);
+      expect(result.issues.some((i) => i.path.includes('branch'))).toBe(true);
     });
 
     it('validates remote source ref must be string', () => {
@@ -118,7 +120,7 @@ describe('validateConfig', () => {
           remote: [{ url: 'https://example.com', type: 'git', ref: 123 }],
         },
       });
-      expect(result.issues.some(i => i.path.includes('ref'))).toBe(true);
+      expect(result.issues.some((i) => i.path.includes('ref'))).toBe(true);
     });
 
     it('validates sources.catalogs entries', () => {
@@ -127,8 +129,8 @@ describe('validateConfig', () => {
           catalogs: [{ url: 'invalid', type: 'invalid' }],
         },
       });
-      expect(result.issues.some(i => i.path.includes('url'))).toBe(true);
-      expect(result.issues.some(i => i.path.includes('type'))).toBe(true);
+      expect(result.issues.some((i) => i.path.includes('url'))).toBe(true);
+      expect(result.issues.some((i) => i.path.includes('type'))).toBe(true);
     });
 
     it('accepts valid catalog source', () => {
@@ -146,7 +148,7 @@ describe('validateConfig', () => {
           catalogs: [{ url: 'https://example.com', type: 'static', cacheMinutes: -1 }],
         },
       });
-      expect(result.issues.some(i => i.path.includes('cacheMinutes'))).toBe(true);
+      expect(result.issues.some((i) => i.path.includes('cacheMinutes'))).toBe(true);
     });
 
     it('warns on unknown sources keys', () => {
@@ -156,7 +158,9 @@ describe('validateConfig', () => {
           unknownKey: [],
         },
       });
-      expect(result.issues.some(i => i.path.includes('unknownKey') && i.severity === 'warning')).toBe(true);
+      expect(
+        result.issues.some((i) => i.path.includes('unknownKey') && i.severity === 'warning'),
+      ).toBe(true);
     });
 
     it('rejects non-object entries in local array', () => {
@@ -165,7 +169,7 @@ describe('validateConfig', () => {
           local: ['not-an-object'],
         },
       });
-      expect(result.issues.some(i => i.path.includes('local[0]'))).toBe(true);
+      expect(result.issues.some((i) => i.path.includes('local[0]'))).toBe(true);
     });
 
     it('rejects non-object entries in remote array', () => {
@@ -174,7 +178,7 @@ describe('validateConfig', () => {
           remote: [null],
         },
       });
-      expect(result.issues.some(i => i.path.includes('remote[0]'))).toBe(true);
+      expect(result.issues.some((i) => i.path.includes('remote[0]'))).toBe(true);
     });
 
     it('rejects non-object entries in catalogs array', () => {
@@ -183,42 +187,42 @@ describe('validateConfig', () => {
           catalogs: [42],
         },
       });
-      expect(result.issues.some(i => i.path.includes('catalogs[0]'))).toBe(true);
+      expect(result.issues.some((i) => i.path.includes('catalogs[0]'))).toBe(true);
     });
 
     it('rejects non-array local', () => {
       const result = validateConfig({
         sources: { local: 'not-array' },
       });
-      expect(result.issues.some(i => i.path === 'sources.local')).toBe(true);
+      expect(result.issues.some((i) => i.path === 'sources.local')).toBe(true);
     });
 
     it('rejects non-array remote', () => {
       const result = validateConfig({
         sources: { remote: {} },
       });
-      expect(result.issues.some(i => i.path === 'sources.remote')).toBe(true);
+      expect(result.issues.some((i) => i.path === 'sources.remote')).toBe(true);
     });
 
     it('rejects non-array catalogs', () => {
       const result = validateConfig({
         sources: { catalogs: 123 },
       });
-      expect(result.issues.some(i => i.path === 'sources.catalogs')).toBe(true);
+      expect(result.issues.some((i) => i.path === 'sources.catalogs')).toBe(true);
     });
   });
 
   describe('security validation', () => {
     it('rejects non-object security', () => {
       const result = validateConfig({ security: 'invalid' });
-      expect(result.issues.some(i => i.path === 'security')).toBe(true);
+      expect(result.issues.some((i) => i.path === 'security')).toBe(true);
     });
 
     it('validates minTrustLevel enum', () => {
       const result = validateConfig({
         security: { minTrustLevel: 'invalid' },
       });
-      expect(result.issues.some(i => i.path.includes('minTrustLevel'))).toBe(true);
+      expect(result.issues.some((i) => i.path.includes('minTrustLevel'))).toBe(true);
     });
 
     it('accepts valid minTrustLevel', () => {
@@ -234,7 +238,7 @@ describe('validateConfig', () => {
           accessControl: { mode: 'invalid' },
         },
       });
-      expect(result.issues.some(i => i.path.includes('accessControl.mode'))).toBe(true);
+      expect(result.issues.some((i) => i.path.includes('accessControl.mode'))).toBe(true);
     });
 
     it('accepts valid accessControl', () => {
@@ -250,21 +254,21 @@ describe('validateConfig', () => {
       const result = validateConfig({
         security: { accessControl: 'invalid' },
       });
-      expect(result.issues.some(i => i.path === 'security.accessControl')).toBe(true);
+      expect(result.issues.some((i) => i.path === 'security.accessControl')).toBe(true);
     });
   });
 
   describe('logging validation', () => {
     it('rejects non-object logging', () => {
       const result = validateConfig({ logging: [] });
-      expect(result.issues.some(i => i.path === 'logging')).toBe(true);
+      expect(result.issues.some((i) => i.path === 'logging')).toBe(true);
     });
 
     it('validates logging.level enum', () => {
       const result = validateConfig({
         logging: { level: 'invalid' },
       });
-      expect(result.issues.some(i => i.path.includes('level'))).toBe(true);
+      expect(result.issues.some((i) => i.path.includes('level'))).toBe(true);
     });
 
     it('accepts valid logging level', () => {
@@ -280,7 +284,9 @@ describe('validateConfig', () => {
       const result = validateConfig({
         registries: { sources: [] },
       });
-      expect(result.issues.some(i => i.path === 'registries' && i.severity === 'warning')).toBe(true);
+      expect(result.issues.some((i) => i.path === 'registries' && i.severity === 'warning')).toBe(
+        true,
+      );
     });
   });
 });
@@ -308,16 +314,20 @@ describe('formatValidationIssues', () => {
 
   it('includes expected/actual when present', () => {
     const output = formatValidationIssues([
-      { path: 'test', message: 'Type mismatch', severity: 'error', expected: 'string', actual: 'number' },
+      {
+        path: 'test',
+        message: 'Type mismatch',
+        severity: 'error',
+        expected: 'string',
+        actual: 'number',
+      },
     ]);
     expect(output).toContain('expected: string');
     expect(output).toContain('got: number');
   });
 
   it('handles empty path', () => {
-    const output = formatValidationIssues([
-      { path: '', message: 'Root error', severity: 'error' },
-    ]);
+    const output = formatValidationIssues([{ path: '', message: 'Root error', severity: 'error' }]);
     expect(output).toContain('Root error');
     expect(output).not.toContain("at ''");
   });

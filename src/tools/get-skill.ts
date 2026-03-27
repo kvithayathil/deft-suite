@@ -2,16 +2,24 @@ import type { ToolHandler } from './types.js';
 import { skillNotFound, skillQuarantined } from '../core/errors.js';
 import { SkillState, TRUST_INDICATORS } from '../core/types.js';
 
-interface GetSkillParams { name: string; }
+interface GetSkillParams {
+  name: string;
+}
 
 export const handleGetSkill: ToolHandler<GetSkillParams> = async (params, ctx) => {
   const entry = ctx.lifecycle.getState(params.name);
 
   // Check lifecycle state
   if (entry?.state === SkillState.Quarantined) {
-    throw skillQuarantined(params.name, entry.findings.map(f => ({
-      rule: 'scan', severity: 'critical' as const, message: f, file: 'SKILL.md',
-    })));
+    throw skillQuarantined(
+      params.name,
+      entry.findings.map((f) => ({
+        rule: 'scan',
+        severity: 'critical' as const,
+        message: f,
+        file: 'SKILL.md',
+      })),
+    );
   }
 
   // Stale-serve behavior: while scanning, serve the currently resolvable version
@@ -33,19 +41,25 @@ export const handleGetSkill: ToolHandler<GetSkillParams> = async (params, ctx) =
       : undefined;
 
     return {
-      content: [{
-        type: 'text',
-        text: JSON.stringify({
-          name: staleSkill.metadata.name,
-          description: staleSkill.metadata.description,
-          trust: `${staleIndicator} ${staleSkill.trustLevel}`,
-          content: staleSkill.content,
-          resources: staleSkill.resources,
-          stale: true,
-          scanning: true,
-          ...(staleVendorConfig ? { vendor_config: staleVendorConfig } : {}),
-        }, null, 2),
-      }],
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(
+            {
+              name: staleSkill.metadata.name,
+              description: staleSkill.metadata.description,
+              trust: `${staleIndicator} ${staleSkill.trustLevel}`,
+              content: staleSkill.content,
+              resources: staleSkill.resources,
+              stale: true,
+              scanning: true,
+              ...(staleVendorConfig ? { vendor_config: staleVendorConfig } : {}),
+            },
+            null,
+            2,
+          ),
+        },
+      ],
     };
   }
 
@@ -66,17 +80,23 @@ export const handleGetSkill: ToolHandler<GetSkillParams> = async (params, ctx) =
     : undefined;
 
   return {
-    content: [{
-      type: 'text',
-      text: JSON.stringify({
-        name: skill.metadata.name,
-        description: skill.metadata.description,
-        trust: `${indicator} ${skill.trustLevel}`,
-        content: skill.content,
-        resources: skill.resources,
-        stale,
-        ...(vendorConfig ? { vendor_config: vendorConfig } : {}),
-      }, null, 2),
-    }],
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify(
+          {
+            name: skill.metadata.name,
+            description: skill.metadata.description,
+            trust: `${indicator} ${skill.trustLevel}`,
+            content: skill.content,
+            resources: skill.resources,
+            stale,
+            ...(vendorConfig ? { vendor_config: vendorConfig } : {}),
+          },
+          null,
+          2,
+        ),
+      },
+    ],
   };
 };

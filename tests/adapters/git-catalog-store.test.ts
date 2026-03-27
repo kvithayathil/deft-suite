@@ -51,10 +51,10 @@ describe('GitCatalogStore', () => {
     vi.mocked(execFile).mockImplementation((_, args, callback) => {
       Promise.resolve(handler?.(args as string[]))
         .then(() => {
-          (callback as ((error: Error | null) => void))(null);
+          (callback as (error: Error | null) => void)(null);
         })
         .catch((error) => {
-          (callback as ((error: Error) => void))(error as Error);
+          (callback as (error: Error) => void)(error as Error);
         });
 
       return {} as never;
@@ -102,7 +102,7 @@ describe('GitCatalogStore', () => {
 
   it('returns graceful error when git is not installed', async () => {
     vi.mocked(execFile).mockImplementation((_, __, callback) => {
-      (callback as ((error: Error) => void))(new Error('ENOENT: git not found'));
+      (callback as (error: Error) => void)(new Error('ENOENT: git not found'));
       return {} as never;
     });
 
@@ -197,11 +197,7 @@ describe('GitCatalogStore', () => {
           '---\nname: valid-skill\ndescription: valid\n---\nContent',
           'utf-8',
         );
-        await writeFile(
-          join(dir, 'skills', 'no-skillmd', 'README.md'),
-          '# Not a skill',
-          'utf-8',
-        );
+        await writeFile(join(dir, 'skills', 'no-skillmd', 'README.md'), '# Not a skill', 'utf-8');
       });
 
       const store = new GitCatalogStore(baseDir);
@@ -222,11 +218,7 @@ describe('GitCatalogStore', () => {
           '---\nname: good\ndescription: good skill\n---\nContent',
           'utf-8',
         );
-        await writeFile(
-          join(dir, 'skills', 'bad', 'SKILL.md'),
-          'no frontmatter here',
-          'utf-8',
-        );
+        await writeFile(join(dir, 'skills', 'bad', 'SKILL.md'), 'no frontmatter here', 'utf-8');
       });
 
       const store = new GitCatalogStore(baseDir);

@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { SkillResolver, parseSourceString, type ResolveOptions, type CatalogResolutionOptions } from '../../src/core/skill-resolver.js';
+import {
+  SkillResolver,
+  parseSourceString,
+  type ResolveOptions,
+  type CatalogResolutionOptions,
+} from '../../src/core/skill-resolver.js';
 import { InMemorySkillStore } from '../helpers/in-memory-skill-store.js';
 import { NoopLogger } from '../helpers/noop-logger.js';
 import { FIXTURE_SKILLS } from '../helpers/fixture-skills.js';
@@ -11,7 +16,13 @@ describe('SkillResolver', () => {
     const cacheStore = new InMemorySkillStore();
     const bundledStore = new InMemorySkillStore();
     const logger = new NoopLogger();
-    const resolver = new SkillResolver(cacheStore, bundledStore, configuredSources, logger, catalog);
+    const resolver = new SkillResolver(
+      cacheStore,
+      bundledStore,
+      configuredSources,
+      logger,
+      catalog,
+    );
     return { resolver, cacheStore, bundledStore, logger };
   }
 
@@ -86,7 +97,11 @@ describe('SkillResolver', () => {
       const catalog: CatalogEntry = {
         name: 'example-catalog',
         skills: [
-          { name: 'catalog-skill', description: 'from catalog', source: { type: 'path', path: 'skills/catalog-skill' } },
+          {
+            name: 'catalog-skill',
+            description: 'from catalog',
+            source: { type: 'path', path: 'skills/catalog-skill' },
+          },
         ],
       };
 
@@ -182,7 +197,9 @@ describe('SkillResolver', () => {
     });
 
     it('throws on unsupported URL scheme', () => {
-      expect(() => parseSourceString('https://gitlab.com/acme/repo')).toThrow('Unsupported source URL');
+      expect(() => parseSourceString('https://gitlab.com/acme/repo')).toThrow(
+        'Unsupported source URL',
+      );
     });
 
     it('throws on unrecognized format', () => {

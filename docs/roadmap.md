@@ -40,6 +40,10 @@ Everything below is included in the current release. See [CHANGELOG.md](../CHANG
 |------|-------------|--------|--------|
 | **Secret scanning** | Three-layer defense: gitleaks pre-commit + CI workflow + GitHub Secret Scanning | Small | ✅ Done |
 | **Code quality gates** | jscpd duplication, eslint-plugin-sonarjs cognitive complexity, gist-backed badges | Small | ✅ Done |
+| **OXC toolchain** | oxlint as primary linter (TypeScript + correctness + suspicious), oxfmt as formatter (single quotes), ESLint for security/sonarjs only | Small | ✅ Done |
+| **Multi-runtime support** | Bun as default dev runtime, Deno as first-class alternative, mise.toml for pinned tool versions | Small | ✅ Done |
+| **Editor configs** | VS Code + Zed configs with OXC formatter/linter, Deno/Bun/Node debug launch configs | Small | ✅ Done |
+| **TypeScript scripts** | Converted all scripts/*.mjs → .ts with tsx runner, auto-generated dev-reference.md | Small | ✅ Done |
 | **OTel implementation** | Wire real spans/metrics into existing `Telemetry` port; pluggable backends (Langfuse, Jaeger, Grafana) via config | Small | |
 | **CredentialStore adapter** | OS keychain + encrypted file backends for API tokens | Small | |
 | **Enhanced scanner** | Integrate Semgrep, ShellCheck, Trivy when available on PATH | Medium | |

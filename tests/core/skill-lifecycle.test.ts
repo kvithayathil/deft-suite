@@ -89,7 +89,10 @@ describe('SkillLifecycle', () => {
       lifecycle.forceApprove('tdd-python');
 
       expect(logger.messages).toContainEqual(
-        expect.objectContaining({ level: 'warn', message: expect.stringContaining('force-approved') }),
+        expect.objectContaining({
+          level: 'warn',
+          message: expect.stringContaining('force-approved'),
+        }),
       );
     });
   });

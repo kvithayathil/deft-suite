@@ -59,7 +59,10 @@ export function parseSourceString(source: string): ResolveOptions {
   if (shorthandMatch) {
     return {
       source: 'remote',
-      remoteSource: { type: 'git', url: `https://github.com/${shorthandMatch[1]}/${shorthandMatch[2]}.git` },
+      remoteSource: {
+        type: 'git',
+        url: `https://github.com/${shorthandMatch[1]}/${shorthandMatch[2]}.git`,
+      },
     };
   }
 
@@ -154,7 +157,12 @@ export class SkillResolver {
     const catalogSources = this.catalog.catalogSources;
     const catalogStores = this.catalog.catalogStores;
 
-    if (!catalogSources || catalogSources.length === 0 || !catalogStores || catalogStores.size === 0) {
+    if (
+      !catalogSources ||
+      catalogSources.length === 0 ||
+      !catalogStores ||
+      catalogStores.size === 0
+    ) {
       return null;
     }
 
@@ -165,7 +173,8 @@ export class SkillResolver {
       }
 
       try {
-        const catalog = await store.getCached(catalogSource) ?? await store.fetch(catalogSource);
+        const catalog =
+          (await store.getCached(catalogSource)) ?? (await store.fetch(catalogSource));
         const entry = catalog.skills.find((candidate) => candidate.name === name);
         if (!entry) {
           continue;

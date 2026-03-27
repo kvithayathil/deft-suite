@@ -1,6 +1,7 @@
 import type { SkillLock, SkillLockEntry } from './types.js';
 import type { SkillLockStore } from './ports/skill-lock-store.js';
 import type { Logger } from './ports/logger.js';
+import { VERSION } from '../version.js';
 
 export interface VerifyResult {
   matches: boolean;
@@ -75,7 +76,7 @@ export class SkillLockManager {
     return {
       lockVersion: 1,
       generatedAt: new Date().toISOString(),
-      generatedBy: 'deft-mcp@1.0.0-beta.4',
+      generatedBy: `deft-mcp@${VERSION}`,
       skills: {},
     };
   }

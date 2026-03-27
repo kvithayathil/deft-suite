@@ -6,16 +6,22 @@ export class StubScanner implements Scanner {
   private results = new Map<string, ScanResult>();
 
   async scanSkill(_skillPath: string, skillName: string): Promise<ScanResult> {
-    return this.results.get(skillName) ?? {
-      skillName,
-      findings: [],
-      passed: true,
-      hash: 'stub-hash',
-      timestamp: new Date().toISOString(),
-    };
+    return (
+      this.results.get(skillName) ?? {
+        skillName,
+        findings: [],
+        passed: true,
+        hash: 'stub-hash',
+        timestamp: new Date().toISOString(),
+      }
+    );
   }
 
-  async scanDiff(_skillPath: string, skillName: string, _changedFiles: string[]): Promise<ScanResult> {
+  async scanDiff(
+    _skillPath: string,
+    skillName: string,
+    _changedFiles: string[],
+  ): Promise<ScanResult> {
     return this.scanSkill('', skillName);
   }
 

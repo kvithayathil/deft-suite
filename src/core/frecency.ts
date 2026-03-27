@@ -24,7 +24,10 @@ export function computeFrecency(entry: UsageEntry, now: Date = new Date()): numb
   return entry.score / 4;
 }
 
-export function computeFrecencyScores(entries: UsageEntry[], now: Date = new Date()): Map<string, number> {
+export function computeFrecencyScores(
+  entries: UsageEntry[],
+  now: Date = new Date(),
+): Map<string, number> {
   const scores = new Map<string, number>();
   for (const entry of entries) {
     scores.set(entry.name, computeFrecency(entry, now));
@@ -97,7 +100,11 @@ export function applySessionCap(currentBumps: number, cap: number): boolean {
   return currentBumps < cap;
 }
 
-export function applyCeiling(entryScore: number, totalScore: number, ceilingPercent: number): number {
+export function applyCeiling(
+  entryScore: number,
+  totalScore: number,
+  ceilingPercent: number,
+): number {
   if (totalScore <= 0) {
     return entryScore;
   }

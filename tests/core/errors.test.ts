@@ -65,7 +65,14 @@ describe('error factory functions', () => {
   });
 
   it('scanFailed includes findings in details', () => {
-    const err = scanFailed('my-skill', [{ rule: 'prompt-injection', severity: 'critical', message: 'found override phrase', file: 'SKILL.md' }]);
+    const err = scanFailed('my-skill', [
+      {
+        rule: 'prompt-injection',
+        severity: 'critical',
+        message: 'found override phrase',
+        file: 'SKILL.md',
+      },
+    ]);
     expect(err.code).toBe('SCAN_FAILED');
     expect(err.category).toBe('security');
     expect(err.details.findings).toHaveLength(1);
@@ -110,7 +117,9 @@ describe('error factory functions', () => {
   });
 
   it('skillQuarantined includes scan findings', () => {
-    const err = skillQuarantined('bad-skill', [{ rule: 'eval-usage', severity: 'critical', message: 'dynamic eval', file: 'scripts/run.js' }]);
+    const err = skillQuarantined('bad-skill', [
+      { rule: 'eval-usage', severity: 'critical', message: 'dynamic eval', file: 'scripts/run.js' },
+    ]);
     expect(err.code).toBe('SKILL_QUARANTINED');
     expect(err.category).toBe('security');
   });

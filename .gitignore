@@ -28,3 +28,4 @@ docs/superpowers/specs/
 **/secrets/
 # .npmrc is tracked — contains only public registry URL, no auth tokens
 .git-forbidden-patterns
+deno.lock

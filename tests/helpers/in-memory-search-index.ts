@@ -11,16 +11,17 @@ export class InMemorySearchIndex implements SearchIndex {
   async search(query: string, limit: number = 10): Promise<SearchResult[]> {
     const lowerQuery = query.toLowerCase();
     return this.skills
-      .filter(s =>
-        s.name.toLowerCase().includes(lowerQuery) ||
-        s.description.toLowerCase().includes(lowerQuery)
+      .filter(
+        (s) =>
+          s.name.toLowerCase().includes(lowerQuery) ||
+          s.description.toLowerCase().includes(lowerQuery),
       )
       .slice(0, limit)
       .map((s, i) => ({
         name: s.name,
         description: s.description,
         trustLevel: TrustLevel.Bundled,
-        score: 1 - (i * 0.1),
+        score: 1 - i * 0.1,
       }));
   }
 
@@ -36,8 +37,8 @@ export class InMemorySearchIndex implements SearchIndex {
 
   async getByCategory(category: string): Promise<SearchResult[]> {
     return this.skills
-      .filter(s => s.tags?.includes(category))
-      .map(s => ({
+      .filter((s) => s.tags?.includes(category))
+      .map((s) => ({
         name: s.name,
         description: s.description,
         trustLevel: TrustLevel.Bundled,

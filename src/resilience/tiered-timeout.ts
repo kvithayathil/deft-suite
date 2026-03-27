@@ -24,9 +24,7 @@ export async function withTimeout<T>(
   const timeoutMs = TIER_TIMEOUTS[tier];
   const controller = new AbortController();
   const timer = setTimeout(() => {
-    controller.abort(
-      operationTimeout(operationName ?? tier, timeoutMs),
-    );
+    controller.abort(operationTimeout(operationName ?? tier, timeoutMs));
   }, timeoutMs);
 
   try {

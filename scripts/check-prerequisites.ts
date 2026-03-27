@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env tsx
 
 /**
  * Checks for recommended system-level tools after npm install.
@@ -10,7 +10,13 @@ import { execSync } from 'node:child_process';
 const yellow = '\x1b[33m';
 const reset = '\x1b[0m';
 
-function isInstalled(cmd) {
+interface MissingTool {
+  name: string;
+  purpose: string;
+  install: string;
+}
+
+function isInstalled(cmd: string): boolean {
   try {
     execSync(`which ${cmd} 2>/dev/null`, { encoding: 'utf8' });
     return true;
@@ -19,7 +25,7 @@ function isInstalled(cmd) {
   }
 }
 
-const missing = [];
+const missing: MissingTool[] = [];
 
 if (!isInstalled('gitleaks')) {
   missing.push({

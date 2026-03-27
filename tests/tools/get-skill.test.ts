@@ -23,7 +23,8 @@ function makeContext(overrides: Partial<ToolContext> = {}): ToolContext {
   const bundledStore = new InMemorySkillStore();
   const logger = new NoopLogger();
   return {
-    skillStore, bundledStore,
+    skillStore,
+    bundledStore,
     configStore: new InMemoryConfigStore(),
     scanner: new StubScanner(),
     searchIndex: new InMemorySearchIndex(),
@@ -93,18 +94,18 @@ describe('handleGetSkill', () => {
     ctx.lifecycle.markActive(skill.metadata.name, 'hash-x');
     ctx.lifecycle.markQuarantined(skill.metadata.name, ['Dangerous instruction detected']);
 
-    await expect(
-      handleGetSkill({ name: skill.metadata.name }, ctx),
-    ).rejects.toMatchObject({ code: ErrorCode.SkillQuarantined });
+    await expect(handleGetSkill({ name: skill.metadata.name }, ctx)).rejects.toMatchObject({
+      code: ErrorCode.SkillQuarantined,
+    });
   });
 
   it('throws SKILL_NOT_FOUND for missing skill', async () => {
     const usageStore = new InMemoryUsageStore();
     const ctx = makeContext({ usageStore });
 
-    await expect(
-      handleGetSkill({ name: 'nonexistent-skill' }, ctx),
-    ).rejects.toMatchObject({ code: ErrorCode.SkillNotFound });
+    await expect(handleGetSkill({ name: 'nonexistent-skill' }, ctx)).rejects.toMatchObject({
+      code: ErrorCode.SkillNotFound,
+    });
 
     expect(usageStore.getRawData()).toHaveLength(0);
   });

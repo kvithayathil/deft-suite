@@ -8,13 +8,19 @@ export const handleSaveConfig: ToolHandler<Record<string, unknown>> = async (_pa
   }
 
   return {
-    content: [{
-      type: 'text',
-      text: JSON.stringify({
-        saved: true,
-        path: ctx.configStore.getPath(),
-        message: `Config saved and reloaded from '${ctx.configStore.getPath()}'.`,
-      }, null, 2),
-    }],
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify(
+          {
+            saved: true,
+            path: ctx.configStore.getPath(),
+            message: `Config saved and reloaded from '${ctx.configStore.getPath()}'.`,
+          },
+          null,
+          2,
+        ),
+      },
+    ],
   };
 };

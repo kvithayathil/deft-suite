@@ -29,7 +29,12 @@ function makeContext(): ToolContext {
   const searchIndex = new InMemorySearchIndex();
   const lockStore = new InMemorySkillLockStore();
 
-  const resolver = new SkillResolver(skillStore, bundledStore, flattenSourcesForResolver(config.sources), logger);
+  const resolver = new SkillResolver(
+    skillStore,
+    bundledStore,
+    flattenSourcesForResolver(config.sources),
+    logger,
+  );
   const trustEvaluator = new TrustEvaluator(config.security);
   const lifecycle = new SkillLifecycle(logger);
   const lockManager = new SkillLockManager(lockStore, logger);
@@ -95,9 +100,14 @@ describe('MCP Server Integration', () => {
     ]);
     const server = await createMcpServer(ctx, handlers);
 
-    const callHandler = (server as unknown as {
-      _requestHandlers: Map<string, (request: unknown, extra: unknown) => Promise<{ content: Array<{ text: string }> }>>;
-    })._requestHandlers.get('tools/call');
+    const callHandler = (
+      server as unknown as {
+        _requestHandlers: Map<
+          string,
+          (request: unknown, extra: unknown) => Promise<{ content: Array<{ text: string }> }>
+        >;
+      }
+    )._requestHandlers.get('tools/call');
 
     expect(callHandler).toBeDefined();
 
@@ -182,7 +192,9 @@ describe('End-to-End Install Flow', () => {
 
     const { SkillMcpError, ErrorCode } = await import('../../src/core/errors.js');
 
-    await expect(handleInstallSkill({ skill: 'already-installed' }, ctx)).rejects.toThrow(SkillMcpError);
+    await expect(handleInstallSkill({ skill: 'already-installed' }, ctx)).rejects.toThrow(
+      SkillMcpError,
+    );
 
     try {
       await handleInstallSkill({ skill: 'already-installed' }, ctx);

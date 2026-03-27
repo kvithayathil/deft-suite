@@ -32,7 +32,12 @@ function makeContext(overrides: Partial<ToolContext> = {}): ToolContext {
     searchIndex: new InMemorySearchIndex(),
     lockManager: new SkillLockManager(new InMemorySkillLockStore(), logger),
     lifecycle: new SkillLifecycle(logger),
-    resolver: new SkillResolver(skillStore, bundledStore, flattenSourcesForResolver(config.sources), logger),
+    resolver: new SkillResolver(
+      skillStore,
+      bundledStore,
+      flattenSourcesForResolver(config.sources),
+      logger,
+    ),
     trustEvaluator: new TrustEvaluator(config.security),
     manifestBuilder: new ManifestBuilder(config.manifest),
     config,

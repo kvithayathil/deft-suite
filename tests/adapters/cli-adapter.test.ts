@@ -39,7 +39,12 @@ function makeContext(overrides: Partial<ToolContext> = {}): ToolContext {
     searchIndex: new InMemorySearchIndex(),
     lockManager: new SkillLockManager(new InMemorySkillLockStore(), logger),
     lifecycle: new SkillLifecycle(logger),
-    resolver: new SkillResolver(skillStore, bundledStore, flattenSourcesForResolver(config.sources), logger),
+    resolver: new SkillResolver(
+      skillStore,
+      bundledStore,
+      flattenSourcesForResolver(config.sources),
+      logger,
+    ),
     trustEvaluator: new TrustEvaluator(config.security),
     manifestBuilder: new ManifestBuilder(config.manifest),
     config,
@@ -56,44 +61,54 @@ describe('CliAdapter', () => {
     const ctx = makeContext();
 
     const searchHandler = vi.fn(async () => ({
-      content: [{
-        type: 'text' as const,
-        text: JSON.stringify({
-          local: [{
-            name: 'database-local',
-            description: 'Installed database helper',
-            trustLevel: 'bundled',
-            score: 10,
-            frecency: 1,
-            installed: true,
-          }],
-          catalogs: {
-            'team-catalog': [{
-              name: 'database-migrations',
-              description: 'Safe migration patterns',
-              source: { type: 'github', repo: 'acme/db-migrations' },
-              catalogName: 'team-catalog',
-              score: 8,
-            }],
-          },
-          github: [{
-            name: 'oss/db-patterns',
-            description: 'Open source db patterns',
-            source: { type: 'github', repo: 'oss/db-patterns' },
-            tags: ['database'],
-            score: 7,
-            installable: true,
-          }],
-          offline: false,
-        }),
-      }],
+      content: [
+        {
+          type: 'text' as const,
+          text: JSON.stringify({
+            local: [
+              {
+                name: 'database-local',
+                description: 'Installed database helper',
+                trustLevel: 'bundled',
+                score: 10,
+                frecency: 1,
+                installed: true,
+              },
+            ],
+            catalogs: {
+              'team-catalog': [
+                {
+                  name: 'database-migrations',
+                  description: 'Safe migration patterns',
+                  source: { type: 'github', repo: 'acme/db-migrations' },
+                  catalogName: 'team-catalog',
+                  score: 8,
+                },
+              ],
+            },
+            github: [
+              {
+                name: 'oss/db-patterns',
+                description: 'Open source db patterns',
+                source: { type: 'github', repo: 'oss/db-patterns' },
+                tags: ['database'],
+                score: 7,
+                installable: true,
+              },
+            ],
+            offline: false,
+          }),
+        },
+      ],
     }));
 
     const installHandler = vi.fn(async () => ({
-      content: [{
-        type: 'text' as const,
-        text: JSON.stringify({ registration: 'Installed successfully.' }),
-      }],
+      content: [
+        {
+          type: 'text' as const,
+          text: JSON.stringify({ registration: 'Installed successfully.' }),
+        },
+      ],
     }));
 
     const adapter = new CliAdapter({

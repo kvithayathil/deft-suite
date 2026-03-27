@@ -15,7 +15,7 @@ export interface WorkerManagerOptions {
 }
 
 const WORKER_NAMES = ['sync', 'scanner', 'index'] as const;
-type WorkerName = typeof WORKER_NAMES[number];
+type WorkerName = (typeof WORKER_NAMES)[number];
 
 function toHeartbeatTarget(worker: Worker, name: string): HeartbeatTarget {
   return {

@@ -1,4 +1,9 @@
-import { TrustLevel, meetsMinTrust, type SecurityConfig, type AccessControlEntry } from './types.js';
+import {
+  TrustLevel,
+  meetsMinTrust,
+  type SecurityConfig,
+  type AccessControlEntry,
+} from './types.js';
 
 export class TrustEvaluator {
   constructor(private readonly config: SecurityConfig) {}
@@ -13,9 +18,15 @@ export class TrustEvaluator {
     const { mode, blocked, allowed } = this.config.accessControl;
 
     if (mode === 'blocklist') {
-      return !this.matchesAnyEntry(sourceUrl, blocked.filter(e => e.type === 'source'));
+      return !this.matchesAnyEntry(
+        sourceUrl,
+        blocked.filter((e) => e.type === 'source'),
+      );
     } else {
-      return this.matchesAnyEntry(sourceUrl, allowed.filter(e => e.type === 'source'));
+      return this.matchesAnyEntry(
+        sourceUrl,
+        allowed.filter((e) => e.type === 'source'),
+      );
     }
   }
 
@@ -27,14 +38,14 @@ export class TrustEvaluator {
     const { mode, blocked, allowed } = this.config.accessControl;
 
     if (mode === 'blocklist') {
-      return !blocked.some(e => e.type === 'skill' && e.name === skillName);
+      return !blocked.some((e) => e.type === 'skill' && e.name === skillName);
     } else {
-      return allowed.some(e => e.type === 'skill' && e.name === skillName);
+      return allowed.some((e) => e.type === 'skill' && e.name === skillName);
     }
   }
 
   private matchesAnyEntry(url: string, entries: AccessControlEntry[]): boolean {
-    return entries.some(entry => {
+    return entries.some((entry) => {
       if (!entry.url) return false;
       if (entry.url.endsWith('/*')) {
         const prefix = entry.url.slice(0, -1); // Remove trailing *

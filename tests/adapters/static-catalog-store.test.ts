@@ -87,7 +87,9 @@ describe('StaticCatalogStore', () => {
   });
 
   it('clearCache clears one source or all cache entries', async () => {
-    vi.mocked(fetch).mockImplementation(async () => new Response(JSON.stringify(catalog), { status: 200 }));
+    vi.mocked(fetch).mockImplementation(
+      async () => new Response(JSON.stringify(catalog), { status: 200 }),
+    );
 
     const store = new StaticCatalogStore();
     await store.fetch(source);

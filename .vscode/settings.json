@@ -1,0 +1,39 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always",
+    "source.fixAll.oxc": "always"
+  },
+  "oxc.enable": true,
+  "oxc.configPath": ".oxlintrc.json",
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "vscode.markdown-language-features"
+  },
+  "search.exclude": {
+    "**/dist": true,
+    "**/coverage": true,
+    "**/reports": true,
+    "**/node_modules": true
+  },
+  "files.exclude": {
+    "**/.DS_Store": true,
+    "**/dist": false,
+    "**/coverage": true
+  },
+  "testing.automaticallyOpenPeekView": "failureAnywhere"
+}

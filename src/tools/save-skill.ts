@@ -36,7 +36,9 @@ export const handleSaveSkill: ToolHandler<SaveSkillParams> = async (params, ctx)
         if (typeof parsed?.description === 'string') {
           description = parsed.description;
         }
-      } catch { /* ignore malformed frontmatter */ }
+      } catch {
+        /* ignore malformed frontmatter */
+      }
     }
   }
 
@@ -80,7 +82,10 @@ export const handleSaveSkill: ToolHandler<SaveSkillParams> = async (params, ctx)
   if (!scanResult.passed) {
     await ctx.skillStore.delete(params.name);
     await rebuildSearchIndex(ctx);
-    ctx.lifecycle.markQuarantined(params.name, scanResult.findings.map((f) => f.message));
+    ctx.lifecycle.markQuarantined(
+      params.name,
+      scanResult.findings.map((f) => f.message),
+    );
     throw scanFailed(params.name, scanResult.findings);
   }
 
@@ -102,13 +107,19 @@ export const handleSaveSkill: ToolHandler<SaveSkillParams> = async (params, ctx)
   await rebuildSearchIndex(ctx);
 
   return {
-    content: [{
-      type: 'text',
-      text: JSON.stringify({
-        saved: params.name,
-        hash: hash.slice(0, 8),
-        message: `Skill '${params.name}' saved successfully.`,
-      }, null, 2),
-    }],
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify(
+          {
+            saved: params.name,
+            hash: hash.slice(0, 8),
+            message: `Skill '${params.name}' saved successfully.`,
+          },
+          null,
+          2,
+        ),
+      },
+    ],
   };
 };

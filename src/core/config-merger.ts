@@ -1,10 +1,20 @@
 import { TrustLevel, type Config } from './types.js';
 import { validateConfig } from './config-validator.js';
+import { VERSION } from '../version.js';
 
 export const DEFAULT_CONFIG: Config = {
   schemaVersion: 1,
   manifest: {
-    skills: ['mcp-guide', 'skill-writer', 'security-baseline', 'mcp-debug', 'git-workflows', 'cli-discovery', 'core-cli-tools', 'agent-hooks'],
+    skills: [
+      'mcp-guide',
+      'skill-writer',
+      'security-baseline',
+      'mcp-debug',
+      'git-workflows',
+      'cli-discovery',
+      'core-cli-tools',
+      'agent-hooks',
+    ],
     maxManifestSize: 10,
     warnThreshold: 8,
   },
@@ -29,8 +39,20 @@ export const DEFAULT_CONFIG: Config = {
   },
   projectConfigPaths: ['.deft', '.claude/deft', '.agents/deft'],
   push: { remote: 'origin', branch: 'main', autoCommit: false },
-  logging: { level: 'error', file: '~/.cache/deft/logs/deft.log', maxFileSize: '10MB', maxFiles: 3, structured: false },
-  telemetry: { enabled: false, exporterEndpoint: null, exporterProtocol: 'grpc', serviceName: 'deft-mcp', sampleRate: 1.0 },
+  logging: {
+    level: 'error',
+    file: '~/.cache/deft/logs/deft.log',
+    maxFileSize: '10MB',
+    maxFiles: 3,
+    structured: false,
+  },
+  telemetry: {
+    enabled: false,
+    exporterEndpoint: null,
+    exporterProtocol: 'grpc',
+    serviceName: 'deft-mcp',
+    sampleRate: 1.0,
+  },
   resilience: {
     rateLimits: {
       search_skills: { bucketSize: 20, refillPerMinute: 20 },
@@ -39,7 +61,12 @@ export const DEFAULT_CONFIG: Config = {
     },
   },
   backup: { enabled: false, target: 'git', interval: 'daily', onConfigChange: true },
-  metadata: { createdOn: process.platform, createdBy: 'deft-mcp@1.0.0-beta.4', platforms: [process.platform], arch: process.arch },
+  metadata: {
+    createdOn: process.platform,
+    createdBy: `deft-mcp@${VERSION}`,
+    platforms: [process.platform],
+    arch: process.arch,
+  },
 };
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -115,7 +142,11 @@ export function migrateConfig(raw: Record<string, unknown>): Record<string, unkn
 // Array paths that use concatenation semantics (all others replace)
 const CONCAT_ARRAY_PATHS = new Set(['projectConfigPaths', 'sources.local', 'sources.remote']);
 
-function deepMerge(base: Record<string, unknown>, override: Record<string, unknown>, pathPrefix = ''): Record<string, unknown> {
+function deepMerge(
+  base: Record<string, unknown>,
+  override: Record<string, unknown>,
+  pathPrefix = '',
+): Record<string, unknown> {
   const result = { ...base };
   for (const key of Object.keys(override)) {
     if (key.endsWith(':replace')) continue;
@@ -140,17 +171,20 @@ function deepMerge(base: Record<string, unknown>, override: Record<string, unkno
   return result;
 }
 
-export function mergeConfigs(global?: Partial<Config> | null, project?: Partial<Config> | null): Config {
+export function mergeConfigs(
+  global?: Partial<Config> | null,
+  project?: Partial<Config> | null,
+): Config {
   let result = { ...DEFAULT_CONFIG } as Record<string, unknown>;
   const envOverrides = loadEnvOverrides();
   if (envOverrides) {
     result = deepMerge(result, envOverrides as Record<string, unknown>);
   }
   if (global) {
-    result = deepMerge(result, migrateConfig({ ...global as Record<string, unknown> }));
+    result = deepMerge(result, migrateConfig({ ...(global as Record<string, unknown>) }));
   }
   if (project) {
-    result = deepMerge(result, migrateConfig({ ...project as Record<string, unknown> }));
+    result = deepMerge(result, migrateConfig({ ...(project as Record<string, unknown>) }));
     enforceAccessControlPrecedence(result, global);
   }
   return result as unknown as Config;
@@ -170,16 +204,27 @@ export { validateConfig, formatValidationIssues } from './config-validator.js';
 function loadEnvOverrides(): Partial<Config> | null {
   const overrides: Record<string, unknown> = {};
   const logLevel = process.env.DEFT_LOG_LEVEL;
-  if (logLevel) { overrides.logging = { level: logLevel }; }
+  if (logLevel) {
+    overrides.logging = { level: logLevel };
+  }
   const minTrust = process.env.DEFT_MIN_TRUST;
-  if (minTrust) { overrides.security = { minTrustLevel: minTrust }; }
-  return Object.keys(overrides).length > 0 ? overrides as Partial<Config> : null;
+  if (minTrust) {
+    overrides.security = { minTrustLevel: minTrust };
+  }
+  return Object.keys(overrides).length > 0 ? (overrides as Partial<Config>) : null;
 }
 
-function enforceAccessControlPrecedence(merged: Record<string, unknown>, global?: Partial<Config> | null): void {
+function enforceAccessControlPrecedence(
+  merged: Record<string, unknown>,
+  global?: Partial<Config> | null,
+): void {
   if (!global) return;
-  const mergedSec = (merged as Record<string, Record<string, unknown>>).security?.accessControl as Record<string, unknown> | undefined;
-  const globalSec = (global as Record<string, Record<string, unknown>>).security?.accessControl as Record<string, unknown> | undefined;
+  const mergedSec = (merged as Record<string, Record<string, unknown>>).security?.accessControl as
+    | Record<string, unknown>
+    | undefined;
+  const globalSec = (global as Record<string, Record<string, unknown>>).security?.accessControl as
+    | Record<string, unknown>
+    | undefined;
   if (!mergedSec || !globalSec) return;
 
   if (globalSec.mode === 'blocklist' && mergedSec.blocked && globalSec.blocked) {
@@ -187,7 +232,7 @@ function enforceAccessControlPrecedence(merged: Record<string, unknown>, global?
     const globalBlocked = globalSec.blocked as Array<Record<string, unknown>>;
     for (const entry of globalBlocked) {
       const key = (entry.url ?? entry.name) as string;
-      if (!mergedBlocked.some(e => ((e.url ?? e.name) as string) === key)) {
+      if (!mergedBlocked.some((e) => ((e.url ?? e.name) as string) === key)) {
         mergedBlocked.push(entry);
       }
     }
@@ -195,9 +240,9 @@ function enforceAccessControlPrecedence(merged: Record<string, unknown>, global?
 
   if (globalSec.mode === 'allowlist' && mergedSec.allowed && globalSec.allowed) {
     const globalAllowed = globalSec.allowed as Array<Record<string, unknown>>;
-    const globalKeys = new Set(globalAllowed.map(e => ((e.url ?? e.name) as string)));
-    mergedSec.allowed = (mergedSec.allowed as Array<Record<string, unknown>>).filter(
-      e => globalKeys.has(((e.url ?? e.name) as string)),
+    const globalKeys = new Set(globalAllowed.map((e) => (e.url ?? e.name) as string));
+    mergedSec.allowed = (mergedSec.allowed as Array<Record<string, unknown>>).filter((e) =>
+      globalKeys.has((e.url ?? e.name) as string),
     );
   }
 }

@@ -38,11 +38,7 @@ export async function withToolResilience<T>(
   }
 
   try {
-    const result = await withTimeout(
-      async (signal) => operation(signal),
-      tier,
-      toolName,
-    );
+    const result = await withTimeout(async (signal) => operation(signal), tier, toolName);
 
     if (options?.circuitBreakerKey) {
       const breaker = resilience.circuitBreakers.get(options.circuitBreakerKey);

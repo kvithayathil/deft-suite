@@ -29,7 +29,9 @@ export class ConsoleLogger implements Logger {
     if (!context || Object.keys(context).length === 0) {
       return '';
     }
-    return ` ${Object.entries(context).map(([k, v]) => `${k}=${String(v)}`).join(' ')}`;
+    return ` ${Object.entries(context)
+      .map(([k, v]) => `${k}=${String(v)}`)
+      .join(' ')}`;
   }
 
   private log(level: LogLevel, message: string, context?: Record<string, unknown>): void {

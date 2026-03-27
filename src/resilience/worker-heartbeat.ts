@@ -25,7 +25,9 @@ export class WorkerHeartbeat {
   private consecutiveHangs = 0;
   private hangTimestamps: number[] = [];
   private _disabled = false;
-  private readonly options: Required<Omit<HeartbeatOptions, 'onHung'>> & { onHung?: (name: string) => void };
+  private readonly options: Required<Omit<HeartbeatOptions, 'onHung'>> & {
+    onHung?: (name: string) => void;
+  };
 
   // After 3 consecutive restarts within 10 minutes, disable the worker for the session (spec §8a)
   private static readonly MAX_RESTARTS = 3;
@@ -45,7 +47,9 @@ export class WorkerHeartbeat {
     this.target.onPong(() => this.handlePong());
   }
 
-  get disabled(): boolean { return this._disabled; }
+  get disabled(): boolean {
+    return this._disabled;
+  }
 
   start(): void {
     if (this._disabled) {
@@ -108,14 +112,16 @@ export class WorkerHeartbeat {
 
     // Terminate the hung worker (spec §8a)
     this.target.terminate();
-    this.logger.warn(`Worker '${this.target.name}' terminated after missed heartbeat (hang #${this.consecutiveHangs})`);
+    this.logger.warn(
+      `Worker '${this.target.name}' terminated after missed heartbeat (hang #${this.consecutiveHangs})`,
+    );
 
     // Track restart timestamps for the "within 10 minutes" window check
     const now = Date.now();
     this.hangTimestamps.push(now);
     // Keep only timestamps within the restart window
     this.hangTimestamps = this.hangTimestamps.filter(
-      t => now - t < WorkerHeartbeat.RESTART_WINDOW_MS,
+      (t) => now - t < WorkerHeartbeat.RESTART_WINDOW_MS,
     );
 
     // Disable after MAX_RESTARTS consecutive hangs (no successful pong between them) within the window (spec §8a)
@@ -125,7 +131,9 @@ export class WorkerHeartbeat {
     ) {
       this._disabled = true;
       this.stop();
-      this.logger.error(`Worker '${this.target.name}' disabled — ${WorkerHeartbeat.MAX_RESTARTS} consecutive restarts within 10 minutes`);
+      this.logger.error(
+        `Worker '${this.target.name}' disabled — ${WorkerHeartbeat.MAX_RESTARTS} consecutive restarts within 10 minutes`,
+      );
     }
 
     this.options.onHung?.(this.target.name);

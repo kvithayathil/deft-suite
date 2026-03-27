@@ -18,10 +18,7 @@ describe('handleInstallSkill', () => {
       FIXTURE_SKILLS.tddPython,
     );
 
-    const result = await handleInstallSkill(
-      { skill: FIXTURE_SKILLS.tddPython.metadata.name },
-      ctx,
-    );
+    const result = await handleInstallSkill({ skill: FIXTURE_SKILLS.tddPython.metadata.name }, ctx);
 
     const parsed = JSON.parse(result.content[0].text);
     expect(parsed.installed).toBe('tdd-python');
@@ -66,9 +63,7 @@ describe('handleInstallSkill', () => {
       FIXTURE_SKILLS.tddPython,
     );
 
-    await expect(
-      handleInstallSkill({ skill: 'tdd-python' }, ctx),
-    ).resolves.toBeDefined();
+    await expect(handleInstallSkill({ skill: 'tdd-python' }, ctx)).resolves.toBeDefined();
   });
 
   it('rejects blocked skill (access control) — throws error', async () => {
@@ -86,9 +81,9 @@ describe('handleInstallSkill', () => {
       FIXTURE_SKILLS.tddPython,
     );
 
-    await expect(
-      handleInstallSkill({ skill: 'tdd-python' }, ctx),
-    ).rejects.toMatchObject({ code: ErrorCode.PermissionDenied });
+    await expect(handleInstallSkill({ skill: 'tdd-python' }, ctx)).rejects.toMatchObject({
+      code: ErrorCode.PermissionDenied,
+    });
 
     // Skill should NOT have been written
     expect(await ctx.skillStore.exists('tdd-python')).toBe(false);
@@ -103,9 +98,9 @@ describe('handleInstallSkill', () => {
       FIXTURE_SKILLS.tddPython,
     );
 
-    await expect(
-      handleInstallSkill({ skill: 'tdd-python' }, ctx),
-    ).rejects.toMatchObject({ code: ErrorCode.AlreadyInstalled });
+    await expect(handleInstallSkill({ skill: 'tdd-python' }, ctx)).rejects.toMatchObject({
+      code: ErrorCode.AlreadyInstalled,
+    });
   });
 
   it('rejects skill that fails metadata validation', async () => {
@@ -119,9 +114,9 @@ describe('handleInstallSkill', () => {
       sourcePath: 'BAD-NAME',
     });
 
-    await expect(
-      handleInstallSkill({ skill: 'BAD-NAME' }, ctx),
-    ).rejects.toMatchObject({ code: ErrorCode.ValidationFailed });
+    await expect(handleInstallSkill({ skill: 'BAD-NAME' }, ctx)).rejects.toMatchObject({
+      code: ErrorCode.ValidationFailed,
+    });
   });
 
   it('throws SKILL_NOT_FOUND when resolver returns null', async () => {
@@ -159,12 +154,17 @@ describe('handleInstallSkill', () => {
     );
 
     (ctx.scanner as StubScanner).failSkill('community-tool', [
-      { rule: 'dangerous-exec', severity: 'critical', message: 'Dangerous exec call detected', file: 'skill.md' },
+      {
+        rule: 'dangerous-exec',
+        severity: 'critical',
+        message: 'Dangerous exec call detected',
+        file: 'skill.md',
+      },
     ]);
 
-    await expect(
-      handleInstallSkill({ skill: 'community-tool' }, ctx),
-    ).rejects.toMatchObject({ code: ErrorCode.ScanFailed });
+    await expect(handleInstallSkill({ skill: 'community-tool' }, ctx)).rejects.toMatchObject({
+      code: ErrorCode.ScanFailed,
+    });
 
     // Lifecycle should be quarantined
     const state = ctx.lifecycle.getState('community-tool');

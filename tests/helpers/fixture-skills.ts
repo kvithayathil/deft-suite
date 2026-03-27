@@ -23,7 +23,10 @@ export const FIXTURE_SKILLS = {
     sourcePath: '.agents/skills/tdd-python',
   }),
   securityBaseline: makeSkill({
-    metadata: { name: 'security-baseline', description: 'Security-aware patterns for skill authoring' },
+    metadata: {
+      name: 'security-baseline',
+      description: 'Security-aware patterns for skill authoring',
+    },
     trustLevel: TrustLevel.Bundled,
     sourcePath: '.agents/skills/security-baseline',
   }),

@@ -1,0 +1,89 @@
+[
+  // ── Deno (first-class) ──────────────────────────────────────
+  {
+    "label": "Deno: MCP Server",
+    "command": "deno task run",
+    "use_new_terminal": true,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "Deno: CLI (search)",
+    "command": "deno task cli search example",
+    "use_new_terminal": true,
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "Deno: Lint",
+    "command": "deno task lint",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  },
+  // ── Bun (default) ───────────────────────────────────────────
+  {
+    "label": "Bun: MCP Server",
+    "command": "bun run src/index.ts",
+    "use_new_terminal": true,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "Bun: CLI (search)",
+    "command": "bun run src/cli.ts search example",
+    "use_new_terminal": true,
+    "allow_concurrent_runs": true
+  },
+  {
+    "label": "Bun: Test current file",
+    "command": "bunx vitest run --no-file-parallelism $ZED_FILE",
+    "use_new_terminal": true,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "Bun: Test all",
+    "command": "bun test",
+    "use_new_terminal": true,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "Bun: Test watch",
+    "command": "bun run test:watch",
+    "use_new_terminal": true,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "Bun: Build",
+    "command": "bun run build",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "Bun: Typecheck",
+    "command": "bun run typecheck",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "Bun: Lint",
+    "command": "bun run lint",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "Bun: Format",
+    "command": "bun run fmt",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  },
+  // ── Node/npm (fallback) ─────────────────────────────────────
+  {
+    "label": "npm: Test all",
+    "command": "npm test",
+    "use_new_terminal": true,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "npm: Lint",
+    "command": "npm run lint",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  }
+]

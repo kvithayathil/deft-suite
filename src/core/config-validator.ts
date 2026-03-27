@@ -62,7 +62,13 @@ function checkEnum(
 ): boolean {
   if (typeof value !== 'string' || !allowed.includes(value)) {
     issues.push(
-      issue(path, `Must be one of: ${allowed.join(', ')}`, 'error', allowed.join(' | '), String(value)),
+      issue(
+        path,
+        `Must be one of: ${allowed.join(', ')}`,
+        'error',
+        allowed.join(' | '),
+        String(value),
+      ),
     );
     return false;
   }
@@ -81,7 +87,11 @@ function checkUrl(issues: ValidationIssue[], path: string, value: unknown): bool
   return true;
 }
 
-function validateLocalSources(issues: ValidationIssue[], sources: unknown[], basePath: string): void {
+function validateLocalSources(
+  issues: ValidationIssue[],
+  sources: unknown[],
+  basePath: string,
+): void {
   for (let i = 0; i < sources.length; i++) {
     const entry = sources[i] as Record<string, unknown>;
     const p = `${basePath}[${i}]`;
@@ -102,7 +112,11 @@ function validateLocalSources(issues: ValidationIssue[], sources: unknown[], bas
   }
 }
 
-function validateRemoteSources(issues: ValidationIssue[], sources: unknown[], basePath: string): void {
+function validateRemoteSources(
+  issues: ValidationIssue[],
+  sources: unknown[],
+  basePath: string,
+): void {
   for (let i = 0; i < sources.length; i++) {
     const entry = sources[i] as Record<string, unknown>;
     const p = `${basePath}[${i}]`;
@@ -117,7 +131,9 @@ function validateRemoteSources(issues: ValidationIssue[], sources: unknown[], ba
     }
 
     if (entry.branch !== undefined && typeof entry.branch !== 'string') {
-      issues.push(issue(`${p}.branch`, `Expected a string`, 'error', 'string', typeof entry.branch));
+      issues.push(
+        issue(`${p}.branch`, `Expected a string`, 'error', 'string', typeof entry.branch),
+      );
     }
 
     if (entry.ref !== undefined && typeof entry.ref !== 'string') {
@@ -138,7 +154,15 @@ function validateCatalogs(issues: ValidationIssue[], sources: unknown[], basePat
 
     if (entry.cacheMinutes !== undefined) {
       if (typeof entry.cacheMinutes !== 'number' || entry.cacheMinutes < 0) {
-        issues.push(issue(`${p}.cacheMinutes`, `Must be a non-negative number`, 'error', 'number >= 0', String(entry.cacheMinutes)));
+        issues.push(
+          issue(
+            `${p}.cacheMinutes`,
+            `Must be a non-negative number`,
+            'error',
+            'number >= 0',
+            String(entry.cacheMinutes),
+          ),
+        );
       }
     }
   }
@@ -170,7 +194,13 @@ function validateSources(issues: ValidationIssue[], sources: unknown): void {
   const knownKeys = new Set(['local', 'remote', 'catalogs']);
   for (const key of Object.keys(src)) {
     if (!knownKeys.has(key)) {
-      issues.push(issue(`sources.${key}`, `Unknown sources key '${key}'; expected: local, remote, catalogs`, 'warning'));
+      issues.push(
+        issue(
+          `sources.${key}`,
+          `Unknown sources key '${key}'; expected: local, remote, catalogs`,
+          'warning',
+        ),
+      );
     }
   }
 }
@@ -214,7 +244,9 @@ export function validateConfig(config: unknown): ValidationResult {
   const cfg = config as Record<string, unknown>;
 
   if (cfg.schemaVersion !== undefined && cfg.schemaVersion !== 1) {
-    issues.push(issue('schemaVersion', `Unsupported schema version`, 'error', '1', String(cfg.schemaVersion)));
+    issues.push(
+      issue('schemaVersion', `Unsupported schema version`, 'error', '1', String(cfg.schemaVersion)),
+    );
   }
 
   if (cfg.sources !== undefined) {
@@ -231,19 +263,23 @@ export function validateConfig(config: unknown): ValidationResult {
 
   // Detect legacy config shapes and provide migration hints
   if ('registries' in cfg) {
-    issues.push(issue(
-      'registries',
-      `'registries' has been replaced by 'sources.catalogs'. Move your registry sources into sources.catalogs.`,
-      'warning',
-    ));
+    issues.push(
+      issue(
+        'registries',
+        `'registries' has been replaced by 'sources.catalogs'. Move your registry sources into sources.catalogs.`,
+        'warning',
+      ),
+    );
   }
 
   if (Array.isArray(cfg.sources)) {
-    issues.push(issue(
-      'sources',
-      `'sources' is now an object with { local, remote, catalogs } instead of a flat array. See docs/configuration.md for migration guide.`,
-      'error',
-    ));
+    issues.push(
+      issue(
+        'sources',
+        `'sources' is now an object with { local, remote, catalogs } instead of a flat array. See docs/configuration.md for migration guide.`,
+        'error',
+      ),
+    );
   }
 
   return {
