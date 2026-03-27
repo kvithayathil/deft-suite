@@ -18,6 +18,7 @@
   ],
   "scripts": {
     "build": "tsc",
+    "preversion": "npm run typecheck && npm run lint",
     "prepare": "tsc && npm run generate:notices",
     "postinstall": "git config core.hooksPath .githooks || true && tsx scripts/check-prerequisites.ts || true",
     "generate:notices": "tsx scripts/generate-notices.ts",
@@ -26,6 +27,9 @@
     "check:schema": "tsx scripts/generate-schema.ts --check",
     "generate:dev-reference": "tsx scripts/generate-dev-reference.ts",
     "check:dev-reference": "tsx scripts/generate-dev-reference.ts --check",
+    "sync:version": "tsx scripts/sync-version.ts",
+    "check:version": "tsx scripts/sync-version.ts --check",
+    "version": "npm run sync:version && npm run generate:dev-reference && npm run generate:schema && npm run generate:notices && git add -A",
     "dev": "tsc --watch",
     "test": "vitest run",
     "test:watch": "vitest",

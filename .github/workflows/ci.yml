@@ -34,6 +34,9 @@ jobs:
       - name: Check dev reference is up to date
         run: npm run check:dev-reference
 
+      - name: Check version references are in sync
+        run: npm run check:version
+
       - name: Format check
         run: npm run fmt:check
 

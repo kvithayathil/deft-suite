@@ -1,5 +1,6 @@
 import { TrustLevel, type Config } from './types.js';
 import { validateConfig } from './config-validator.js';
+import { VERSION } from '../version.js';
 
 export const DEFAULT_CONFIG: Config = {
   schemaVersion: 1,
@@ -62,7 +63,7 @@ export const DEFAULT_CONFIG: Config = {
   backup: { enabled: false, target: 'git', interval: 'daily', onConfigChange: true },
   metadata: {
     createdOn: process.platform,
-    createdBy: 'deft-mcp@1.0.0-beta.4',
+    createdBy: `deft-mcp@${VERSION}`,
     platforms: [process.platform],
     arch: process.arch,
   },

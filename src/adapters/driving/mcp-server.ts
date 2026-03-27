@@ -8,6 +8,7 @@ import {
 import type { ToolContext } from '../../tools/context.js';
 import type { ToolHandler } from '../../tools/types.js';
 import { SkillMcpError } from '../../core/errors.js';
+import { VERSION } from '../../version.js';
 
 const TOOL_DEFINITIONS = [
   {
@@ -133,7 +134,7 @@ export async function createMcpServer(
   const manifestText = ctx.manifestBuilder.toText(manifest);
 
   const server = new Server(
-    { name: 'deft-mcp', version: '1.0.0-beta.4' },
+    { name: 'deft-mcp', version: VERSION },
     { capabilities: { tools: {} } },
   );
 
@@ -146,7 +147,7 @@ export async function createMcpServer(
       capabilities: { tools: {} },
       serverInfo: {
         name: 'deft-mcp',
-        version: '1.0.0-beta.4',
+        version: VERSION,
       },
       instructions: manifestText,
     };

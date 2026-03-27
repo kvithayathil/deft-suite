@@ -135,7 +135,7 @@ Pin a specific version for stability:
   "mcpServers": {
     "deft-mcp": {
       "command": "npx",
-      "args": ["-y", "github:kvithayathil/deft-suite#v1.0.0-beta.3", "deft-mcp"]
+      "args": ["-y", "github:kvithayathil/deft-suite#v1.0.0-beta.4", "deft-mcp"]
     }
   }
 }

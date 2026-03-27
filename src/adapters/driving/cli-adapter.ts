@@ -20,6 +20,7 @@ import { handleInstallSkill } from '../../tools/install-skill.js';
 import type { ToolContext } from '../../tools/context.js';
 import type { SearchStats, UnifiedSearchResult, UsageEntry, UsageStats } from '../../core/types.js';
 import { wireOptionalAdapters } from '../../bootstrap.js';
+import { VERSION } from '../../version.js';
 
 interface CliAdapterOptions {
   createContext?: () => Promise<ToolContext>;
@@ -47,7 +48,7 @@ export class CliAdapter {
     this.promptSelection = options.promptSelection;
     this.stdout = options.stdout ?? process.stdout;
     this.stderr = options.stderr ?? process.stderr;
-    this.versionText = options.version ?? '1.0.0-beta.4';
+    this.versionText = options.version ?? VERSION;
   }
 
   async run(args: string[], flags: Record<string, unknown>): Promise<void> {
