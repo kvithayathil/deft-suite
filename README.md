@@ -8,7 +8,7 @@
 [![npm version](https://img.shields.io/npm/v/deft-mcp)](https://www.npmjs.com/package/deft-mcp)
 -->
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen)](https://nodejs.org)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen)](https://nodejs.org)
 [![coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/kvithayathil/c6e1b113c3ce1aa0729dd3f6a9e24476/raw/coverage-badge.json)](https://github.com/kvithayathil/deft-suite/actions/workflows/ci.yml)
 [![duplication](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/kvithayathil/c6e1b113c3ce1aa0729dd3f6a9e24476/raw/duplication-badge.json)](https://github.com/kvithayathil/deft-suite/actions/workflows/ci.yml)
 
@@ -17,7 +17,7 @@
 [![GitLab Coverage](https://gitlab.com/YOUR_GROUP/deft-suite/badges/main/coverage.svg)](https://gitlab.com/YOUR_GROUP/deft-suite/-/graphs/main/charts)
 -->
 
-> **v1.0.0-beta.3** — [Changelog](CHANGELOG.md)
+> **v1.0.0-beta.4** — [Changelog](CHANGELOG.md)
 
 An MCP server for discovering, validating, installing, and managing reusable agent skills.
 
@@ -30,9 +30,10 @@ An MCP server for discovering, validating, installing, and managing reusable age
 
 ## Prerequisites
 
-- Node.js `>=20.0.0`
-- npm
+- Node.js `>=22.0.0`
+- A package manager: **bun** (recommended), pnpm, or npm
 - Build toolchain for native addons (`better-sqlite3`)
+- Optional: [mise](https://mise.jdx.dev/) for pinned runtime versions
 
 ## Installation
 
@@ -45,7 +46,7 @@ npm install -g github:kvithayathil/deft-suite
 Or pin a specific tag:
 
 ```bash
-npm install -g github:kvithayathil/deft-suite#v1.0.0-beta.3
+npm install -g github:kvithayathil/deft-suite#v1.0.0-beta.4
 ```
 
 ### From npm (once published)
@@ -59,8 +60,9 @@ npm install -g deft-mcp
 ```bash
 git clone https://github.com/kvithayathil/deft-suite.git
 cd deft-suite
-npm install
-npm run build
+mise install          # install pinned runtimes (node, bun, deno, pnpm)
+bun install           # or: npm install
+bun run build         # or: npm run build
 npm link
 ```
 
@@ -71,13 +73,18 @@ This makes the `deft` CLI available globally via symlink.
 Start the MCP server over stdio:
 
 ```bash
-node dist/index.js
+node dist/index.js          # Node.js
+bun dist/index.js           # Bun
+deno task run                # Deno
 ```
 
 Or use the CLI:
 
 ```bash
-node dist/cli.js --help
+deft --help                 # if installed globally
+node dist/cli.js --help     # Node.js
+bun dist/cli.js --help      # Bun
+deno task cli -- --help      # Deno
 ```
 
 ## MCP Client Setup
@@ -193,6 +200,7 @@ deft usage reset --all
 | [Configuration](docs/configuration.md) | Full config schema, merge semantics, environment overrides |
 | [Tools Reference](docs/tools-reference.md) | Per-tool parameters, responses, and error codes |
 | [Agent Hooks](docs/agent-hooks.md) | Hook integration for consistent MCP usage across agent platforms |
+| [Developer Reference](docs/dev-reference.md) | Auto-generated: scripts, toolchain, dependencies |
 | [Roadmap](docs/roadmap.md) | What shipped, what's next |
 | [Changelog](CHANGELOG.md) | Release history |
 
@@ -205,8 +213,9 @@ Contributions welcome. Add tests for behavioral changes and keep docs aligned wi
 ```bash
 git clone https://github.com/kvithayathil/deft-suite.git
 cd deft-suite
-npm install        # also configures git hooks and checks prerequisites
-npm run build
+mise install       # install pinned runtimes (optional but recommended)
+bun install        # or: npm install — also configures git hooks
+bun run build      # or: npm run build
 ```
 
 **Recommended**: Install [gitleaks](https://github.com/gitleaks/gitleaks) for pre-commit secret scanning:
@@ -221,11 +230,19 @@ All checks run automatically via pre-commit hook and CI:
 
 | Check | Command | Gate |
 |-------|---------|------|
-| Type safety | `npm run typecheck` | 0 errors |
-| Lint (includes SonarJS) | `npm run lint` | 0 errors |
-| Code duplication | `npm run check:duplication` | < 6% |
-| Tests | `npm test` | Pass |
+| Format | `bun run fmt:check` | oxfmt (single quotes) |
+| Type safety | `bun run typecheck` | 0 errors |
+| Lint (oxlint + ESLint) | `bun run lint` | 0 errors |
+| Code duplication | `bun run check:duplication` | < 6% |
+| Tests | `bun run test` | Pass |
 | Secret scanning | `gitleaks protect --staged` | 0 leaks |
+
+Shortcuts via [mise](https://mise.jdx.dev/):
+
+```bash
+mise run check    # fmt:check + typecheck + lint
+mise run ci       # full CI pipeline locally
+```
 
 See [SECURITY.md](SECURITY.md) for the full security tooling overview.
 <!-- THIRD-PARTY-START -->

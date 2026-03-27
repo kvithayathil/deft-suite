@@ -25,14 +25,14 @@ All clients use the same server definition. Choose one:
 }
 ```
 
-> **Tip:** Pin a version for stability: `"args": ["-y", "github:kvithayathil/deft-suite#v1.0.0-beta.3", "deft-mcp"]`
+> **Tip:** Pin a version for stability: `"args": ["-y", "github:kvithayathil/deft-suite#v1.0.0-beta.4", "deft-mcp"]`
 
 ### Version Pinning
 
 Appending `#<tag>` to the GitHub specifier locks `npx` to a specific release:
 
 ```
-github:kvithayathil/deft-suite#v1.0.0-beta.3
+github:kvithayathil/deft-suite#v1.0.0-beta.4
 ```
 
 **Why pin?**
@@ -277,7 +277,7 @@ OpenCode supports config in two locations:
     "deft-mcp": {
       "enabled": true,
       "type": "local",
-      "command": ["npx", "-y", "github:kvithayathil/deft-suite#v1.0.0-beta.3", "deft-mcp"],
+      "command": ["npx", "-y", "github:kvithayathil/deft-suite#v1.0.0-beta.4", "deft-mcp"],
       "timeout": 30000
     }
   }
