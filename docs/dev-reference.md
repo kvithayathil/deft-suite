@@ -41,8 +41,10 @@ Run `mise install` to set up all required runtimes.
 | `generate:dev-reference` | `tsx scripts/generate-dev-reference.ts` | 📋 CI/Gen |
 | `check:dev-reference` | `tsx scripts/generate-dev-reference.ts --check` | 📋 CI/Gen |
 | `sync:version` | `tsx scripts/sync-version.ts` | ⚙️ Other |
+| `generate:agent-docs` | `tsx scripts/generate-agent-docs.ts` | 📋 CI/Gen |
+| `check:agent-docs` | `tsx scripts/generate-agent-docs.ts --check` | 📋 CI/Gen |
 | `check:version` | `tsx scripts/sync-version.ts --check` | 📋 CI/Gen |
-| `version` | `npm run sync:version && npm run generate:dev-reference && npm run generate:schema && npm run generate:notices && git add -A` | ⚙️ Other |
+| `version` | `npm run sync:version && npm run generate:agent-docs && npm run generate:dev-reference && npm run generate:schema && npm run generate:notices && git add README.md THIRD-PARTY-NOTICES.md docs/getting-started.md docs/client-setup.md docs/dev-reference.md docs/configuration.md docs/agents/ config.schema.json package-lock.json` | ⚙️ Other |
 | `dev` | `tsc --watch` | 🔨 Build |
 | `test` | `vitest run` | 🧪 Test |
 | `test:watch` | `vitest` | 🧪 Test |
