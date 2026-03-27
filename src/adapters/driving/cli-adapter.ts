@@ -47,7 +47,7 @@ export class CliAdapter {
     this.promptSelection = options.promptSelection;
     this.stdout = options.stdout ?? process.stdout;
     this.stderr = options.stderr ?? process.stderr;
-    this.versionText = options.version ?? '1.0.0-beta.3';
+    this.versionText = options.version ?? '1.0.0-beta.4';
   }
 
   async run(args: string[], flags: Record<string, unknown>): Promise<void> {
@@ -352,7 +352,8 @@ async function defaultCreateCliContext(): Promise<ToolContext> {
   const searchIndex = new MemorySearchIndex();
   const scanner = new BuiltinScanner();
   const { flattenSourcesForResolver } = await import('../../core/types.js');
-  const resolver = new SkillResolver(skillStore, bundledStore, flattenSourcesForResolver(config.sources), logger);
+  const allSources = flattenSourcesForResolver(config.sources);
+  const resolver = new SkillResolver(skillStore, bundledStore, allSources, logger);
   const trustEvaluator = new TrustEvaluator(config.security);
   const lifecycle = new SkillLifecycle(logger);
   const lockStore = new FileSkillLockStore(join(configDir, 'skill-lock.json'));
@@ -371,7 +372,7 @@ async function defaultCreateCliContext(): Promise<ToolContext> {
     trustEvaluator,
     manifestBuilder,
     config,
-    rawConfig: rawConfig ? structuredClone(rawConfig) : {},
+    rawConfig: rawConfig ?? {},
     logger,
   };
 

@@ -204,6 +204,38 @@ describe('handleSearchSkills', () => {
     expect(store.cachedCalls).toBe(0);
   });
 
+  it('resets catalog circuit breaker when refresh is true', async () => {
+    const { CircuitBreaker } = await import('../../src/resilience/circuit-breaker.js');
+    const breaker = new CircuitBreaker({ failureThreshold: 1 });
+    breaker.recordFailure();
+    expect(breaker.isAllowed()).toBe(false);
+
+    const ctx = makeContext({
+      catalogStores: new Map([[CATALOG_SOURCE.url, new InMemoryCatalogStore({
+        [CATALOG_SOURCE.url]: {
+          name: 'team-catalog',
+          skills: [
+            {
+              name: 'catalog-python-skill',
+              description: 'Python tool from team catalog',
+              source: { type: 'url', url: 'https://catalog.test/python' },
+              tags: ['python'],
+            },
+          ],
+        },
+      })]]),
+      resilience: {
+        rateLimiters: new Map(),
+        circuitBreakers: new Map([[CATALOG_SOURCE.url, breaker]]),
+      },
+    });
+    await ctx.searchIndex.rebuild([FIXTURE_SKILLS.tddPython.metadata]);
+
+    await handleSearchSkills({ query: 'python', sources: ['catalog'], refresh: true }, ctx);
+
+    expect(breaker.isAllowed()).toBe(true);
+  });
+
   it('sets offline when remote sources are unavailable and records per-source search stats', async () => {
     const usageStore = new InMemoryUsageStore();
     const ctx = makeContext({

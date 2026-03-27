@@ -19,7 +19,7 @@
   "scripts": {
     "build": "tsc",
     "prepare": "tsc && npm run generate:notices",
-    "postinstall": "git config core.hooksPath .githooks || true",
+    "postinstall": "git config core.hooksPath .githooks || true && node scripts/check-prerequisites.mjs || true",
     "generate:notices": "node scripts/generate-notices.mjs",
     "check:notices": "node scripts/generate-notices.mjs --check",
     "generate:schema": "node scripts/generate-schema.mjs",
@@ -29,10 +29,11 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src/ tests/",
+    "check:duplication": "jscpd src/ tests/",
     "typecheck": "tsc --noEmit"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
   "license": "GPL-3.0-only",
   "keywords": [
@@ -58,6 +59,8 @@
     "@vitest/coverage-v8": "^4.1.0",
     "eslint": "^10.0.3",
     "eslint-plugin-security": "^4.0.0",
+    "eslint-plugin-sonarjs": "^4.0.2",
+    "jscpd": "^4.0.8",
     "license-checker": "^25.0.1",
     "ts-json-schema-generator": "^2.4.0",
     "typescript": "^5.9.3",

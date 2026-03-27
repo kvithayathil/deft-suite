@@ -18,8 +18,20 @@ export class InMemorySkillStore implements SkillStore {
     return this.skills.has(name);
   }
 
-  async write(name: string, skill: Skill): Promise<void> {
-    this.skills.set(name, skill);
+  async write(name: string, skill: Skill, resources?: Record<string, string>): Promise<void> {
+    const resourceEntries = resources ? Object.entries(resources) : [];
+    this.skills.set(name, {
+      ...skill,
+      resources: resourceEntries.length > 0 ? resourceEntries.map(([resourcePath]) => resourcePath) : skill.resources,
+    });
+
+    if (resourceEntries.length > 0) {
+      const resourceMap = new Map<string, string>();
+      for (const [resourcePath, content] of resourceEntries) {
+        resourceMap.set(resourcePath, content);
+      }
+      this.resources.set(name, resourceMap);
+    }
   }
 
   async delete(name: string): Promise<void> {

@@ -5,4 +5,5 @@ export interface CatalogStore {
   getCached(source: CatalogSourceConfig): Promise<CatalogEntry | null>;
   isFresh(source: CatalogSourceConfig, maxAgeMinutes: number): boolean;
   clearCache(source?: CatalogSourceConfig): void;
+  prune?(maxAgeDays: number): Promise<number>;
 }

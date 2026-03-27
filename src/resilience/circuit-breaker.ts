@@ -53,6 +53,12 @@ export class CircuitBreaker {
     }
   }
 
+  reset(): void {
+    this.state = CircuitState.Closed;
+    this.consecutiveFailures = 0;
+    this.openedAt = null;
+  }
+
   private trip(): void {
     this.state = CircuitState.Open;
     this.openedAt = Date.now();
