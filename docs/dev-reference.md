@@ -3,7 +3,7 @@
 > **Auto-generated** from project config files.
 > Do not edit manually — run `npm run generate:dev-reference` to regenerate.
 
-- **Package**: `deft-mcp` v1.0.0-beta.4
+- **Package**: `deft-mcp` v1.0.0-beta.5
 - **License**: GPL-3.0-only
 - **Node**: `>=22.0.0`
 - **Module System**: `module`
@@ -31,6 +31,7 @@ Run `mise install` to set up all required runtimes.
 | Script | Command | Category |
 | --- | --- | --- |
 | `build` | `tsc` | 🔨 Build |
+| `preversion` | `npm run typecheck && npm run lint` | ⚙️ Other |
 | `prepare` | `tsc && npm run generate:notices` | 🔨 Build |
 | `postinstall` | `git config core.hooksPath .githooks || true && tsx scripts/check-prerequisites.ts || true` | ⚙️ Other |
 | `generate:notices` | `tsx scripts/generate-notices.ts` | 📋 CI/Gen |
@@ -39,6 +40,9 @@ Run `mise install` to set up all required runtimes.
 | `check:schema` | `tsx scripts/generate-schema.ts --check` | 📋 CI/Gen |
 | `generate:dev-reference` | `tsx scripts/generate-dev-reference.ts` | 📋 CI/Gen |
 | `check:dev-reference` | `tsx scripts/generate-dev-reference.ts --check` | 📋 CI/Gen |
+| `sync:version` | `tsx scripts/sync-version.ts` | ⚙️ Other |
+| `check:version` | `tsx scripts/sync-version.ts --check` | 📋 CI/Gen |
+| `version` | `npm run sync:version && npm run generate:dev-reference && npm run generate:schema && npm run generate:notices && git add -A` | ⚙️ Other |
 | `dev` | `tsc --watch` | 🔨 Build |
 | `test` | `vitest run` | 🧪 Test |
 | `test:watch` | `vitest` | 🧪 Test |

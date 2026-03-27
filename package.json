@@ -1,6 +1,6 @@
 {
   "name": "deft-mcp",
-  "version": "1.0.0-beta.4",
+  "version": "1.0.0-beta.5",
   "description": "Deft Suite — Context-efficient MCP broker for agent skills, tools, prompts, and resources",
   "type": "module",
   "main": "dist/index.js",
@@ -29,7 +29,7 @@
     "check:dev-reference": "tsx scripts/generate-dev-reference.ts --check",
     "sync:version": "tsx scripts/sync-version.ts",
     "check:version": "tsx scripts/sync-version.ts --check",
-    "version": "npm run sync:version && npm run generate:dev-reference && npm run generate:schema && npm run generate:notices && git add -A",
+    "version": "npm run sync:version && npm run generate:dev-reference && npm run generate:schema && npm run generate:notices && git add README.md THIRD-PARTY-NOTICES.md docs/getting-started.md docs/client-setup.md docs/dev-reference.md docs/configuration.md config.schema.json package-lock.json",
     "dev": "tsc --watch",
     "test": "vitest run",
     "test:watch": "vitest",
