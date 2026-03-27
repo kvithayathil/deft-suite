@@ -1,81 +1,55 @@
 # Toolchain
 
-## Formatter: oxfmt
+## Formatter
 
-- Config: `.oxfmtrc.json`
-- Style: single quotes, auto semicolons
-- Ignore patterns cover non-source files (docs, configs, lockfiles)
-- Run: `bun run fmt` (format) or `bun run fmt:check` (verify)
+**oxfmt** — config: `.oxfmtrc.json`. Single quotes. Run `bun run fmt` or `bun run fmt:check`.
 
-## Linter: oxlint + ESLint
+## Linter
 
-Two linters run in sequence: `oxlint && eslint`.
+Runs `oxlint && eslint` in sequence.
 
-### oxlint (primary)
+| Linter | Config | Role |
+|--------|--------|------|
+| **oxlint** | `.oxlintrc.json` | Primary. `typescript` plugin, `correctness` + `suspicious` categories. |
+| **ESLint** | `eslint.config.js` | Secondary. `security` + `sonarjs` plugins only. `eslint-plugin-oxlint` deduplicates. |
 
-- Config: `.oxlintrc.json`
-- Plugins: `typescript`
-- Categories: `correctness` (error), `suspicious` (warn)
-- Handles: type safety, unused vars, no-useless-escape, etc.
+## Test Runner
 
-### ESLint (secondary)
+**vitest** — config: `vitest.config.ts`. Globals enabled. Coverage: v8, thresholds enforced. Pattern: `tests/**/*.test.ts`.
 
-- Config: `eslint.config.js`
-- Plugins: `eslint-plugin-security`, `eslint-plugin-sonarjs`
-- Bridge: `eslint-plugin-oxlint` disables rules already covered by oxlint
-- Handles: security patterns, cognitive complexity
+### Test directories
 
-### Why two linters?
+<!-- BEGIN:test-tree -->
+| Directory | Size |
+|-----------|---------|
+| `tests/adapters/` | 12 files |
+| `tests/core/` | 15 files |
+| `tests/helpers/` | 15 files |
+| `tests/integration/` | 4 files |
+| `tests/resilience/` | 5 files |
+| `tests/telemetry/` | 1 files |
+| `tests/tools/` | 8 files |
+| `tests/workers/` | 2 files |
+<!-- END:test-tree -->
 
-oxlint is 50-100x faster than ESLint and covers most rules. ESLint is retained only for `security` and `sonarjs` plugins which oxlint doesn't support yet.
+## Scripts
 
-## Test Runner: vitest
+All in `scripts/*.ts`, run via `tsx`. Each supports `--check` for CI.
 
-- Config: `vitest.config.ts`
-- Globals enabled (`describe`, `it`, `expect` available without imports)
-- Coverage: v8 provider, thresholds enforced
-- Pattern: `tests/**/*.test.ts`
+<!-- BEGIN:scripts -->
+| Script | Purpose |
+|--------|---------|
+| `check-prerequisites.ts` | Verify system tools (bun, deno, gitleaks, etc.) |
+| `generate-agent-docs.ts` | Inject auto-generated sections into docs/agents/ |
+| `generate-dev-reference.ts` | Generate docs/dev-reference.md from config files |
+| `generate-notices.ts` | Generate THIRD-PARTY-NOTICES.md + README dep table |
+| `generate-schema.ts` | Generate config.schema.json + docs/configuration.md |
+| `sync-version.ts` | Sync version from package.json into doc references |
+<!-- END:scripts -->
 
-### Test organization
+## Quality Gates
 
-```
-tests/
-├── adapters/       # Adapter implementation tests
-├── core/           # Core domain logic tests
-├── helpers/        # Test utilities, in-memory fakes, fixtures
-├── integration/    # Full-stack MCP server integration tests
-├── resilience/     # Circuit breaker, rate limiter, timeout tests
-├── telemetry/      # OTel instrumentation tests
-├── tools/          # MCP tool handler tests
-└── workers/        # Worker manager tests
-```
-
-## Scripts: TypeScript via tsx
-
-- All scripts in `scripts/*.ts` run via `tsx` (TypeScript execute)
-- Scripts follow a `--check` mode pattern for CI validation
-- Available scripts:
-  - `check-prerequisites.ts` — verify system tools
-  - `generate-notices.ts` — THIRD-PARTY-NOTICES.md + README dependency table
-  - `generate-schema.ts` — config.schema.json + docs/configuration.md injection
-  - `generate-dev-reference.ts` — docs/dev-reference.md from config files
-
-## Version Management: mise
-
-- Config: `mise.toml`
-- Pins: node (lts), bun, deno, pnpm
-- Tasks: `dev`, `check`, `ci` shortcuts
-- Install: `mise install` to get all pinned versions
-
-## Code Duplication: jscpd
-
-- Config: `.jscpd.json`
-- Threshold: < 6% duplication
-- Reports: `reports/jscpd/jscpd-report.json`
-- CI badge: gist-backed dynamic badge
-
-## Secret Scanning: gitleaks
-
-- Config: `.gitleaks.toml`
-- Runs in pre-commit hook and CI workflow
-- Install: `brew install gitleaks` (macOS)
+| Tool | Config | Threshold |
+|------|--------|-----------|
+| jscpd | `.jscpd.json` | < 6% duplication |
+| gitleaks | `.gitleaks.toml` | 0 leaks (pre-commit + CI) |

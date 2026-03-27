@@ -37,6 +37,9 @@ jobs:
       - name: Check version references are in sync
         run: npm run check:version
 
+      - name: Check agent docs are in sync
+        run: npm run check:agent-docs
+
       - name: Format check
         run: npm run fmt:check
 

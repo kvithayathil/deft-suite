@@ -4,62 +4,60 @@
 
 **Use `bun` as the default runner. Use `bunx` instead of `npx`.**
 
-- Fallback order: `bun` → `pnpm` → `npm`
-- Never default to `npm` or `npx` when `bun`/`bunx` is available
-- Runtime versions pinned in `mise.toml` (node 22, bun, deno, pnpm)
-- Pre-commit hook auto-detects fastest runner (bun → pnpm → npm)
-- CI uses npm for reproducibility (lockfile-exact `npm ci`)
+Fallback order: `bun` → `pnpm` → `npm`. CI uses `npm ci` for lockfile reproducibility.
+
+### Pinned versions (from `mise.toml`)
+
+<!-- BEGIN:mise-versions -->
+| Tool | Version |
+|------|---------|
+| node | lts |
+| bun | latest |
+| deno | latest |
+| pnpm | latest |
+<!-- END:mise-versions -->
 
 ## Commands
 
-All commands use `bun run`:
+Prefix all commands with `bun run`. Substitute `npm run` only if bun is unavailable.
 
-| Task | Command |
-|------|---------|
-| Test | `bun run test` |
-| Test (watch) | `bun run test:watch` |
-| Test (coverage) | `bun run test:coverage` |
-| Build | `bun run build` |
-| Lint | `bun run lint` (oxlint + ESLint chained) |
-| Format | `bun run fmt` |
-| Format check | `bun run fmt:check` |
-| Type check | `bun run typecheck` |
-| Duplication | `bun run check:duplication` |
-| Notices check | `bun run check:notices` |
-| Dev reference check | `bun run check:dev-reference` |
-| Generate notices | `bun run generate:notices` |
-| Generate dev ref | `bun run generate:dev-reference` |
-| Generate schema | `bun run generate:schema` |
+<!-- BEGIN:commands -->
+| Command | Runs |
+|---------|------|
+| `bun run build` | `tsc` |
+| `bun run generate:notices` | `tsx scripts/generate-notices.ts` |
+| `bun run check:notices` | `tsx scripts/generate-notices.ts --check` |
+| `bun run generate:schema` | `tsx scripts/generate-schema.ts` |
+| `bun run check:schema` | `tsx scripts/generate-schema.ts --check` |
+| `bun run generate:dev-reference` | `tsx scripts/generate-dev-reference.ts` |
+| `bun run check:dev-reference` | `tsx scripts/generate-dev-reference.ts --check` |
+| `bun run sync:version` | `tsx scripts/sync-version.ts` |
+| `bun run check:version` | `tsx scripts/sync-version.ts --check` |
+| `bun run dev` | `tsc --watch` |
+| `bun run test` | `vitest run` |
+| `bun run test:watch` | `vitest` |
+| `bun run test:coverage` | `vitest run --coverage` |
+| `bun run lint` | `oxlint && eslint src/ tests/` |
+| `bun run lint:oxlint` | `oxlint` |
+| `bun run lint:eslint` | `eslint src/ tests/` |
+| `bun run fmt` | `oxfmt` |
+| `bun run fmt:check` | `oxfmt --check` |
+| `bun run check:duplication` | `jscpd src/ tests/` |
+| `bun run typecheck` | `tsc --noEmit` |
+<!-- END:commands -->
 
-### mise shortcuts
+### mise tasks
 
-```bash
-mise run check    # fmt:check + typecheck + lint
-mise run ci       # full CI pipeline locally
-mise run dev      # start MCP server
-```
+<!-- BEGIN:mise-tasks -->
+| Command | Description |
+|---------|-------------|
+| `mise run dev` | Install deps and start dev mode |
+| `mise run check` | Run all checks (fmt, typecheck, lint) |
+| `mise run ci` | Full CI pipeline locally |
+<!-- END:mise-tasks -->
 
-## Multi-Runtime Support
+## Git
 
-This project supports three runtimes with Bun as primary:
-
-| Runtime | Role | Config |
-|---------|------|--------|
-| **Bun** | Primary dev runtime | `mise.toml` |
-| **Deno** | First-class alternative | `deno.json` |
-| **Node.js** | CI + production + fallback | `package.json` engines |
-
-### Running the server
-
-```bash
-node dist/index.js          # Node.js
-bun dist/index.js           # Bun
-deno task run                # Deno
-```
-
-## Git Conventions
-
-- Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/)
-- Pre-commit hook runs: `generate:notices` → `check:duplication` → `gitleaks`
-- Do not include `docs/internal/` in commits unless explicitly asked
-- `.git-forbidden-patterns` (gitignored) blocks corporate URLs from leaking into commits
+- **Commits**: [Conventional Commits](https://www.conventionalcommits.org/) format required.
+- **Pre-commit hook**: `generate:notices` → `check:duplication` → `gitleaks`. Auto-detects bun → pnpm → npm.
+- **Forbidden**: `docs/internal/` must not be committed unless explicitly requested.
