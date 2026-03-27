@@ -244,7 +244,7 @@ Controls local usage/frecency tracking.
   },
   "metadata": {
     "createdOn": "<platform>",
-    "createdBy": "deft-mcp@1.0.0-beta.4",
+    "createdBy": "deft-mcp@1.0.0-beta.5",
     "platforms": [
       "<platform>"
     ],
