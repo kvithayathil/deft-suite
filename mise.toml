@@ -1,0 +1,27 @@
+[tools]
+node = "lts"
+bun = "latest"
+deno = "latest"
+pnpm = "latest"
+
+[tasks.dev]
+description = "Install deps and start dev mode"
+run = "bun install && bun run dev"
+
+[tasks.check]
+description = "Run all checks (fmt, typecheck, lint)"
+run = """
+bun run fmt:check
+bun run typecheck
+bun run lint
+"""
+
+[tasks.ci]
+description = "Full CI pipeline locally"
+run = """
+bun run fmt:check
+bun run typecheck
+bun run lint
+bun run check:duplication
+bun run test:coverage
+"""

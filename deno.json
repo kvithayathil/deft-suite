@@ -1,0 +1,21 @@
+{
+  "nodeModulesDir": "auto",
+  "unstable": [
+    "sloppy-imports",
+    "node-globals"
+  ],
+  "tasks": {
+    "run": "deno run -A src/index.ts",
+    "cli": "deno run -A src/cli.ts",
+    "test": "deno test -A tests/",
+    "fmt": "deno run -A npm:oxfmt",
+    "fmt:check": "deno run -A npm:oxfmt --check",
+    "lint": "deno run -A npm:oxlint && deno run -A npm:eslint src/ tests/"
+  },
+  "exclude": [
+    "dist",
+    "coverage",
+    "reports",
+    "node_modules"
+  ]
+}
