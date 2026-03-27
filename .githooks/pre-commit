@@ -1,6 +1,15 @@
 #!/bin/sh
 set -e
 
+# ── Detect fastest available package runner ──────────────────────
+if command -v bun >/dev/null 2>&1; then
+  RUN="bun run"
+elif command -v pnpm >/dev/null 2>&1; then
+  RUN="pnpm run"
+else
+  RUN="npm run"
+fi
+
 # Block commits containing forbidden patterns (loaded from local config)
 PATTERNS_FILE="$(git rev-parse --show-toplevel)/.git-forbidden-patterns"
 if [ -f "$PATTERNS_FILE" ]; then
@@ -29,10 +38,10 @@ if [ -f "$PATTERNS_FILE" ]; then
   done < "$PATTERNS_FILE"
 fi
 
-npm run generate:notices
+$RUN generate:notices
 git add THIRD-PARTY-NOTICES.md README.md
 
-npm run check:duplication
+$RUN check:duplication
 
 # Secret scanning — requires gitleaks (brew install gitleaks)
 if command -v gitleaks >/dev/null 2>&1; then
