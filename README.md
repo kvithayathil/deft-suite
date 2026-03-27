@@ -4,17 +4,13 @@
 [![CodeQL](https://github.com/kvithayathil/deft-suite/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/kvithayathil/deft-suite/actions/workflows/codeql.yml)
 [![Secret Scanning](https://github.com/kvithayathil/deft-suite/actions/workflows/gitleaks.yml/badge.svg?branch=main)](https://github.com/kvithayathil/deft-suite/actions/workflows/gitleaks.yml)
 [![codecov](https://codecov.io/gh/kvithayathil/deft-suite/branch/main/graph/badge.svg)](https://codecov.io/gh/kvithayathil/deft-suite)
+<!-- npm badge — uncomment after first publish
 [![npm version](https://img.shields.io/npm/v/deft-mcp)](https://www.npmjs.com/package/deft-mcp)
+-->
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen)](https://nodejs.org)
-[![codecov](https://codecov.io/gh/kvithayathil/deft-suite/branch/main/graph/badge.svg)](https://codecov.io/gh/kvithayathil/deft-suite)
-
-<!-- Gist-backed dynamic badge (disabled) — uncomment after setting up the gist workflow
-[![coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/kvithayathil/GIST_ID/raw/coverage-badge.json)](https://github.com/kvithayathil/deft-suite/actions/workflows/ci.yml)
--->
-
-[![coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/kvithayathil/c6e1b113c3ce1aa0729dd3fa9e24476/raw/coverage-badge.json)](https://github.com/kvithayathil/deft-suite/actions/workflows/ci.yml)
-[![duplication](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/kvithayathil/c6e1b113c3ce1aa0729dd3fa9e24476/raw/duplication-badge.json)](https://github.com/kvithayathil/deft-suite/actions/workflows/ci.yml)
+[![coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/kvithayathil/c6e1b113c3ce1aa0729dd3f6a9e24476/raw/coverage-badge.json)](https://github.com/kvithayathil/deft-suite/actions/workflows/ci.yml)
+[![duplication](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/kvithayathil/c6e1b113c3ce1aa0729dd3f6a9e24476/raw/duplication-badge.json)](https://github.com/kvithayathil/deft-suite/actions/workflows/ci.yml)
 
 <!-- GitLab badges — uncomment and replace YOUR_GROUP/deft-suite with your GitLab project path
 [![GitLab Pipeline](https://gitlab.com/YOUR_GROUP/deft-suite/badges/main/pipeline.svg)](https://gitlab.com/YOUR_GROUP/deft-suite/-/pipelines)

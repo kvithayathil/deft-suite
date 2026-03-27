@@ -2,6 +2,7 @@ import tsParser from '@typescript-eslint/parser';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import securityPlugin from 'eslint-plugin-security';
 import sonarjsPlugin from 'eslint-plugin-sonarjs';
+import oxlint from 'eslint-plugin-oxlint';
 
 export default [
   {
@@ -75,4 +76,5 @@ export default [
       'sonarjs/assertions-in-tests': 'warn',
     },
   },
+  ...oxlint.configs['flat/recommended'],
 ];
