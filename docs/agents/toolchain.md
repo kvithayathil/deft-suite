@@ -23,7 +23,7 @@ Runs `oxlint && eslint` in sequence.
 | Directory | Size |
 |-----------|---------|
 | `tests/adapters/` | 12 files |
-| `tests/core/` | 15 files |
+| `tests/core/` | 16 files |
 | `tests/helpers/` | 15 files |
 | `tests/integration/` | 4 files |
 | `tests/resilience/` | 5 files |
