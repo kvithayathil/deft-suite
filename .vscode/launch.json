@@ -1,0 +1,162 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    // ── Deno (first-class) ──────────────────────────────────────
+    {
+      "name": "Deno: MCP Server",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "run",
+        "-A"
+      ],
+      "args": [
+        "${workspaceFolder}/src/index.ts"
+      ],
+      "console": "integratedTerminal",
+      "attachSimplePort": 9229
+    },
+    {
+      "name": "Deno: CLI (search)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "run",
+        "-A"
+      ],
+      "args": [
+        "${workspaceFolder}/src/cli.ts",
+        "search",
+        "example"
+      ],
+      "console": "integratedTerminal",
+      "attachSimplePort": 9229
+    },
+    // ── Bun (default) ───────────────────────────────────────────
+    {
+      "name": "Bun: MCP Server",
+      "type": "bun",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/index.ts",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Bun: CLI (search)",
+      "type": "bun",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/cli.ts",
+      "args": [
+        "search",
+        "example"
+      ],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Bun: Debug Current Test",
+      "type": "bun",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/vitest/vitest.mjs",
+      "args": [
+        "run",
+        "--no-file-parallelism",
+        "${relativeFile}"
+      ],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Bun: Debug All Tests",
+      "type": "bun",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/vitest/vitest.mjs",
+      "args": [
+        "run",
+        "--no-file-parallelism"
+      ],
+      "console": "integratedTerminal"
+    },
+    // ── Node (fallback) ─────────────────────────────────────────
+    {
+      "name": "Node: MCP Server",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": [
+        "--import",
+        "tsx"
+      ],
+      "args": [
+        "${workspaceFolder}/src/index.ts"
+      ],
+      "env": {
+        "NODE_NO_WARNINGS": "1"
+      },
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
+      "name": "Node: CLI (search)",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": [
+        "--import",
+        "tsx"
+      ],
+      "args": [
+        "${workspaceFolder}/src/cli.ts",
+        "search",
+        "example"
+      ],
+      "env": {
+        "NODE_NO_WARNINGS": "1"
+      },
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
+      "name": "Node: Debug Current Test",
+      "type": "node",
+      "request": "launch",
+      "autoAttachChildProcesses": true,
+      "program": "${workspaceFolder}/node_modules/vitest/vitest.mjs",
+      "args": [
+        "run",
+        "--no-file-parallelism",
+        "${relativeFile}"
+      ],
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
+      "name": "Node: Debug All Tests",
+      "type": "node",
+      "request": "launch",
+      "autoAttachChildProcesses": true,
+      "program": "${workspaceFolder}/node_modules/vitest/vitest.mjs",
+      "args": [
+        "run",
+        "--no-file-parallelism"
+      ],
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    }
+  ]
+}
