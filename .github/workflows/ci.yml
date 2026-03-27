@@ -31,6 +31,12 @@ jobs:
       - name: Check third-party notices are up to date
         run: npm run check:notices
 
+      - name: Check dev reference is up to date
+        run: npm run check:dev-reference
+
+      - name: Format check
+        run: npm run fmt:check
+
       - name: Typecheck
         run: npm run typecheck
 
@@ -55,7 +61,7 @@ jobs:
           PCT="${{ steps.duplication-summary.outputs.pct }}"
           COLOR=$(node -e "const v=$PCT,lo=0,hi=10;const t=Math.min(Math.max((v-lo)/(hi-lo),0),1);const r=Math.round(255*t),g=Math.round(255*(1-t));console.log(r.toString(16).padStart(2,'0')+g.toString(16).padStart(2,'0')+'00')")
           JSON_PAYLOAD=$(jq -n --arg label duplication --arg message "${PCT}%" --arg color "$COLOR" --arg logo eslint \
-            '{($label + ".json"): {content: ({schemaVersion:1,label:$label,message:$message,color:$color,namedLogo:$logo} | tojson)}}')
+            '{($label + "-badge.json"): {content: ({schemaVersion:1,label:$label,message:$message,color:$color,namedLogo:$logo} | tojson)}}')
           curl -sf -X PATCH "https://api.github.com/gists/${GIST_ID}" \
             -H "Authorization: token ${GIST_TOKEN}" \
             -H "Accept: application/vnd.github+json" \
