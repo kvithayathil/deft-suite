@@ -79,11 +79,11 @@ lint:
 
 test:node-22:
   extends: .test-base
-  image: node:22
+  image: node:24
 
 test:node-20:
   extends: .test-base
-  image: node:20
+  image: node:24
 
 # ---------------------------------------------------------------------------
 # Stage: build
@@ -137,7 +137,7 @@ dependency_scanning:
 # ---------------------------------------------------------------------------
 publish:npm:
   stage: release
-  image: node:22
+  image: node:24
   needs: [build, test:node-22, test:node-20, sast]
   before_script:
     - npm ci --prefer-offline
