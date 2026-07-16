@@ -33,7 +33,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-## @modelcontextprotocol/sdk (1.28.0)
+## @modelcontextprotocol/sdk (1.29.0)
 
 - License: MIT
 - Repository: https://github.com/modelcontextprotocol/typescript-sdk
@@ -122,7 +122,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-## ajv (8.18.0)
+## ajv (8.20.0)
 
 - License: MIT
 - Repository: https://github.com/ajv-validator/ajv
@@ -180,7 +180,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-## better-sqlite3 (12.8.0)
+## better-sqlite3 (12.11.1)
 
 - License: MIT
 - Repository: https://github.com/WiseLibs/better-sqlite3
