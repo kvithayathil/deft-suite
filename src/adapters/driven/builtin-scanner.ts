@@ -35,7 +35,11 @@ const PROMPT_INJECTION_RULES: ScanRule[] = [
   {
     rule: 'template-injection',
     severity: 'warning',
-    pattern: /\{\{[^}]*\}\}/,
+    // Tempered greedy token: the content class `[^{}]` cannot consume the
+    // `}}` delimiter, keeping the match linear (sonarjs/super-linear-regex).
+    // Note: content with a bare interior `{` is not matched — acceptable
+    // for markdown template-injection detection; see PR #30 discussion.
+    pattern: /\{\{(?:(?!\}\})[^{}])*\}\}/,
     fileExtensions: ['.md'],
     message: 'Template syntax in markdown — potential injection vector for dynamic content',
   },

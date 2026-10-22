@@ -3065,7 +3065,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-## semver (7.7.4)
+## semver (7.8.5)
 
 - License: ISC
 - Repository: https://github.com/npm/node-semver
@@ -3813,7 +3813,7 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ```
 
-## yaml (2.8.3)
+## yaml (2.9.1)
 
 - License: ISC
 - Repository: https://github.com/eemeli/yaml

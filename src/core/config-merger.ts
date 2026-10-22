@@ -74,6 +74,84 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 }
 
 /**
+ * Copy the given optional source fields onto `into` when present.
+ */
+function copySourceFields(
+  entry: Record<string, unknown>,
+  into: Record<string, unknown>,
+  fields: readonly string[],
+): Record<string, unknown> {
+  for (const field of fields) {
+    if (entry[field]) into[field] = entry[field];
+  }
+  return into;
+}
+
+/**
+ * Migrate a legacy flat `sources` array into `{ local, remote }` buckets.
+ */
+function migrateLocalSource(entry: Record<string, unknown>): Record<string, unknown> {
+  return copySourceFields(entry, {}, ['path', 'trust']);
+}
+
+function migrateRemoteSource(
+  entry: Record<string, unknown>,
+  type: string,
+): Record<string, unknown> {
+  const migrated: Record<string, unknown> = {
+    type: type === 'registry' ? 'hosted' : type,
+  };
+  return copySourceFields(entry, migrated, ['url', 'branch', 'ref', 'trust']);
+}
+
+function migrateFlatSources(sources: Record<string, unknown>[]): {
+  local: Record<string, unknown>[];
+  remote: Record<string, unknown>[];
+} {
+  const local: Record<string, unknown>[] = [];
+  const remote: Record<string, unknown>[] = [];
+
+  for (const entry of sources) {
+    const type = entry.type as string | undefined;
+    if (type === 'local' || type === 'bundled') {
+      local.push(migrateLocalSource(entry));
+    } else if (type === 'git' || type === 'registry' || type === 'hosted') {
+      remote.push(migrateRemoteSource(entry, type));
+    }
+  }
+
+  return { local, remote };
+}
+
+/**
+ * Move a legacy `registries` block into `sources.catalogs` and delete it.
+ */
+function migrateRegistries(raw: Record<string, unknown>): void {
+  const reg = raw.registries as Record<string, unknown>;
+  const regSources = reg.sources as Record<string, unknown>[] | undefined;
+  const cacheMinutes = reg.cacheMinutes as number | undefined;
+
+  if (Array.isArray(regSources) && regSources.length > 0) {
+    const catalogs = regSources.map((s) => {
+      const migrated = { ...s };
+      if (cacheMinutes !== undefined && migrated.cacheMinutes === undefined) {
+        migrated.cacheMinutes = cacheMinutes;
+      }
+      return migrated;
+    });
+
+    // Ensure sources is an object before assigning catalogs
+    if (!isPlainObject(raw.sources)) {
+      raw.sources = { local: [], remote: [], catalogs };
+    } else {
+      (raw.sources as Record<string, unknown>).catalogs = catalogs;
+    }
+  }
+
+  delete raw.registries;
+}
+
+/**
  * Auto-migrate legacy config shapes to the current structure.
  * Mutates and returns the same object for convenience.
  *
@@ -85,55 +163,13 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 export function migrateConfig(raw: Record<string, unknown>): Record<string, unknown> {
   // 1. Flat sources array → structured object
   if (Array.isArray(raw.sources)) {
-    const local: Record<string, unknown>[] = [];
-    const remote: Record<string, unknown>[] = [];
-
-    for (const entry of raw.sources as Record<string, unknown>[]) {
-      const type = entry.type as string | undefined;
-      if (type === 'local' || type === 'bundled') {
-        const migrated: Record<string, unknown> = {};
-        if (entry.path) migrated.path = entry.path;
-        if (entry.trust) migrated.trust = entry.trust;
-        local.push(migrated);
-      } else if (type === 'git' || type === 'registry' || type === 'hosted') {
-        const migrated: Record<string, unknown> = {
-          type: type === 'registry' ? 'hosted' : type,
-        };
-        if (entry.url) migrated.url = entry.url;
-        if (entry.branch) migrated.branch = entry.branch;
-        if (entry.ref) migrated.ref = entry.ref;
-        if (entry.trust) migrated.trust = entry.trust;
-        remote.push(migrated);
-      }
-    }
-
+    const { local, remote } = migrateFlatSources(raw.sources as Record<string, unknown>[]);
     raw.sources = { local, remote, catalogs: [] };
   }
 
   // 2. registries → sources.catalogs
   if (isPlainObject(raw.registries)) {
-    const reg = raw.registries as Record<string, unknown>;
-    const regSources = reg.sources as Record<string, unknown>[] | undefined;
-    const cacheMinutes = reg.cacheMinutes as number | undefined;
-
-    if (Array.isArray(regSources) && regSources.length > 0) {
-      const catalogs = regSources.map((s) => {
-        const migrated = { ...s };
-        if (cacheMinutes !== undefined && migrated.cacheMinutes === undefined) {
-          migrated.cacheMinutes = cacheMinutes;
-        }
-        return migrated;
-      });
-
-      // Ensure sources is an object before assigning catalogs
-      if (!isPlainObject(raw.sources)) {
-        raw.sources = { local: [], remote: [], catalogs };
-      } else {
-        (raw.sources as Record<string, unknown>).catalogs = catalogs;
-      }
-    }
-
-    delete raw.registries;
+    migrateRegistries(raw);
   }
 
   return raw;
@@ -141,6 +177,26 @@ export function migrateConfig(raw: Record<string, unknown>): Record<string, unkn
 
 // Array paths that use concatenation semantics (all others replace)
 const CONCAT_ARRAY_PATHS = new Set(['projectConfigPaths', 'sources.local', 'sources.remote']);
+
+/**
+ * Decide how two array values merge: explicit `:replace`, concat path, or replacement.
+ */
+function mergeArrays(
+  baseVal: unknown[],
+  overrideVal: unknown[],
+  override: Record<string, unknown>,
+  key: string,
+  fullPath: string,
+): unknown[] {
+  const replaceKey = `${key}:replace`;
+  if (override[replaceKey] === true) {
+    return overrideVal;
+  }
+  if (CONCAT_ARRAY_PATHS.has(fullPath)) {
+    return [...baseVal, ...overrideVal];
+  }
+  return overrideVal;
+}
 
 function deepMerge(
   base: Record<string, unknown>,
@@ -154,14 +210,7 @@ function deepMerge(
     const overrideVal = override[key];
     const fullPath = pathPrefix.length > 0 ? `${pathPrefix}.${key}` : key;
     if (Array.isArray(baseVal) && Array.isArray(overrideVal)) {
-      const replaceKey = `${key}:replace`;
-      if (override[replaceKey] === true) {
-        result[key] = overrideVal;
-      } else if (CONCAT_ARRAY_PATHS.has(fullPath)) {
-        result[key] = [...baseVal, ...overrideVal];
-      } else {
-        result[key] = overrideVal;
-      }
+      result[key] = mergeArrays(baseVal, overrideVal, override, key, fullPath);
     } else if (isPlainObject(baseVal) && isPlainObject(overrideVal)) {
       result[key] = deepMerge(baseVal, overrideVal, fullPath);
     } else if (overrideVal !== undefined) {
