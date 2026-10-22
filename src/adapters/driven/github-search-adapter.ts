@@ -181,36 +181,43 @@ export class GitHubSearchAdapter implements GitHubSearch {
     const mapped: GitHubSearchResult[] = [];
 
     for (const item of response.items) {
-      if (!item || typeof item !== 'object') {
-        continue;
+      const result = this.mapResponseItem(item);
+      if (result) {
+        mapped.push(result);
       }
-
-      const candidate = item as GitHubSearchApiItem;
-      const repository = candidate.repository;
-      if (!repository || typeof repository !== 'object') {
-        continue;
-      }
-
-      const repoName = typeof repository.full_name === 'string' ? repository.full_name : null;
-      if (!repoName) {
-        continue;
-      }
-
-      const description = typeof repository.description === 'string' ? repository.description : '';
-      const tags = Array.isArray(repository.topics)
-        ? repository.topics.filter((topic): topic is string => typeof topic === 'string')
-        : [];
-
-      mapped.push({
-        name: repoName,
-        description,
-        source: { type: 'github', repo: repoName },
-        tags,
-        score: typeof candidate.score === 'number' ? candidate.score : 0,
-        installable: true,
-      });
     }
 
     return mapped;
+  }
+
+  private mapResponseItem(item: unknown): GitHubSearchResult | null {
+    if (!item || typeof item !== 'object') {
+      return null;
+    }
+
+    const candidate = item as GitHubSearchApiItem;
+    const repository = candidate.repository;
+    if (!repository || typeof repository !== 'object') {
+      return null;
+    }
+
+    const repoName = typeof repository.full_name === 'string' ? repository.full_name : null;
+    if (!repoName) {
+      return null;
+    }
+
+    const description = typeof repository.description === 'string' ? repository.description : '';
+    const tags = Array.isArray(repository.topics)
+      ? repository.topics.filter((topic): topic is string => typeof topic === 'string')
+      : [];
+
+    return {
+      name: repoName,
+      description,
+      source: { type: 'github', repo: repoName },
+      tags,
+      score: typeof candidate.score === 'number' ? candidate.score : 0,
+      installable: true,
+    };
   }
 }

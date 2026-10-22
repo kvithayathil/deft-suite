@@ -25,7 +25,7 @@ describe('MemorySearchIndex', () => {
       { name: 'skill-b', description: 'Handles logging' },
     ]);
     const results = await idx.search('authentication');
-    expect(results.length).toBe(1);
+    expect(results).toHaveLength(1);
     expect(results[0].name).toBe('skill-a');
   });
 
@@ -37,7 +37,7 @@ describe('MemorySearchIndex', () => {
       { name: 'vue-testing', description: 'Testing Vue components' },
     ]);
     const results = await idx.search('react');
-    expect(results.length).toBe(2);
+    expect(results).toHaveLength(2);
     expect(results.every((r) => r.score > 0)).toBe(true);
   });
 
@@ -45,7 +45,7 @@ describe('MemorySearchIndex', () => {
     const idx = new MemorySearchIndex();
     await idx.rebuild([{ name: 'tdd-python', description: 'TDD patterns' }]);
     const results = await idx.search('TDD');
-    expect(results.length).toBe(1);
+    expect(results).toHaveLength(1);
   });
 
   it('listCategories returns unique categories from tags', async () => {
