@@ -18,8 +18,6 @@ interface PackageJson {
   engines?: Record<string, string>;
   bin?: Record<string, string>;
   scripts?: Record<string, string>;
-  dependencies?: Record<string, string>;
-  devDependencies?: Record<string, string>;
 }
 
 interface DenoJson {
@@ -331,26 +329,6 @@ async function generate(): Promise<string> {
     codeBlock(
       'bash',
       'deno task run     # Start MCP server\ndeno task cli     # Run CLI\ndeno task lint    # Lint',
-    ),
-    '',
-  );
-
-  // ── Dependencies
-  sections.push(
-    '## Dependencies',
-    '',
-    '### Runtime',
-    '',
-    table(
-      ['Package', 'Version'],
-      Object.entries(pkg.dependencies ?? {}).map(([name, ver]) => [`\`${name}\``, `\`${ver}\``]),
-    ),
-    '',
-    '### Development',
-    '',
-    table(
-      ['Package', 'Version'],
-      Object.entries(pkg.devDependencies ?? {}).map(([name, ver]) => [`\`${name}\``, `\`${ver}\``]),
     ),
     '',
   );

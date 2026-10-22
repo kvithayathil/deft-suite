@@ -5,7 +5,7 @@
 
 - **Package**: `deft-mcp` v1.0.0-beta.5
 - **License**: GPL-3.0-only
-- **Node**: `>=22.0.0`
+- **Node**: `>=22.12.0`
 - **Module System**: `module`
 
 ## Runtime Toolchain (mise)
@@ -144,36 +144,3 @@ deno task run     # Start MCP server
 deno task cli     # Run CLI
 deno task lint    # Lint
 ```
-
-## Dependencies
-
-### Runtime
-
-| Package | Version |
-| --- | --- |
-| `@modelcontextprotocol/sdk` | `^1.27.1` |
-| `ajv` | `^8.18.0` |
-| `better-sqlite3` | `^12.8.0` |
-| `yaml` | `^2.8.2` |
-
-### Development
-
-| Package | Version |
-| --- | --- |
-| `@types/better-sqlite3` | `^7.6.13` |
-| `@types/node` | `^25.5.0` |
-| `@typescript-eslint/eslint-plugin` | `^8.57.0` |
-| `@typescript-eslint/parser` | `^8.57.0` |
-| `@vitest/coverage-v8` | `^4.1.0` |
-| `eslint` | `^10.0.3` |
-| `eslint-plugin-oxlint` | `^1.57.0` |
-| `eslint-plugin-security` | `^4.0.0` |
-| `eslint-plugin-sonarjs` | `^4.0.2` |
-| `jscpd` | `^4.0.8` |
-| `license-checker` | `^25.0.1` |
-| `oxfmt` | `^0.42.0` |
-| `oxlint` | `^1.57.0` |
-| `ts-json-schema-generator` | `^2.4.0` |
-| `tsx` | `^4.21.0` |
-| `typescript` | `^5.9.3` |
-| `vitest` | `^4.1.0` |

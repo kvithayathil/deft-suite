@@ -46,9 +46,10 @@ export class CircuitBreaker {
 
   recordFailure(): void {
     this.consecutiveFailures++;
-    if (this.state === CircuitState.HalfOpen) {
-      this.trip();
-    } else if (this.consecutiveFailures >= this.options.failureThreshold) {
+    if (
+      this.state === CircuitState.HalfOpen ||
+      this.consecutiveFailures >= this.options.failureThreshold
+    ) {
       this.trip();
     }
   }
