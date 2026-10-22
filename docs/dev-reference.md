@@ -5,7 +5,7 @@
 
 - **Package**: `deft-mcp` v1.0.0-beta.5
 - **License**: GPL-3.0-only
-- **Node**: `>=22.0.0`
+- **Node**: `>=22.12.0`
 - **Module System**: `module`
 
 ## Runtime Toolchain (mise)
